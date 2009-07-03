@@ -1,0 +1,23 @@
+CREDITS - Ginger - Version 1.0
+==============================
+
+  This file lists the people responsible for the development
+  of Ginger.  If you are looking for your name in lights
+  but we've forgotten you here, please send an email to
+  "bugs@ging3r.org" and we'll update this file accordingly.
+
+CORE DEVELOPERS
+---------------
+
+  The following people do the day-to-day development of Ginger:
+
+  James Dean Palmer (james@tiger3k.com)
+  Eddie Hillenbrand ()
+
+OTHER CONTRIBUTORS
+------------------
+
+  The following people have contributed fixes or enhancements
+  for Ginger (in no particular order):
+
+  Joe Flieger ()
