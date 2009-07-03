@@ -1,0 +1,16 @@
+include "turtle.gin"
+
+define polygon (n)
+  repeat n
+    forward 100
+    turn (/ 360 n)
+
+pen-color 1.0 0.0 0.0
+
+polygon 17
+scale 0.5
+polygon 17
+scale 0.5
+polygon 17
+
+save-as-png "polygon.png"

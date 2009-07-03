@@ -1,0 +1,577 @@
+; Copyright 2009 by James Dean Palmer and others.
+;
+; Ginger is free software.  You can redistribute and/or modify
+; this work under ther terms of the Apache License Version 2.0
+; or, at your option, Ginger's amended LGPL 2.1 license.  You may
+; not use this file except in compliance with one of these licenses.
+; You may also obtain a copy of the Apache License at
+;
+;   http://www.apache.org/licenses/LICENSE-2.0
+;
+; You may obtain a copy of Ginger's amended LGPL License at:
+;
+;   http://ging3r.org/licenses/LGPL-2.1.txt
+;
+; Unless required by applicable law or agreed to in writing, 
+; software distributed under the License is distributed on an 
+; "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+; either express or implied. See the License(s) for the specific 
+; language governing permissions and limitations.
+;
+; Please report all bugs and problems to "bugs@ging3r.org".
+
+include "pdf.gin"
+
+define assertEquals (a b)
+    if (and (Integer? a) (Integer? b))
+       if (= a b) (println "pass")
+       else: (println "failure")
+    elsif: (and (String? a) (String? b))
+       if (String::eq? a b)  (println "pass")
+       else: (println "failure")
+    elsif: (and (Binary? a) (Binary? b))
+       if (eq? a b)  (println "pass")
+       else: (println "failure")
+    elsif: (and (Char? a) (Char? b))
+       if (eq? a b)  (println "pass")
+       else: (println "failure")
+    elsif: (and (Number? a) (Number? b))
+       if (eq? a b)  (println "pass")
+       else: (println "failure")
+    else:
+       println "failure, check the parameters you are comparing"
+
+define assertTrue ( a )
+    if (a) (println "pass")
+    else: (println "failure")
+
+define assertFalse ( a )
+    if (not (a)) (println "pass")
+    else: (println "failure")
+
+;---------------------------------------------------------
+;
+;BINARY
+;
+
+; define test-binary-make ( )
+;     println "Test for Binary::make"
+;     println (Binary::make 5)
+;     ;println (Binary::make 26)
+;     println (Binary::make 20)
+;     println (Type::eq? (type (Binary::make 5)) Binary)
+;     println
+; test-binary-make
+
+; define test-binary ( )
+;     println "Test for Binary?"
+;     assertTrue (Binary? 0_2)
+;     assertFalse (Binary? 1233)
+;     assertTrue (Binary? -100_2)
+; test-binary
+
+; define test-binary-integer ( )
+;     println "Test for Binary->Integer"
+;     println (Binary->Integer 1)
+; test-binary-integer
+
+; ;Strings
+
+; define test-new-string ( )
+;     println "Test for new-string"
+;     assertEquals (new-string "abc" "def") "abcdef"
+;     assertEquals (new-string "abc" ascii-d) "abcd"
+;     assertEquals (new-string ascii-x "yz1$") "xyz1$"
+;     assertFalse (new-string 'a' "xxx") 
+;     assertEquals (new-string ascii-a ascii-b) "ab"
+; test-new-string
+
+define test-substring ()
+  println "Test Substring"
+  ;println (String::substring "abcdefg" 0 5)
+  assertEquals (String::substring "abcdefg" 0 5) "abcde"
+;test-substring
+
+define test-string-append ()
+  println "Test String Append"
+  assertEquals (String::append "abc" "def") "abcdef"
+  assertEquals (String::append "" "abc") "abc"
+  assertEquals (String::append "abc" "") "abc"
+  define str ""
+  set str (String::append str "abc")
+  assertEquals str "abc"
+  set str (String::append str "abc")
+  set str (String::append str "abc")
+  assertEquals str "abcabcabc"
+  define tmp ""
+  set tmp "CITE"
+  set str (String::append str tmp)
+  set str (String::append str tmp)
+  assertEquals str "abcabcabcCITECITE"
+
+  define str2 ""
+  define adoc (list "orange" 'sym1 "apple" 'sym2)
+  each part adoc
+    define tmp ""
+    if (String? part)
+      println "got a string!"
+      set tmp part
+    else:
+      println "got something else!"
+      set tmp "SOMETHING ELSE"
+    set str2 (String::append str2 tmp)
+  println "### " str2
+;test-string-append
+
+; define test-str-rest ( )
+;        println "Test for String::rest"
+;        assertEquals (String::rest "abcd") "bcd"
+;        assertEquals (String::rest "a") ""
+; test-str-rest
+
+; define test-str-boolean ( )
+;        println "Test for String::Boolean?"
+;        assertTrue (String::Boolean? "true")
+;        assertTrue (String::Boolean? "false")
+;        assertFalse (String::Boolean? "faLse")
+;        assertFalse (String::Boolean? "true123")
+; test-str-boolean
+
+; define test-str-to-boolean ( )
+;        println "Test for String->Boolean"
+;        assertTrue (String->Boolean "true")
+;        assertFalse (String->Boolean "false")
+;        assertFalse (String->Boolean "tt123")
+;        assertFalse (String->Boolean 123)
+; test-str-to-boolean
+
+; define test-str-ellipses ( )
+;        println "Test for String ellipses?"
+;        assertTrue (String::ellipses? "..")
+;        assertFalse (String::ellipses? ".")
+;        assertFalse (String::ellipses? 1)
+; test-str-ellipses
+
+; define test-str-numeric
+;        println "Test for String numeric?"
+;        assertTrue (String::numeric? "123")
+;        assertTrue (String::numeric? "-123")
+;        println (String::numeric? "12.23")	
+; test-str-numeric
+
+; define test-str-digits ( )
+;     println "Test for String->digits"
+;     assertEquals (String->digits "9F" 16) 159
+;     assertEquals (String->digits "10010" 2) 18
+;     assertEquals (String->digits "90" 10) 90
+;     assertEquals (String->digits "65" 8) 53
+;     println " "
+; test-str-digits
+
+; define test-str-int ( )
+;     println "Test for String->Integer"   
+;     assertTrue (String->Integer "90")
+;     assertTrue (String->Integer "-90")
+;     assertFalse (String->Integer "90.03")  
+;     println (first (tail (String::split "-90_10" ascii-underscore)))
+;     println (* -1 (String->digits (String::rest "-90")))
+;     println (String->Integer "-90_10")
+;     println (String->Integer "11_2")
+;     println (Integer::+ 12 2)
+;     println " hhh "
+; test-str-int
+
+; define test-str-ratio ( )
+;     println "Test for String->Ratio"
+;     assertEquals (String->Ratio "90") 90
+;     assertEquals (String->Ratio "-90") -90
+;     assertFalse (String->Ratio "") 
+;     assertEquals (String->Ratio "90/30") 3
+;     println " "
+; test-str-ratio
+
+; define test-str-scientific ( )
+;     println "Test for String->Scientific"
+;     assertEquals (String->Scientific "10_10e1") 100
+;     println (expt 10 -1)
+;     if (> -6 12)
+;        println "ttt"
+;     else:
+;        println "yyyy"
+;     println (> -2 -5)
+;     println (/ 5345 10)
+;     println (String->Scientific "24.534_10e1")
+;     println " "
+; test-str-scientific
+
+; define test-str-symbol ( )
+;     println "Test for String->Symbol"
+;     assertEquals (String->Symbol "ss") "ss"
+; ;    assertEquals (String->Symbol "s2e%+*/$@!<>=?:r;") s2e%+*/$@!<>=?:r;
+; test-str-symbol
+
+
+; define test-str-complex ( )
+;     println "Test for String->Complex"
+;     println (String->Complex "3.5+3i")
+; ;    assertEquals (String->Complex "
+; test-str-complex
+
+
+; ; Characters
+
+; define test-char-digit ( )
+;     println "Test for Char->digit"
+;     assertEquals (Char->digit ascii-9 10) 9
+;     assertEquals (Char->digit ascii-1 2) 1
+;     assertEquals (Char->digit ascii-b 16) 11
+;     assertFalse (Char->digit ascii-9 -1)
+;     assertEquals (Char->digit ascii-8) 8
+;     assertFalse (Char->digit ascii-8 2)
+; test-char-digit
+
+; ;Dicts
+
+; define test-dict-make ( )
+;     println "Test for Dict::make"
+;     define dict-book1 (Dict::make "Title" "Anatomy and Physiology")
+;     assertTrue (Dict? dict-book1)
+;     define dict-empty (Dict::make)
+;     assertTrue (Dict? dict-empty)
+; ;    define dict-odd (Dict::make 1 "a" 2)
+; test-dict-make
+
+; define dict-book (Dict::make "Title" "Anatomy and Physiology")
+; define dict-empty (Dict::make)
+
+; define test-dict-string ( )
+;     println "Test for Dict->String"
+;     println dict-book
+;     assertEquals (Dict->String dict-book) "#[Dict 2291492]"
+;     println (Dict->String "a")
+;     println (Dict->String 22)
+;     println (Dict->String "abc")
+; test-dict-string
+
+; define test-dict-keys ( )
+;     println "Test for Dict->keys"
+;     println (Dict->keys dict-book)
+;     ;println (type dict-book)
+;     ;println (Dict->keys dict-empty)
+; test-dict-keys
+
+; define test-dict-set ( )
+;     println "Test for Dict::set"
+;     Dict::set dict-book "Author" "Kenneth Saladin"
+;     println (Dict->keys dict-book)
+; test-dict-set
+
+; define test-dict-get ( )
+;     println "Test for Dict::get"
+;     println (Dict::get dict-book "Author")
+;     println (Dict::get dict-book "Title")
+;     println (Dict::get dict-book "authoR")
+;     println (Dict::get dict-book "test")
+;     println (Dict::get dict-book " ")
+; test-dict-get
+
+; define test-dict-contains ( )
+;     println "Test for Dict::contains?"
+;     println (Dict::contains? dict-book "Author")
+;     println (Dict::contains? dict-book " ")
+;     println (Dict::contains? dict-book "test")
+; test-dict-contains
+
+; ;streams
+
+
+
+; define test-stream ( )
+;     println "Test for streams"
+    
+;     define o (open-output-file "copy.txt")
+;     write-char o ascii-t
+;     write-char o ascii-e
+;     write-char o ascii-s
+;     write-char o ascii-t
+;     close-stream current-output-stream
+
+;     define r (open-input-file "copy.txt")
+;     define st ""
+;     while (not (eos-object? (peek-char r)))
+;       define st (String::append st (String::string (read-char r)))
+;     assertEquals st "test"
+
+;     define os (open-input-string ("test1"))
+;     define st1 ""
+;     while (not (eos-object? (peek-char os)))
+;       define st1 (String::append st1 (String::string (read-char os)))
+;     assertEquals st1 "test1"
+;     println (read-char os)
+
+;     define rs (open-output-string)
+;     write-char rs ascii-t
+;     write-char rs ascii-e
+;     write-char rs ascii-s
+;     write-char rs ascii-1
+;     ;write-char rs ascii-s
+;     ;write-char rs ascii-t
+;     println (get-output-string rs)
+;     assertEquals (get-output-string rs) "tes1"
+; test-stream
+
+; ;READ
+
+define test-read ( )
+    println "Test for read"
+    define tr1 (read "a b c")
+    println (String? tr1)
+    println tr1
+    define s (read "define test-dict-make () :println \"Test for Dict::make\" :define dict-book1 (Dict::make "Title" \"Anatomy and Physiology\") :assertTrue (Dict? dict-book1) :define dict-empty (Dict::make) :assertTrue (Dict? dict-empty) :test-dict-make ")
+    println s
+    ;TODO - Debug indentation
+    define tr2pre "chunk *\\n  :$ hello world program\\n  :$ call hello function\\n  :$ call hello function"
+    println tr2pre
+    define tr2 (read tr2pre)
+    println tr2
+    
+    println (read ":$ hello")
+    println (read "chunk *\\n  :$ hello")
+    println (read "chunk *\\n  :$ hello\\n  :$ bye")
+    ;   (
+;         (chunk * 
+;           (
+;             ($ (String::append hello ) )
+;             ($ (String::append bye   ) ) 
+;           ) 
+;         ) 
+;       )
+    println (read "chunk *\\n  :$ hello\\n  :$ hello\\n  :$ goodbye")
+;     (
+;       (chunk * 
+;         (
+;           ($ (String::append hello ) )
+;           ($ (String::append hello ) )
+;           ($ (String::append goodbye ) )
+;         )
+;       )
+;     )
+
+    define tr3 (read ":$ hello world program\\n:$ call hello function")
+    println tr3
+;test-read
+
+
+; define test-string-join ()
+;   println "Test String::join"
+;   assertEquals (String::join (list "foo" "bar" "baz") ":") "foo:bar:baz"
+;   assertEquals (String::join (list "foo") ":") "foo"
+;   assertEquals (String::join (list "") ":") ""
+; test-string-join
+
+; define test-getenv ()
+;   println "Test getenv"
+;   assertEquals (getenv "TERM") "xterm-color" ; this is a silly check
+;                                              ; since environment
+;                                              ; variables by definition
+;                                              ; have no standard value
+;   assertEquals (getenv "AWESOME_TERM" "xterm-256color") "xterm-256color"
+;   assertEquals (getenv "VOODOO_MAGIC" false) false
+; test-getenv
+
+; define test-file-exists? ()
+;   println "Test file-exists?"
+;   assertTrue (file-exists? "ginger.h")
+;   assertFalse (file-exists? "icanhascheezburger.conf")
+; test-file-exists?
+
+; define dict-test ()
+;   println "Dict test"
+;   ;define dict (Dict::make)
+;   define q 'm
+;   ;println q
+;   ;Dict::set dict 'm "some value"
+;   ;println (Dict::get dict '*)
+; dict-test
+
+; define test-object-string ()
+;   println "Test object->string"
+;   assertEquals (String::append "" "null") "null"
+;   assertEquals (object->string null) "null"
+;   assertEquals (object->string "string") "string"
+;   assertEquals (object->string ascii-a) "a"
+;   assertEquals (object->string 42) "42"
+;   assertEquals (object->string (list "one" "two")) "(one two )"
+;   assertEquals (object->string (list (list "one" "two") "three" "four")) "((one two ) three four )"
+;   ; TODO - Test all other cases
+; test-object-string
+
+; define test-cairo ()
+;   ; compile with --cairo flag
+;   include "cairo.gin"
+;   println "Test Cairo"
+;   define surface (cairo-image-surface-create 500 500)
+;   define context (cairo-create surface)
+;   cairo-use-cartesian-coordinate-system context 500 500
+;   <cairo>-set-source-rgb context 1.0 1.0 1.0
+;   <cairo>-paint context
+;   <cairo>-set-source-rgb context 0.0 0.0 0.0
+;   <cairo>-move-to context 10.0 10.0
+;   <cairo>-line-to context 20.0 20.0
+;   <cairo>-stroke context
+;   <cairo>-surface-write-to-png surface "test-cairo.png"
+; test-cairo  
+
+;include "pango.gin"
+define test-pango ()
+  ; compile with --pango flag
+  println "Test Pango"
+
+  ;define surface (cairo-image-surface-create 500 500)
+  define surface (cairo-pdf-surface-create "pango.pdf" 500 500)
+  define cr (cairo-create surface)
+
+  ; Do we really need to paint the page white?
+  <cairo>-set-source-rgb cr 1.0 1.0 1.0
+  <cairo>-paint cr
+
+  define font-desc (Pango::font-description-new)
+  Pango::font-description-set-family font-desc "serif"
+  Pango::font-description-set-weight font-desc PANGO-WEIGHT-BOLD
+  Pango::font-description-set-absolute-size font-desc (* 32 PANGO-SCALE)
+  
+  define layout (Pango::cairo-create-layout cr)
+  Pango::layout-set-font-description layout font-desc
+  Pango::layout-set-text layout "Hello from pango!"
+
+  <cairo>-set-source-rgb cr 0.0 0.0 1.0
+  <cairo>-move-to cr 10.0 50.0
+
+  Pango::cairo-show-layout cr layout
+
+  g-object-unref layout
+  Pango::font-description-free font-desc
+
+  cairo-destroy cr
+  cairo-surface-destroy surface
+;test-pango
+
+define test-pango-multipage-pdf ()
+  println "Test Pango Multipage PDF"
+  define US-LETTER-WIDTH 612
+  define US-LETTER-HEIGHT 792
+  
+  define US-LETTER-TOP-MARGIN 72
+  define US-LETTER-LEFT-MARGIN 72
+  define US-LETTER-RIGHT-MARGIN 72
+  define US-LETTER-BUTTOM-MARGIN 72
+
+  define US-LETTER-PARAGRAPH-SPACING 12
+
+  define gin-pango-size (s)
+    * PANGO-SCALE s
+
+  ;define surface (cairo-image-surface-create 500 500)
+  define surface (cairo-pdf-surface-create "pango-multipage.pdf" US-LETTER-WIDTH US-LETTER-HEIGHT)
+  define cr (cairo-create surface)
+
+  <cairo>-set-source-rgb cr 1.0 1.0 1.0
+  <cairo>-paint cr
+
+  define font-desc (Pango::font-description-new)
+  Pango::font-description-set-family font-desc "serif"
+  Pango::font-description-set-weight font-desc PANGO-WEIGHT-NORMAL
+  Pango::font-description-set-absolute-size font-desc (gin-pango-size 12)
+  
+  define layout (Pango::cairo-create-layout cr)
+  Pango::layout-set-width layout (- (gin-pango-size US-LETTER-WIDTH) (gin-pango-size (+ US-LETTER-LEFT-MARGIN US-LETTER-RIGHT-MARGIN)))
+  Pango::layout-set-font-description layout font-desc
+  Pango::layout-set-text layout "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Cras enim nunc, commodo semper, pellentesque quis, accumsan at, neque. Aliquam lacinia. Nullam eu tortor ac ipsum dignissim molestie. Nullam at tortor. Cras vestibulum porttitor lectus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce neque purus, aliquam et, porta vitae, rutrum ut, eros. Vivamus eros. Etiam sed ipsum. Maecenas vel elit id lectus pretium ultricies. Quisque egestas quam semper eros. Vestibulum sit amet lorem. Quisque semper vehicula massa. Duis nec dui non ante tempor varius. Curabitur ac orci vel augue bibendum hendrerit. Pellentesque aliquet, metus ut dictum pellentesque, nisl leo vulputate sem, nec ultricies nibh ipsum eu leo. Ut libero enim, scelerisque eu, elementum in, varius eget, pede. In vel diam vel nunc aliquam viverra. Aliquam erat volutpat. Praesent placerat. Vestibulum augue. Ut orci libero, nonummy non, dictum semper, suscipit eget, mauris. Nullam consequat dui eget wisi. Morbi eget magna sed nulla volutpat lobortis."
+
+  <cairo>-set-source-rgb cr 0.0 0.0 0.0
+  <cairo>-move-to cr US-LETTER-LEFT-MARGIN US-LETTER-TOP-MARGIN
+  Pango::cairo-show-layout cr layout
+
+  define layout2 (Pango::cairo-create-layout cr)
+  Pango::layout-set-width layout2 (- (gin-pango-size US-LETTER-WIDTH) (gin-pango-size (+ US-LETTER-LEFT-MARGIN US-LETTER-RIGHT-MARGIN)))
+  Pango::layout-set-font-description layout2 font-desc
+  Pango::layout-set-text layout2 "WORKS! Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Cras enim nunc, commodo semper, pellentesque quis, accumsan at, neque. Aliquam lacinia. Nullam eu tortor ac ipsum dignissim molestie. Nullam at tortor. Cras vestibulum porttitor lectus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce neque purus, aliquam et, porta vitae, rutrum ut, eros. Vivamus eros. Etiam sed ipsum. Maecenas vel elit id lectus pretium ultricies. Quisque egestas quam semper eros. Vestibulum sit amet lorem. Quisque semper vehicula massa. Duis nec dui non ante tempor varius. Curabitur ac orci vel augue bibendum hendrerit. Pellentesque aliquet, metus ut dictum pellentesque, nisl leo vulputate sem, nec ultricies nibh ipsum eu leo. Ut libero enim, scelerisque eu, elementum in, varius eget, pede. In vel diam vel nunc aliquam viverra. Aliquam erat volutpat. Praesent placerat. Vestibulum augue. Ut orci libero, nonummy non, dictum semper, suscipit eget, mauris. Nullam consequat dui eget wisi. Morbi eget magna sed nulla volutpat lobortis."
+  <cairo>-move-to cr US-LETTER-LEFT-MARGIN (+ US-LETTER-TOP-MARGIN (/ (Pango::layout-get-extents-logical-height layout2) PANGO-SCALE))
+  Pango::cairo-show-layout cr layout2
+
+  <cairo>-show-page cr
+  cairo-destroy cr
+  
+  set cr (cairo-create surface)
+  <cairo>-set-source-rgb cr 0.0 0.0 0.0
+  <cairo>-move-to cr US-LETTER-LEFT-MARGIN US-LETTER-TOP-MARGIN
+  Pango::cairo-show-layout cr layout
+  <cairo>-show-page cr
+  cairo-destroy cr
+  
+  g-object-unref layout
+  Pango::font-description-free font-desc
+  
+  cairo-surface-destroy surface
+;test-pango-multipage-pdf
+
+define LOREM-IPSUM "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Cras enim nunc, commodo semper, pellentesque quis, accumsan at, neque. Aliquam lacinia. Nullam eu tortor ac ipsum dignissim molestie. Nullam at tortor. Cras vestibulum porttitor lectus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce neque purus, aliquam et, porta vitae, rutrum ut, eros. Vivamus eros. Etiam sed ipsum. Maecenas vel elit id lectus pretium ultricies. Quisque egestas quam semper eros. Vestibulum sit amet lorem. Quisque semper vehicula massa. Duis nec dui non ante tempor varius. Curabitur ac orci vel augue bibendum hendrerit. Pellentesque aliquet, metus ut dictum pellentesque, nisl leo vulputate sem, nec ultricies nibh ipsum eu leo. Ut libero enim, scelerisque eu, elementum in, varius eget, pede. In vel diam vel nunc aliquam viverra. Aliquam erat volutpat. Praesent placerat. Vestibulum augue. Ut orci libero, nonummy non, dictum semper, suscipit eget, mauris. Nullam consequat dui eget wisi. Morbi eget magna sed nulla volutpat lobortis."
+
+define test-make-document ()
+  println "Test make document"
+  define document (PDF::make-document "document.pdf")
+  define font (PDF::make-font 'serif 'normal 12)
+  define paragraph (PDF::make-paragraph LOREM-IPSUM font)
+  Dict::set paragraph 'indent 25
+  ;Dict::set paragraph 'spacing 25
+  ;Dict::set paragraph 'justify true
+  ;Dict::set paragraph 'alignment 'center
+  PDF::add-paragraph document paragraph
+  PDF::add-paragraph document paragraph
+  PDF::add-paragraph document paragraph
+  PDF::add-paragraph document paragraph
+  PDF::add-paragraph document paragraph ; force a page break
+  PDF::close document
+;test-make-document
+
+define test-pango-list-fonts ()
+  println "Test pango list fonts"
+  define surface (cairo-pdf-surface-create "pango-multipage.pdf" 500 500)
+  define cr (cairo-create surface)
+  
+  define layout (Pango::cairo-create-layout cr)
+  define context (Pango::layout-get-context layout)
+  Pango::context-list-families context
+test-pango-list-fonts
+
+define test-font-from-string ()
+  println "Test make document"
+  define document (PDF::make-document "font.pdf")
+  define paragraph (PDF::make-paragraph LOREM-IPSUM "Arial 14")
+  PDF::add-paragraph document paragraph
+  PDF::close document
+;test-font-from-string
+
+define test-color-document ()
+  println "Test color document"
+  define document (PDF::make-document "colors.pdf")
+  define paragraph (PDF::make-paragraph "I'm the color..." "Impact 12")
+
+  ; default color
+  PDF::add-paragraph document paragraph
+
+  Dict::set paragraph 'color 'red
+  PDF::add-paragraph document paragraph
+
+  Dict::set paragraph 'color 'green
+  PDF::add-paragraph document paragraph
+
+  Dict::set paragraph 'color 'blue
+  PDF::add-paragraph document paragraph
+
+  Dict::set paragraph 'color 'black
+  PDF::add-paragraph document paragraph
+
+  PDF::close document
+;test-color-document
+

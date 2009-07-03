@@ -1,0 +1,177 @@
+; Koch Snowflakes in Ginger from OOPSLA paper.
+; Demonstrates literate programming in Ginger.
+
+; Note: this will crash without the *.png files.
+; TODO - fix crash. add PNGs to examples directory.
+
+:title Koch Snowflakes in Ginger
+
+:section Introduction
+
+:doc
+  The following program demonstrates
+  literate programming in Ginger much in 
+  the same spirit as the primes programs
+  that appears in (:cite knuth:literate). 
+  This program will generate a Koch 
+  snowflake using turtle-style graphics. 
+  We shall begin as Knuth did, by reducing 
+  the entire program to its top-level 
+  description.
+
+chunk *
+  :$ program to display a Koch snowflake
+
+:section Implementation Plan
+
+:doc
+  Sometimes the best beginning is the end.  
+  What we would like to do in this program 
+  is generates a fractal snowflake with 
+  "sides" of length 100 which we will store 
+  in a file called 
+  (:code koch-snowflake.png).  
+
+chunk (: create a snowflake)
+  Koch-snowflake 100
+  save-canvas "koch-snowflake.png"
+
+:doc
+  While (:code save-canvas) is implemented
+  by the graphics library, we will need to
+  define functions that implement the 
+  snowflake. These include the 
+  (:code Koch-snowflake) function we have 
+  already alluded to in the previous chunk 
+  and the (:code Koch-curve) function on 
+  which it is based.
+
+chunk (: program functions)
+  :$ Koch snowflake function
+  :$ Koch curve function
+
+:doc
+  The program structure is then a simple 
+  matter of providing the function 
+  implementation and using that 
+  implementation to create the desired 
+  output.
+
+chunk (: program to display a Koch snowflake)
+  :$ program functions
+  :$ create a snowflake
+
+:doc
+  In the remaining sections we will delve 
+  into the process of creating fractal 
+  curves and snowflakes.
+
+:section Koch Curves and Bump Fractals
+
+:doc
+  A Koch curve is a "bump fractal."  The 
+  general recipe for generating a bump 
+  fractal is to draw the fractal at one 
+  level of recursion and then replace each 
+  (:code forward) call with a recursive 
+  call.  The Koch curve is based on a 
+  single triangular bump illustrated here:
+
+image "bump.png" width: 1.8
+
+:doc
+  By thinking like a turtle we can easily 
+  come up with the correspoding drawing 
+  code which is relative to the horizontal 
+  measure or extent, (:code x).
+
+:code
+  forward x
+  left-turn 60
+  forward x
+  right-turn 120
+  forward x
+  left-turn 60
+  forward x
+
+:doc
+  We generate the recursive case by using 
+  the bump fractal recipe and replacing the
+  (:code forward \(/ x 3\)) calls with 
+  (:code Koch-curve \(/ x 3\)) calls.
+
+chunk (: recursive case)
+  Koch-curve (/ x 3)
+  left-turn 60
+  Koch-curve (/ x 3)
+  right-turn 120
+  Koch-curve (/ x 3)
+  left-turn 60
+  Koch-curve (/ x 3)
+
+:doc 
+  A Koch curve has infinite length since 
+  each recursive step generates four new 
+  segments one-third the length of the 
+  original segment. The total length of 
+  the curve becomes one-third longer with 
+  each recursive step (:cite koch:curve).  
+  Stated more formally, the length of 
+  the curve at step (:math n) is 
+  (:math \(4/3\)^n).  A related measure, 
+  the fractal dimension, describes how
+  how the complexity of the fractal 
+  increases as it scales. The fractal 
+  dimension of a Koch curve is 
+  (:math log 4 / log 3) or approximately 
+  1.26.
+
+  Though the fractal may be of infinite 
+  length and composed of an infinite 
+  number or segments, the resolution of 
+  our display is finite. It is convenient 
+  to end the recursion at the smallest
+  representable length - a pixel. Our base 
+  case is then to simply draw a line of 
+  length (:code x), where (:code x < 1).
+
+chunk (: base case)
+  forward x
+
+:doc 
+  We combine the base case and the 
+  recursive cases to form our Koch-curve 
+  function which generates a single Koch 
+  curve whose horizontal measure is 
+  (:code x):
+
+chunk (: Koch curve function)
+  define Koch-curve (x)
+    if (< x 1)
+      :$ base case
+    else:
+      :$ recursive case
+
+:section Koch Snowflakes
+
+:doc
+  The (:code Koch-snowflake) function is 
+  trivially implemented by repeating three 
+  Koch curves to form an equilateral 
+  triangle.
+
+chunk (: Koch snowflake function)
+  define Koch-snowflake (x)
+    repeat 3
+      Koch-curve x
+      right-turn 120
+
+:section Results
+
+:doc
+  After the program is executed, the 
+  following image is generated.
+
+image "koch-snowflake.png" width: 1.25
+
+:bibliography koch.bib

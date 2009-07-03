@@ -1,0 +1,1763 @@
+; Copyright 2009 by James Dean Palmer and others.
+;
+; Ginger is free software.  You can redistribute and/or modify
+; this work under ther terms of the Apache License Version 2.0
+; or, at your option, Ginger's amended LGPL 2.1 license.  You may
+; not use this file except in compliance with one of these licenses.
+; You may also obtain a copy of the Apache License at
+;
+;   http://www.apache.org/licenses/LICENSE-2.0
+;
+; You may obtain a copy of Ginger's amended LGPL License at:
+;
+;   http://ging3r.org/licenses/LGPL-2.1.txt
+;
+; Unless required by applicable law or agreed to in writing, 
+; software distributed under the License is distributed on an 
+; "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+; either express or implied. See the License(s) for the specific 
+; language governing permissions and limitations.
+;
+; Please report all bugs and problems to "bugs@ging3r.org".
+
+define banner "This is ginger, Version 20080216"
+
+define output false
+define output-file-name false
+define input-file-name false
+define last-char false
+define line 1
+define column 0
+define cbq-indent 0
+
+define tag (a b)
+  pair a b
+
+define type (v)
+  first v
+
+define form (v)
+  tail v
+
+define relate (a b)
+  ; b is a kind of a..
+  noop
+
+define get-char (input)
+  require (input-stream? input)
+  ensure (or (eos-object? result) (char? result))
+  if (not (last-char))
+    ; if its empty then get it from input
+    read-char input
+  else:
+    ; if its not empty then ...
+    if (char? last-char)
+      ; if its just a char then grab it and reset buffer
+      define current-char last-char
+      set last-char false
+      current-char
+    else:
+      ; if its a string then ...
+      define current-char (string-first last-char)
+      if (= (string-length last-char) 2)
+        ; if this is the last time it will be a string
+        set last-char (string-first (string-rest last-char))
+      else:
+        ; otherwise there is more string left over
+        set last-char (string-rest last-char)
+      current-char
+
+define unget-char (input c)
+  require (input-stream? input)
+  if (not (last-char))
+    ; if its empty then just set it
+    set last-char c
+  else:
+    ; if its not empty then add to the frount of it
+    set last-char (new-string c last-char)
+
+define indentation 0
+
+define indent (amount)
+  require (integer? amount)
+  ensure (string? result)
+  if (<= amount 0) ""
+  else: (string-append " " (indent (- amount 1)))
+
+define eos? (input)
+  eos-object? (peek-char input)
+
+define char->base-number (v b)
+  require (integer? b)
+  require (char? v)
+  ensure (number? result)
+  define c
+    if (< b 2)
+      false
+    elsif: (> b 36)
+      false
+    elsif: (>= (char->integer v) (char->integer ascii-a))
+      + (- (char->integer v) (char->integer ascii-a)) 10
+    elsif: (>= (char->integer v) (char->integer ascii-A))
+      + (- (char->integer v) (char->integer ascii-A)) 10
+    elsif: (>= (char->integer v) (char->integer ascii-0))
+      - (char->integer v) (char->integer ascii-0)
+    else: false
+  if (not c) false
+  elsif: (< c b) c
+  else: false
+
+define char-base-numeric? (v b)
+  require (integer? b)
+  require (char? v)
+  if (not (char->base-number v b)) false
+  else: true
+
+define char-eol? (c)
+  require (char? c)
+  if (char=? c ascii-lf) true
+  elsif: (char=? c ascii-cr) true
+  else: false
+
+define char->double-quote-escape (c)
+  require (char? c)
+  if (char=? c ascii-newline) "\\n"
+  elsif: (char=? c ascii-return) "\\r"
+  else: c
+
+define new-string (a b)
+  if (and (string? a) (string? b)) (string-append a b)
+  elsif: (and (string? a) (char? b)) (string-append a (string b))
+  elsif: (and (char? a) (string? b)) (string-append (string a) b)
+  elsif: (and (char? a) (char? b)) (string-append (string a) (string b))
+  else: false
+
+define string-first (v)
+  require (string? v)
+  if (= (string-length v) 0) false
+  else: (first (string->list (substring v 0 1)))
+
+define string-last (v)
+  require (string? v)
+  if (= (string-length v) 0) false
+  else: (first (string->list (substring v (- (string-length v) 1) (string-length v))))
+
+; Return everything after the first character in a string.
+define string-rest (v)
+  require (string? v)
+  if (<= (string-length v) 1) false
+  else: (substring v 1 (string-length v))
+
+define noop ()
+  true
+
+; Is the string a boolean?
+define string-boolean? (v)
+  require (string? v)
+  if (or (string=? v "true") (string=? v "false")) true
+  else: false
+
+; Is the string a boolean?
+define string->boolean (v)
+  require (string? v)
+  if (or (string=? v "true") (string=? v "false"))
+    if (string=? v "true") true
+    else: false
+  else: false
+
+; Is the string a boolean?
+define string-ellipses? (v)
+  require (string? v)
+  if (string=? v "..") true
+  else: false
+
+; Is the string composed of only digits 0-9
+define string-numeric? (v)
+  require (string? v)
+  if (= (string-length v) 0) false
+  elsif: (and (= (string-length v) 1) (char-numeric? (string-first v))) true
+  elsif: (char-numeric? (string-first v)) (string-numeric? (string-rest v))
+  else: false
+
+; Is the string composed of only digits valid for a given base b.
+define string->base-number (v b)
+  require (string? v)
+  require (integer? b)
+  define string->base-number-i (v b i)
+    require (string? v)
+    require (integer? b)
+    require (integer? i)
+    if (= (string-length v) 0) false
+    elsif: (and (= (string-length v) 1) (char-base-numeric? (string-first v) b))
+      char->base-number (string-first v) b
+    elsif: (char-base-numeric? (string-first v) b)
+      define n (string->base-number-i (string-rest v) b (- i 1))
+      if (not n) false
+      else: (+ (* (char->base-number (string-first v) b) (expt b (- i 1))) n)
+    else: false
+  string->base-number-i v b (string-length v)
+
+define string-base-numeric? (v b)
+  require (string? v)
+  require (integer? b)
+  if (not (string->base-number v b)) false
+  else: true
+
+define string->intent-integer (v)
+  require (string? v)
+  define v0 (string-split v ascii-underscore)
+  define v1 (first v0)
+  define v2 (tail v0)
+  if (string=? v1 "") false ; _ without anything prefixing it is invalid.
+  elsif: (and (null? v2) (string-numeric? v1)) (string->number v1) ; no base but okay
+  elsif: (null? v2) false ; no base but not numeric
+  elsif: (and (null? (tail v2)) (string-numeric? (first v2)) (string-base-numeric? v1 (string->number (first v2))) )
+    string->base-number v1 (string->number (first v2))  ; base and number are okay
+  else: false
+
+define string-intent-integer? (v)
+  require (string? v)
+  if (not (string->intent-integer v)) false
+  else: true
+
+define string->intent-ratio (v)
+  require (string? v)
+  define v0 (string-split v ascii-slash)
+  define v1 (first v0)
+  define v2 (tail v0)
+  if (string=? v1 "") false ; / without anything prefixing it is invalid.
+  elsif: (and (null? v2) (string-intent-integer? v1)) (string->intent-integer v1) ; no denomenator but okay
+  elsif: (null? v2) false ; no denomenator but not numeric
+  elsif: (and (null? (tail v2)) (string-intent-integer? (first v2)) (string-intent-integer? v1)) ; numerator and denomenator
+    / (string->intent-integer v1) (string->intent-integer (first v2))
+  else: false
+
+define string-intent-ratio? (v)
+  require (string? v)
+  if (not (string->intent-ratio v)) false
+  else: true
+
+define string->intent-scientific (v)
+  require (string? v)
+  define va false
+  define n1 "0"
+  define n2 "0"
+  define exponent "0"
+  define base "10"
+  set va (string-split v ascii-e)
+  if (not (null? (tail va))) ; there IS an exponent
+    if (not (null? (tail (tail va))))
+      ; but there is more than one "e" which is illegal..
+      set exponent false
+    else:
+      set exponent (first (tail va))
+  set va (string-split (first va) ascii-underscore)
+  if (not (null? (tail va))) ; there IS a base
+    ; but there is more than one "_" which is illegal..
+    if (not (null? (tail (tail va))))
+      set base false
+    else:
+        set base (first (tail va))
+  set va (string-split (first va) ascii-period)
+  if (not (null? (tail va))) ; there IS a decimal
+    if (not (null? (tail (tail va))))
+      ; but there is more than one "." which is illegal..
+      set n2 false
+    else:
+      set n2 (first (tail va))
+  set n1 (first va)
+  if (and (not (not n1)) (not (not n2)) (not (not base)) (not (not exponent)) (string-numeric? exponent) (string-numeric? base) (string-base-numeric? n1 (string->number base)) (string-base-numeric? n2 (string->number base)) )
+    + (* (string->base-number n1 (string->number base)) (expt (string->number base) (string->number exponent))) (/ (string->base-number n2 (string->number base)) (expt (string->number base) (- (string-length n2) (string->number exponent))))
+  else:
+    false
+
+define string-intent-scientific? (v)
+  require (string? v)
+  if (not (string->intent-ratio v)) false
+  else: true
+
+define string-intent-rational? (v)
+  require (string? v)
+  if (string-intent-ratio? v) true
+  elsif: (string-intent-scientific? v) true
+  else: false
+
+define string->intent-rational (v)
+  require (string? v)
+  if (string-intent-ratio? v) (string->intent-ratio v)
+  elsif: (string-intent-scientific? v) (string->intent-scientific v)
+  else: false
+
+define string->intent-complex (v)
+  require (string? v)
+  define va (string-split v ascii-plus)
+  if (null? (tail va)) false ; + was not found
+  else:
+    define real-part (first va)
+    define vb (string-split (cadr va) ascii-i)
+    if (null? (tail vb)) false ; i was not found
+    else:
+      define imaginary-part (first vb)
+      define rp
+        if (string-intent-integer? real-part) (string->intent-integer real-part)
+        elsif: (string-intent-ratio? real-part) (string->intent-ratio real-part)
+        elsif: (string-intent-scientific? real-part) (string->intent-scientific real-part)
+      define ip
+        if (string-intent-integer? imaginary-part) (string->intent-integer imaginary-part)
+        elsif: (string-intent-ratio? imaginary-part) (string->intent-ratio imaginary-part)
+        elsif: (string-intent-scientific? imaginary-part) (string->intent-scientific imaginary-part)
+      if (or (not rp) (not ip)) false ; either the real-part or imaginary part is not valid
+      else: (+ rp (* ip 1))
+;      else: (+ rp (* ip 0+1i))
+
+define string-intent-complex? (v)
+  require (string? v)
+  if (not (string->intent-complex v)) false
+  else: true
+
+define string->intent-symbol (v)
+  require (string? v)
+  define char-legal-symbol? (v)
+    if (char-alphabetic? v) true
+    elsif: (char-numeric? v) true
+    elsif: (char=? v ascii-plus) true
+    elsif: (char=? v ascii-minus) true
+    elsif: (char=? v ascii-mult) true
+    elsif: (char=? v ascii-slash) true
+    elsif: (char=? v ascii-percent) true
+    elsif: (char=? v ascii-dollar) true
+    elsif: (char=? v ascii-at) true
+    elsif: (char=? v ascii-exclamation) true
+    elsif: (char=? v ascii-less-than) true
+    elsif: (char=? v ascii-greater-than) true
+    elsif: (char=? v ascii-equals) true
+    elsif: (char=? v ascii-question) true
+    else: false
+  define string-legal-symbol? (v)
+    if (= (string-length v) 0) false
+    elsif: (and (= (string-length v) 1) (char-legal-symbol? (string-first v))) true
+    elsif: (char-legal-symbol? (string-first v)) (string-legal-symbol? (string-rest v))
+    else: false
+  if (not (not (string-intent-complex? v))) false
+  else:
+    if (string-legal-symbol? v) v
+    else: false
+
+define string-intent-symbol? (v)
+  require (string? v)
+  if (not (string->intent-symbol v)) false
+  else: true
+
+define string->label (v)
+  if (< (string-length v) 2) false
+  else:
+    define c (string-intent-symbol? (substring v 0 (- (string-length v) 1)))
+    if (and c (char=? (string-last v) ascii-colon)) v
+    else: false
+
+define string-label? (v)
+  require (string? v)
+  if (not (string->label v)) false
+  else: true
+
+define string-colon-command? (v)
+  require (string? v)
+  if (and (eq? (string-first v) ascii-colon) (or (string-intent-symbol? (string-rest v)) (= (string-length v) 1))) true
+  else: false
+
+define <binding>-new (name export-name term type expansion-function)
+  vector name export-name term type expansion-function
+
+define <binding>-get-name (obj)
+  vector-get obj 0
+
+define <binding>-get-export-name (obj)
+  vector-get obj 1
+
+define <binding>-get-term (obj)
+  vector-get obj 2
+
+define <binding>-get-type (obj)
+  vector-get obj 3
+
+define <binding>-get-expansion-function (obj)
+  vector-get obj 4
+
+define <binding>-set-name (obj v)
+  vector-set obj 0 v
+
+define <binding>-set-export-name (obj v)
+  vector-set obj 1 v
+
+define <binding>-set-term (obj v)
+  vector-set obj 2 v
+
+define <binding>-set-type (obj v)
+  vector-set obj 3 v
+
+define <binding>-set-expansion-function (obj v)
+  vector-set obj 4 v
+
+define <term>-new (parent children bindings type parse-indent line column value)
+  vector parent children bindings type parse-indent line column value 0
+
+define <term>-get-parent (obj)
+  vector-get obj 0
+
+define <term>-get-children (obj)
+  vector-get obj 1
+
+define <term>-get-bindings (obj)
+  vector-get obj 2
+
+define <term>-get-type (obj)
+  vector-get obj 3
+
+define <term>-get-parse-indent (obj)
+  vector-get obj 4
+
+define <term>-get-line (obj)
+  vector-get obj 5
+
+define <term>-get-column (obj)
+  vector-get obj 6
+
+define <term>-get-value (obj)
+  vector-get obj 7
+
+define <term>-get-paren-balance (obj)
+  vector-get obj 8
+
+define <term>-set-parent (obj v)
+  vector-set obj 0 v
+
+define <term>-set-children (obj v)
+  vector-set obj 1 v
+
+define <term>-set-bindings (obj v)
+  vector-set obj 2 v
+
+define <term>-set-type (obj v)
+  vector-set obj 3 v
+
+define <term>-set-parse-indent (obj v)
+  vector-set obj 4 v
+
+define <term>-set-line (obj v)
+  vector-set obj 5 v
+
+define <term>-set-column (obj v)
+  vector-set obj 6 v
+
+define <term>-set-value (obj v)
+  vector-set obj 7 v
+
+define <term>-set-paren-balance (obj v)
+  vector-set obj 8 v
+
+define begin-group? (t)
+  define c (<term>-get-children t)
+  if (null? c) false
+  else:
+    if (eq? (<term>-get-type (first c)) 'begin) true
+    else: false
+
+define paren-balanced ()
+  define paren-balanced2 (t)
+    require (not (eq? t false))
+    if (begin-group? t)
+      if (= (<term>-get-paren-balance t) 0) (list)
+      else: t
+    else:
+      paren-balanced2 (<term>-get-parent t)
+  paren-balanced2 tree-current
+
+define paren-add ()
+  define add-paren2 (t)
+    require (not (eq? t false))
+    if (begin-group? t)
+      <term>-set-paren-balance t (+ (<term>-get-paren-balance t) 1)
+    else:
+      add-paren2 (<term>-get-parent t)
+  add-paren2 tree-current
+
+define paren-remove ()
+  define remove-paren2 (t)
+    require (not (eq? t false))
+    if (begin-group? t)
+      <term>-set-paren-balance t (- (<term>-get-paren-balance t) 1)
+    else:
+      remove-paren2 (<term>-get-parent t)
+  remove-paren2 tree-current
+
+define print-term (t)
+  println ""
+  print-term2 t
+  println ""
+  println ""
+  define print-term2 (t)
+    define it (i)
+      if (or (null? i) (null? (first i)))
+        false
+      else:
+        print-term2 (first i)
+        if (not (null? (tail i)))
+          println ""
+        it (tail i)
+    print (indent indentation) "(" (<term>-get-type t) " value:'" (<term>-get-value t) "' indent:'" (<term>-get-parse-indent t) "' line:'" (<term>-get-line t) "' "
+    if (not (boolean? (<term>-get-children t)))
+      println ""
+      ++ indentation
+      it (<term>-get-children t)
+      -- indentation
+    print ")"
+
+define <group>-new (line column)
+  <term>-new false (list) (list) 'group 0 line column false
+
+define <value>-new (value-type value line column)
+  <term>-new false false false value-type 0 line column value
+
+define <begin>-new (line column)
+  <term>-new false false false 'begin 0 line column false
+
+define <group>-add-child (t c)
+  require (eq? (<term>-get-type t) 'group) ; "Can not add child to non-group."
+  <term>-set-parent c t
+  <term>-set-children t (append (<term>-get-children t) (list c))
+
+define tree-head (<group>-new 0 0)
+define tree-current tree-head
+
+define tree-add (v)
+  <group>-add-child tree-current v
+
+define tree-push ()
+  define g0 (<group>-new line column)
+  tree-add g0
+  set tree-current g0
+
+define tree-pop ()
+  set tree-current (<term>-get-parent tree-current)
+
+define tree-unpop ()
+  set tree-current (last (<term>-get-children tree-current))
+
+define tree-sibling-count ()
+  if (eq? (<term>-get-parent tree-current) false)
+    0
+  else:
+    - (length (<term>-get-children (<term>-get-parent tree-current))) 1
+
+define state-stack (list)
+
+define state-push (s)
+  set state-stack (append state-stack (list s))
+
+define state-top ()
+  last state-stack
+
+define state-pop ()
+  set state-stack (head state-stack)
+
+tree-add (<begin>-new 0 0)
+
+define mangle (t)
+  t
+
+define split-list (lst v)
+  define a (list)
+  define b (list)
+  define middle false
+  each l lst
+    if (eq? l v)
+      set middle true
+    else:
+      if (eq? middle false)
+        set a (append a (list l))
+      else:
+        set b (append b (list l))
+  pair a b
+
+define eval (t)
+  define input (open-input-string t)
+  define old-tree-head tree-head
+  set state-stack (list)
+  set tree-head (<group>-new 0 0)
+  set tree-current tree-head
+  tree-add (<begin>-new 0 0)
+  set line 1
+  set column 0
+  parse input
+  close-input-stream input
+  println "Expand includes.."
+  include-expand tree-head
+
+  println "Inserting bindings.."
+  insert-bindings tree-head
+
+  println "Inserting immutable calls.."
+  insert-calls tree-head false
+
+  ; Open the file for output.
+  set output (open-output-string)
+
+  println "Writing code.."
+  ; Expand into scheme code.
+  expand tree-head
+
+  ; Close the output file.
+  close-output-stream output
+  define scheme-eval-string (get-output-string output)
+  scheme-eval (scheme-read (open-input-string scheme-eval-string))
+
+define include-filename (terms)
+  <term>-get-value (second terms)
+
+define open-include-file (filename)
+  define found-include-file false
+  define include-file-path ""
+  if (file-exists? filename)
+    set found-include-file true
+    set include-file-path filename
+  else:
+    define inc-paths (string-split (getenv "GIN_INCLUDE_PATH" "") ascii-colon)
+    while (and (not found-include-file) (not (null? inc-paths)))
+      define path (string-append (first inc-paths) "/" filename)
+      if (file-exists? path)
+        set found-include-file true
+        set include-file-path path
+      set inc-paths (tail inc-paths)
+  if (not found-include-file)
+    println "No file found for include: " filename
+    exit
+  open-input-file include-file-path
+
+define include-expansion (v)
+  define parent (<term>-get-parent v)
+  define parent-parent (<term>-get-parent parent)
+  define terms (<term>-get-children parent)
+  define input (open-include-file (include-filename terms))
+  define old-tree-head tree-head
+  set state-stack (list)
+  set tree-head (<group>-new 0 0)
+  set tree-current tree-head
+  tree-add (<begin>-new 0 0)
+  set line 1
+  set column 0
+  parse input
+  close-input-stream input
+  define tmp (split-list (<term>-get-children parent-parent) parent)
+  <term>-set-children parent-parent (append (first tmp) (tail (<term>-get-children tree-head)) (tail tmp))
+  define new-stuff (<term>-get-children tree-head)
+  set tree-head old-tree-head
+  expand (first new-stuff)
+
+define def-expansion (v)
+  define terms (<term>-get-children (<term>-get-parent v))
+  define first-term true
+  if (= (length terms) 4)
+    print output "(lambda ("
+    each i (<term>-get-children (caddr terms))
+      if first-term
+        set first-term false
+      else:
+        print output " "
+      print output (<term>-get-value i)
+    print output ")"
+    ++ indentation
+    expand (cadddr terms)
+    -- indentation
+    print output ")"
+  elsif: (= (length terms) 3)
+    print output "(set! " (<term>-get-value (cadr terms)) " "
+    expand (caddr terms)
+    print output ")"
+
+define doc-expansion (v)
+  ; TODO
+  false
+
+define ensure-expansion (v)
+  ; TODO
+  false
+
+define require-expansion (v)
+  ; TODO
+  false
+
+define class-expansion (v)
+  ; TODO
+  ; ginger.scm has an implementation of this which doesn't work well with the
+  ; nested letrec form of autogenerated code.  Maybe I want to wait until
+  ; macros work before implementing?
+  false
+
+define second (v)
+  first (tail v)
+
+define quote-expansion-raw (v strict star)
+  define quote-expansion2 (v strict star)
+    if (eq? (<term>-get-type v) 'symbol)
+      quoted-symbol-expansion v
+    elsif: (eq? (<term>-get-type v) 'begin)
+      if (eq? star 'star)
+        print output " begin "
+      else:
+        noop
+    elsif: (eq? (<term>-get-type v) 'group)
+      define children (<term>-get-children v)
+      if (and (eq? (<term>-get-type (first children)) 'symbol) (string=? (<term>-get-value (first children)) "unquote") (eq? strict 'not-strict))
+        expand (second children)
+      else:
+        print output "(list "
+        each i children
+          quote-expansion2 i strict star
+          print output " "
+        print output ")"
+    else:
+      ; If it isn't a symbol or group then it's a number or some other literal and we expand as normal
+      expand v
+  define terms (<term>-get-children (<term>-get-parent v))
+  ; Recursively look for unquotes and expand them
+  quote-expansion2 (second terms) strict star
+
+define quote-expansion (v)
+  quote-expansion-raw v 'not-strict 'not-star
+
+define quote*-expansion (v)
+  quote-expansion-raw v 'not-strict 'star
+
+define strict-quote-expansion (v)
+  quote-expansion-raw v 'strict 'not-star
+
+define strict-quote*-expansion (v)
+  quote-expansion-raw v 'strict 'star
+
+define table-expansion (v)
+  define terms (<term>-get-children (<term>-get-parent v))
+  print output "(let ((tmp (make-table init: '__reserved-unbound-table-key))) (begin "
+  define x (z)
+    if (not (null? z))
+      print output "(table-set! tmp "
+      expand (first z)
+      print output " "
+      expand (first (tail z))
+      print output ")"
+      x (tail (tail z))
+  x (tail terms)
+  print output " tmp))"
+
+define if-expansion (v)
+  define terms (<term>-get-children (<term>-get-parent v))
+  ; TODO: Validate terms
+  ; The first term is an if.. We always use a cond form..
+  ; The second term is the expression
+  ; The third term is the value if true
+  print output (indent indentation) "(cond ("
+  expand (cadr terms) ; expression (2nd term)
+  print output " "
+  expand (caddr terms) ; value (3rd term)
+  print output ") "
+  ; Iterate over the remaining terms..
+  ; case 1: elseif with two terms..
+  ; case 2: else with one term.
+  define test (t)
+    if (null? t) (noop)
+    elsif: (null? (first t)) (noop)
+    elsif: (string=? (<term>-get-value (first t)) "elsif:")
+      print output "("
+      expand (cadr t) ; expression (2nd term)
+      print output " "
+      expand (caddr t) ; value (3rd term)
+      print output ")"
+      test (cdddr t)
+    elsif: (string=? (<term>-get-value (first t)) "else:")
+      print output "(else "
+      expand (cadr t) ; expression (2nd term)
+      print output ")"
+      test (cddr t)
+  test (cdddr terms)
+  print output ") "
+
+; Primitive iteration
+
+define repeat-expansion (v)
+  ; TODO
+  false
+
+define while-expansion (v)
+  define terms (<term>-get-children (<term>-get-parent v))
+  print output (indent indentation) "(while "
+  expand (cadr terms)
+  print output " "
+  expand (caddr terms)
+  print output ")"
+
+define each-expansion (v)
+  define terms (<term>-get-children (<term>-get-parent v))
+  print output (indent indentation) "(ginger-for-each "
+  <group>-add-binding (<term>-get-parent v) false (<term>-get-value (cadr terms)) (mangle (<term>-get-value (cadr terms))) 'argument
+  print output (<term>-get-value (cadr terms))
+  print output " "
+  expand (caddr terms)
+  print output " "
+  expand (cadddr terms)
+  print output ")"
+
+define begin-expansion (v)
+  define terms (<term>-get-children (<term>-get-parent v))
+  define bindings (<term>-get-bindings (<term>-get-parent v))
+  define first-term true
+  ; expand bindings
+  if (not (= (length bindings) 0))
+    println output ""
+    println output (indent indentation) "(letrec"
+    ++ indentation
+    print output (indent indentation) "("
+    ++ indentation
+    each i bindings
+      if (eq? (<binding>-get-type i) 'variable)
+        ; newline before each term except the first
+        if first-term
+          set first-term false
+        else:
+          println output ""
+          print output (indent indentation)
+        if (char=? (string-first (<binding>-get-export-name i)) ascii-pound)
+          print output "(" (<binding>-get-name i) " " (<binding>-get-export-name i) ")"
+        else:
+          print output "(" (<binding>-get-name i) " #f)"
+      elsif: (eq? (<binding>-get-type i) 'function )
+        ; newline before each term except the first
+        if first-term
+          set first-term false
+        else:
+          println output ""
+          print output (indent indentation)
+        print output "(" (<binding>-get-export-name i) " "
+        expand (first (<term>-get-children (<binding>-get-term i)))
+        print output ")"
+    print output ") "
+    -- indentation
+  println output ""
+  print output (indent indentation) "(begin "
+  set first-term true
+  ; expand terms
+  each i (tail terms)
+    if (not (and (eq? (<term>-get-type (first (<term>-get-children i))) 'def) (= (length (<term>-get-children i)) 4)))
+      println output ""
+      ++ indentation
+      print output (indent indentation)
+      expand i
+      -- indentation
+  if (not (= (length bindings) 0))
+    -- indentation
+    print output ")"
+  print output ")"
+
+define call-expansion (v)
+  define terms (<term>-get-children (<term>-get-parent v))
+  define b0 (<group>-get-binding (<term>-get-parent v) (<term>-get-value v))
+  if (not b0)
+    println "Error on line " line ", column " column ": Function '" (<term>-get-value v) "' was not found."
+    exit
+  print output "(" (<binding>-get-export-name b0)
+  each i (tail terms)
+    print output " "
+    expand i
+  print output ")"
+
+define kall-expansion (v)
+  define terms (<term>-get-children (<term>-get-parent v))
+  ; define b0 (<group>-get-binding (<term>-get-parent v) (<term>-get-value v))
+  print output "("
+  expand (first (tail terms))
+  print output " "
+  expand (first (tail (tail terms)))
+  print output ")"
+
+define call2-expansion (v)
+  define terms (<term>-get-children (<term>-get-parent v))
+  define b0 (<group>-get-binding (<term>-get-parent v) (<term>-get-value v))
+  if (not b0)
+    println "Error on line " line ", column " column ": Function '" (<term>-get-value v) "' was not found."
+    exit
+  ; TODO: klugde - fix me.
+  kall (<binding>-get-expansion-function b0) v
+
+define value-expansion (v)
+  print output (<term>-get-value v)
+
+define string-expansion (v)
+  print output "\"" (<term>-get-value v) "\""
+
+define quoted-symbol-expansion (v)
+  print output "'" (<term>-get-value v)
+
+define variable-expansion (v)
+  print output (<term>-get-value v)
+
+define symbol-expansion (v)
+  print output (<term>-get-value v)
+
+define argument-expansion (v)
+  print output (<term>-get-value v)
+
+define group-expansion (v)
+  define terms (<term>-get-children v)
+  if (eq? (<term>-get-type (first terms)) 'def)
+    if (= (length terms) 3) ; a variable binding, function bindings are skipped
+      expand (first terms)
+  else:
+    expand (first terms)
+
+define head-expansion (v)
+  define terms (<term>-get-children v)
+  if (eq? compiler 'gambit)
+    println output "#!/usr/bin/env gsi"
+  else:
+    println output "#!/usr/bin/env csi"
+  println output "; This file contains code generated by the Ginger compiler.  Do not edit."
+  println output "(include \"support.scm\")"
+  expand (first terms)
+
+define expand (v)
+  ;println (<term>-get-type v) " - " (<term>-get-value v)
+  define type (<term>-get-type v)
+  if (eq? type 'begin) (begin-expansion v)
+  elsif: (eq? type 'def) (def-expansion v)
+  elsif: (and (eq? type 'group) (not (<term>-get-parent v))) (head-expansion v)
+  elsif: (eq? type 'group) (group-expansion v)
+  elsif: (eq? type 'call) (call2-expansion v)
+  elsif: (eq? type 'integer) (value-expansion v)
+  elsif: (eq? type 'string) (string-expansion v)
+  elsif: (eq? type 'quoted-symbol) (quoted-symbol-expansion v)
+  elsif: (eq? type 'boolean) (value-expansion v)
+  elsif: (eq? type 'symbol) (symbol-expansion v)
+  else: (println output "EXPANSION ERROR, type " type ", " (<term>-get-value v))
+
+define include-group-expansion (v)
+  define terms (<term>-get-children v)
+  each t terms
+    include-expand t
+
+define include-expand (v)
+  define type (<term>-get-type v)
+  define value (<term>-get-value v)
+  if (eq? type 'group) (include-group-expansion v)
+  elsif: (and (eq? type 'symbol) (string=? value "include")) (include-expansion v)
+
+define <group>-get-local-binding (group name)
+  define b0 false
+  each i (<term>-get-bindings group)
+    if (string=? (<binding>-get-name i) name)
+      set b0 i
+  b0
+
+define <group>-get-binding (group name)
+  define b0 (<group>-get-local-binding group name)
+  define p0 (<term>-get-parent group)
+  if (not (not b0))
+    b0
+  else:
+    if (not p0)
+      false
+    else:
+      <group>-get-binding p0 name
+
+define <group>-add-binding-with-expansion (group bound-group name export-name type expansion)
+  require (not (not name)) ; "Argument 'name' must be a valid name."
+  define b0 (<binding>-new name export-name bound-group type expansion)
+  <term>-set-bindings group (append (<term>-get-bindings group) (list b0))
+
+define <group>-add-binding (group bound-group name export-name type)
+  if (eq? type 'function)
+    <group>-add-binding-with-expansion group bound-group name export-name type call-expansion
+  elsif: (eq? type 'intrinsic)
+    <group>-add-binding-with-expansion group bound-group name export-name type call-expansion
+  elsif: (eq? type 'argument)
+    <group>-add-binding-with-expansion group bound-group name export-name type argument-expansion
+  elsif: (eq? type 'variable)
+    <group>-add-binding-with-expansion group bound-group name export-name type variable-expansion
+  else:
+    false
+
+define parse (input)
+  define c false
+  define p false
+  define buffer ""
+  define eos false
+  define parse-indent -1
+  define is-quote 0
+  define first-term-on-line true
+  ; 0 = no quote, 1 = buffer is from a quote, 2 = buffer is from an empty quote
+  ; -1 = buffer is a symbol quote, -2 = buffer is from an empty symbol quote
+
+  state-push 'begin
+
+  while (not eos)
+    if (eos? input)
+      set eos true ; terminate next time through the loop
+      set c ascii-space ; set c to space.
+
+      ; if its eos we need to check for paren balence because its usualy done by
+      ; indentation checking but there will be no more lines to check the last line
+      if (not (null? (paren-balanced)))
+        println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis."
+        exit
+    else:
+      set c (get-char input) ; get the next character
+
+      ; windows consideration for dual eol's
+      if (and (char=? c ascii-cr) (char=? (peek-char input) ascii-lf))
+        set c (get-char input)
+
+      if (not (char-whitespace? c))
+        if (= parse-indent -1)
+          set parse-indent column
+
+    ; As we read a character we might be in one of several states:
+    ; 1. Colon Quoting
+    ; 2. Double Quoting
+    ; 3. Reading Commands
+
+    if (eq? (state-top) 'colon-quote)
+      ; if we are allready in colon quote state then it can never be the first term on the line
+      set first-term-on-line false
+      if (or (char=? c ascii-left-parenthesis) (char=? c ascii-right-parenthesis) (char-eol? c) (eq? eos true))
+        if (and (char=? p ascii-backslash) (not (char-eol? c)))
+          ; removed the \\ created becuase of the one \ and add the current char ( or )
+          set buffer (substring buffer 0 (- (string-length buffer) 2))
+          set buffer (new-string buffer c)
+        else:
+          ; if p was not a backslash, we have three options:
+          if (char=? c ascii-left-parenthesis)
+
+            ; Option 1 - We encounter a left parenthesis
+            ; The beginning of a command temporarily suspends this colon quote
+            ; Add what we have so far to the concatenation operator
+
+            tree-add (<value>-new 'string buffer line column)
+
+            ; Clear the buffer
+            set buffer ""
+
+            paren-add
+
+            ; Add a new group for the command
+            tree-push
+            <term>-set-parse-indent tree-current parse-indent
+
+            ; And then add commands..
+            state-push 'command
+
+          elsif: (or (char=? c ascii-right-parenthesis) (char-eol? c) (eq? eos true))
+
+            ; Option 2 - we encounter a right parenthesis, eol, or eos
+            ; The end of a colon quote so we need to check for
+            ; colon block quote and if this is one then handle it
+            ; otherwise we need to wrap everything up.
+
+            define exit-colon-quote false
+            if (not (char-eol? c))
+              ; if its a right parenthis or eos
+              set exit-colon-quote true
+              ; if its a right parenthis make sure we ajust the tree to account for it
+              if (char=? c ascii-right-parenthesis)
+                paren-remove
+                ; if there is to many right parens we imeadetly know we should error
+                if (not (null? (paren-balanced)))
+                  if (< (<term>-get-paren-balance (paren-balanced)) 0)
+                    println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis."
+                    exit
+            else:
+              define count 0
+              define undo-block-quote-check false
+              ; if we have only been working with a colon-quote
+              if (= cbq-indent 0)
+                ; count all leading spaces
+                while (char=? (peek-char input) ascii-space)
+                  get-char input
+                  ++ count
+                ; if its indented then save the indent
+                if (> count (<term>-get-parse-indent tree-current))
+                  set cbq-indent count
+                  ; if there is something in the buffer then we need to
+                  ; add an eol to it
+                  if (not (= (string-length buffer) 0))
+                    set buffer (new-string buffer ascii-newline)
+                ; since we did not find indentation we undo the last few lines
+                ; and wrap up colon-quote
+                else:
+                  set undo-block-quote-check true
+                  set exit-colon-quote true
+              ; if we have been working with a colon-block-quote
+              else:
+                ; count all leading spaces up to the first colon-block-quote-indent
+                while (and (char=? (peek-char input) ascii-space) (< count cbq-indent))
+                  get-char input
+                  ++ count
+                ; if its still >= the first colon-block-quote-indent then we add a new line
+                ; and continue
+                if (>= count cbq-indent)
+                  if (not (= (string-length buffer) 0))
+                    set buffer (new-string buffer ascii-newline)
+                ; if its not the we reset cbq-indent and un what we did in the last few lines
+                ; and wrap up colon-quote
+                else:
+                  set cbq-indent 0
+                  set undo-block-quote-check true
+                  set exit-colon-quote true
+
+              ; undo the check for colon-block-quoteing
+              if (undo-block-quote-check)
+                while (> count 0)
+                  unget-char input ascii-space
+                  -- count
+
+            ; wraps up colon-quoteing
+            if (exit-colon-quote)
+              ; add buffer to tree and clear it
+              tree-add (<value>-new 'string buffer line column)
+              set buffer ""
+              tree-pop ; pop the string-append
+              tree-pop ; pop the enclosing command
+              state-pop ; pop the colon quote state
+              state-pop ; pop the command state
+
+      else:
+
+        ; Option 3 - Anything else gets added to the buffer
+        ; check to see if its a backslash since string-append
+        ; uses \ for escape chars we just assume all \ are not
+        ; escape chars and conver them to \\.
+
+        if (char=? c ascii-backslash)
+          define dbs (new-string c c)
+          set buffer (new-string buffer dbs)
+        else:
+          set buffer (new-string buffer c)
+
+
+    elsif: (eq? (state-top) 'single-quote)
+
+      if (or (char-whitespace? c) (char=? c ascii-right-parenthesis))
+        ; Push the character back so it can be handled properly next time..
+        unget-char input c
+        ; Set c to the more innocuos space so the eol stuff at the end of the loop
+        ; doesnt trip us up
+        set c ascii-space
+        state-pop
+        ; Set is-quote to one if the buffer has something in it.
+        set is-quote -1
+        if (string=? buffer "")
+          ; If the buffer is empty set is-quote to 2
+          set is-quote -2
+          set buffer "null"
+      else:
+        set buffer (new-string buffer c)
+
+    elsif: (eq? (state-top) 'double-quote)
+
+      if (char=? p ascii-backslash)
+        set buffer (new-string buffer (char->double-quote-escape c))
+        ; Set c to something other than \ so that p doesn't become \ and we escape the next time.
+        set c ascii-space
+      else:
+        if (char=? c ascii-double-quote)
+          ; An ending double quote ends a double quote.
+          state-pop
+          set is-quote 1
+          if (string=? buffer "")
+            set is-quote 2
+            set buffer "null"
+        else:
+            set buffer (new-string buffer c)
+
+    elsif: (eq? (state-top) 'comment)
+      if (char-eol? c)
+        state-pop ; pop comment state
+        if (and (not (eq? (state-top) 'begin)) (not first-term-on-line))
+          ; this is inline comment so need to unget c and set it to a space
+          ; so the defult code for the line can wrap things up
+          unget-char input c
+          set c ascii-space
+
+    elsif: (or (eq? (state-top) 'begin) (eq? (state-top) 'command))
+
+      if (char=? c ascii-semi-colon)
+        state-push 'comment
+
+      elsif: (char=? c ascii-double-quote)
+        state-push 'double-quote ; FIXME - not quite right?
+
+      elsif: (char=? c ascii-single-quote)
+        state-push 'single-quote
+
+      elsif: (or (char=? c ascii-left-parenthesis) (char=? c ascii-right-parenthesis) (char-whitespace? c))
+
+        if (char=? c ascii-left-parenthesis)
+          if (and (string=? buffer ":") (= is-quote 0))
+            println "Error on line " line ", column " column ": illegal colon-quote."
+            exit
+          else:
+            set buffer "("
+
+        if (char=? c ascii-right-parenthesis)
+          paren-remove
+          if (not (null? (paren-balanced)))
+            if (< (<term>-get-paren-balance (paren-balanced)) 0)
+              println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis."
+              exit
+
+        if (and (char-whitespace? c) (not (char-eol? c)) (= (string-length buffer) 0))
+          ; ignore spaces that precede a command
+          noop
+        else:
+          if (and (string=? buffer ":") (= is-quote 0))
+            ; defult colon-quote (:_something) or :_something or (:)
+            ; if whitespace follows a : then do not error but ...
+            if (or (char=? ascii-space c) (char-eol? c) (char=? ascii-right-parenthesis c))
+              ; allthough (:) is useless it should be a valid placeholder
+              unget-char input c ; put the char back
+              if (char=? c ascii-right-parenthesis)
+                ; conter act the paren-remove above because we are going to process it twice
+                paren-add
+                unget-char input ascii-space
+              else:
+                set buffer ":string-append" ; override the buffer with the defult command
+                set p ascii-d ; update p with what it should be
+              set c ascii-space ; reset c to a space
+
+          elsif: (= (string-length buffer) 0)
+            ; There is nothing in the buffer
+            if (char-eol? c)
+              ; Nothing in the buffer and it is an EOL
+              if (and (not (eq? (state-top) 'begin)) (not first-term-on-line))
+              ; if (not (eq? (state-top) 'begin))
+                ; EOL - we need to undo this if we find an ..
+                state-pop
+                tree-pop
+            if (char=? c ascii-right-parenthesis)
+              if (= (tree-sibling-count) 0)
+                <term>-set-parse-indent tree-current parse-indent
+              state-pop
+              tree-pop
+          else:
+            ; TODO - this if statement is not necc?
+            ; if (or (eq? (state-top) 'begin) (eq? (state-top) 'command))
+            if (eq? first-term-on-line true)
+              set first-term-on-line false
+              if (> (string-length buffer) 0)
+                if (< (<term>-get-parse-indent tree-current) parse-indent)
+
+                  ; CASE 1 - The current indentation is more than the previous
+                  ; indentation.  This indicates a code block associated with the
+                  ; previous line.
+
+                  ; println "CASE 1  - " (<term>-get-parse-indent tree-current) " - " parse-indent
+
+                  if (not (null? (paren-balanced)))
+                    println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis."
+                    exit
+
+                  if (string-ellipses? buffer)
+                    ; Over indented ellipses don't make any sense!
+                    println "Error on line " line ", column " column ": illegal ellipses indentation."
+                    exit
+
+                  if (string-label? buffer)
+                    ; Over indented labels don't make any sense!
+                    println "Error on line " line ", column " column ": illegal label indentation. (" (<term>-get-parse-indent tree-current) ", " parse-indent ")"
+                    exit
+
+                  ; We need to "continue" the last line with a code block
+                  set tree-current (last (<term>-get-children tree-current))
+
+                  ; We need to account for this by adding an extra state..
+                  state-push 'command
+
+                  ; Add a new group
+                  tree-push
+                  <term>-set-parse-indent tree-current parse-indent
+                  state-push 'begin
+
+                  ; Add a new begin
+                  tree-add (<begin>-new line column)
+
+                  ; Add a group for this command
+                  tree-push
+                  <term>-set-parse-indent tree-current parse-indent
+                  state-push 'command
+
+                elsif: (> (<term>-get-parse-indent tree-current) parse-indent)
+
+                  ; CASE 2 - The current indentation is less than the previous
+                  ; indentation.  We need to "close" some code blocks and
+                  ; begin adding to a different block.
+
+                  ; println "Case 2 - " (<term>-get-parse-indent tree-current) " - " parse-indent
+
+                  ; Keep popping the tree until we get to an indent <= the current
+                  while (< parse-indent (<term>-get-parse-indent tree-current))
+                    if (not (null? (paren-balanced)))
+                      println "Error in code block starting on line " (<term>-get-line (paren-balanced)) ": unbalanced parenthesis."
+                      exit
+                    tree-pop
+                    state-pop
+
+                  tree-pop
+                  state-pop
+
+                  ; The indent should now be equal
+                  if (not (= parse-indent (<term>-get-parse-indent tree-current)))
+                    println "Error on line " line ", column " column ": illegal indentation."
+                    println "[ " parse-indent ", " (<term>-get-parse-indent tree-current) "]"
+                    exit
+
+                  ; And we should be at a State.Begin..
+
+                  if (or (string-ellipses? buffer) (string-label? buffer))
+                    tree-unpop
+                    state-push 'command
+                  else:
+                  ; Add a group for this command
+                    tree-push
+                    <term>-set-parse-indent tree-current parse-indent
+                    state-push 'command
+
+                else:
+
+                  ; CASE 3 - Same indentation level
+
+                  ; println "CASE 3 - buffer:  '" buffer "'"
+
+                  if (or (string-ellipses? buffer) (string-label? buffer))
+                    ; undo what was done at the last line ending..
+                    tree-unpop
+                    state-push 'command
+                  else:
+                    if (not (null? (paren-balanced)))
+                      println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis."
+                      exit
+
+                    ; Add a group for this command
+                    tree-push
+                    <term>-set-parse-indent tree-current parse-indent
+                    state-push 'command
+
+            if (= (tree-sibling-count) 0)
+              <term>-set-parse-indent tree-current parse-indent
+            if (> is-quote 0)
+              ; String
+              if (= is-quote 2)
+                set buffer ""
+              tree-add (<value>-new 'string buffer line column)
+              set is-quote 0
+
+            elsif: (< is-quote 0)
+              ; Quoted symbol
+              if (= is-quote -2)
+                set buffer ""
+              tree-add (<value>-new 'quoted-symbol buffer line column)
+              set is-quote 0
+
+            elsif: (string-intent-integer? buffer)
+              ; Integer
+              tree-add (<value>-new 'integer (string->intent-integer buffer) line column)
+
+            elsif: (string-intent-rational? buffer)
+              ; Rational
+              tree-add (<value>-new 'rational (string->intent-rational buffer) line column)
+
+            elsif: (string-intent-complex? buffer)
+              ; Complex
+              tree-add (<value>-new 'rational (string->intent-complex buffer) line column)
+
+            elsif: (string-boolean? buffer)
+              ; Boolean
+              tree-add (<value>-new 'boolean (string->boolean buffer) line column)
+
+            elsif: (string-colon-command? buffer)
+              ; (:something ... ) or :something
+              ; We have already added a group for the line and then a group for the
+              ; begin paren. which is right...
+
+              tree-add (<value>-new 'symbol (string->intent-symbol (string-rest buffer)) line column)
+              tree-push
+              tree-add (<value>-new 'symbol "string-append" line column)
+              state-push 'colon-quote
+              if (char-eol? c)
+                ; reuse eol for colon-quote
+                unget-char input c
+                set c ascii-space
+              else:
+                ; remove spaces between command and string
+                while (char=? ascii-space (peek-char input))
+                  get-char input
+              set buffer ""
+
+            elsif: (string-label? buffer)
+              ; Label
+              ; tree-add (<value>-new 'symbol (string->label buffer) line column)
+              tree-add (<value>-new 'label (string->label buffer) line column)
+
+            elsif: (string-intent-symbol? buffer)
+              ; Symbol
+              tree-add (<value>-new 'symbol (string->intent-symbol buffer) line column)
+
+            elsif: (string-ellipses? buffer)
+              ; Ellipses
+              if (= (<term>-get-line tree-current) 0)
+                ; Files that begin with ellipses don't make any sense!
+                println "Error on line " line ", column " column ": illegal ellipses."
+                exit
+
+              noop
+
+            elsif: (char=? c ascii-left-parenthesis)
+              paren-add
+
+              tree-push
+              <term>-set-parse-indent tree-current parse-indent
+              state-push 'command
+
+            else:
+              ; Anything else is an error
+              println "Error on line " line ", column " column ": invalid symbol '" buffer "'."
+              exit
+
+            if (char-eol? c)
+              if (not (eq? (state-top) 'begin))
+                state-pop
+                tree-pop
+
+            if (char=? c ascii-right-parenthesis)
+              state-pop
+              tree-pop
+
+            set buffer ""
+
+      else:
+        set buffer (new-string buffer c)
+
+    if (not (eos-object? input))
+      if (char-eol? c)
+        set line (+ line 1)
+        set column 0
+        set parse-indent -1
+        set first-term-on-line true
+      else:
+        set column (+ column 1)
+
+    set p c
+
+  ;close-input-stream input
+
+
+define insert-bindings (g0)
+  define c0 (<term>-get-children g0)
+  define p0 (<term>-get-parent g0)
+  each t1 c0
+    if (eq? (<term>-get-type t1) 'group)
+      insert-bindings t1
+    else:
+      if (eq? (<term>-get-type t1) 'symbol)
+        if (string=? (<term>-get-value t1) "quote")
+          ; TODO - descend looking for unquotes..
+          noop
+        elsif: (string=? (<term>-get-value t1) "define")
+          define name (first (tail c0))
+          if (= (length c0) 4) ; Functions have 4 terms
+            define arguments (first (tail (tail c0)))
+            define code (first (tail (tail (tail c0))))
+            define b1 false
+            ; The name must be a symbol
+            if (not (eq? (<term>-get-type name) 'symbol))
+              println "Error on line " (<term>-get-line name) ", column " (<term>-get-column name) ": Illegal definition."
+              exit
+            each t2 (<term>-get-children arguments)
+              define b0 (<group>-add-binding g0 code (<term>-get-value t2) (mangle (<term>-get-value t2)) 'argument)
+              if (not b0)
+                println "Error on line " (<term>-get-line t2) ", column " (<term>-get-column t2) ": duplicate binding."
+                exit
+              <term>-set-type t2 'argument
+            <term>-set-type t1 'def
+            set b1 (<group>-add-binding p0 g0 (<term>-get-value name) (mangle (<term>-get-value name)) 'function)
+            if (not b1)
+              println "Error on line " (<term>-get-line name) ", column " (<term>-get-column name) ": duplicate binding."
+              exit
+          elsif: (= (length c0) 3) ; Variables have 3 terms
+            <term>-set-type t1 'def
+            ; The name must be a symbol
+            if (not (eq? (<term>-get-type name) 'symbol))
+              println "Error on line " (<term>-get-line name) ", column " (<term>-get-column name) ": Illegal definition."
+              exit
+            define b0 (<group>-add-binding p0 g0 (<term>-get-value name) (mangle (<term>-get-value name)) 'variable)
+            if (not b0)
+              println "Error on line " (<term>-get-line name) ", column " (<term>-get-column name) ": duplicate binding."
+              exit
+          else: ; Any other number of terms to a function is an error
+            println "Error on line " (<term>-get-line name) ", column " (<term>-get-column name) ": ill-formed definition."
+            exit
+
+; This should eventually evolve into inserting calls to immutable functions..
+define insert-calls (tree this-quote)
+  define c0 (<term>-get-children tree)
+  define p0 (<term>-get-parent tree)
+  define next-quote this-quote
+  if (not (null? c0))
+    if (and (eq? (<term>-get-type (first c0)) 'symbol) (string=? (<term>-get-value (first c0)) "quote"))
+      set next-quote true
+    if (and (eq? (<term>-get-type (first c0)) 'symbol) (string=? (<term>-get-value (first c0)) "unquote"))
+      set next-quote false
+    each t1 c0
+      if (eq? (<term>-get-type t1) 'group)
+        insert-calls t1 next-quote
+      else:
+        if (and (and (eq? this-quote false) (eq? (<term>-get-type t1) 'symbol)) (eq? t1 (first c0))) ; if it is the first element and a symbol
+          <term>-set-type t1 'call
+
+; Special
+<group>-add-binding-with-expansion tree-head false "if" false 'intrinsic if-expansion
+<group>-add-binding-with-expansion tree-head false "class" false 'intrinsic class-expansion
+<group>-add-binding-with-expansion tree-head false "repeat" false 'intrinsic repeat-expansion
+<group>-add-binding-with-expansion tree-head false "while" false 'intrinsic while-expansion
+<group>-add-binding-with-expansion tree-head false "each" false 'intrinsic each-expansion
+<group>-add-binding-with-expansion tree-head false "doc" false 'intrinsic doc-expansion
+<group>-add-binding-with-expansion tree-head false "require" false 'intrinsic require-expansion
+<group>-add-binding-with-expansion tree-head false "ensure" false 'intrinsic ensure-expansion
+; <group>-add-binding-with-expansion tree-head false "include" false 'intrinsic include-expansion
+<group>-add-binding-with-expansion tree-head false "kall" false 'intrinsic kall-expansion
+<group>-add-binding-with-expansion tree-head false "table" false 'intrinsic table-expansion
+<group>-add-binding-with-expansion tree-head false "quote" false 'intrinsic quote-expansion
+<group>-add-binding-with-expansion tree-head false "strict-quote" false 'intrinsic strict-quote-expansion
+<group>-add-binding-with-expansion tree-head false "quote*" false 'intrinsic quote*-expansion
+<group>-add-binding-with-expansion tree-head false "strict-quote*" false 'intrinsic strict-quote*-expansion
+
+; Lists
+; first -> car
+; last -> (car (reverse x))
+; head -> (reverse (cdr (reverse x)))
+; tail -> cdr
+
+each i
+  ; General operations
+  quote (("print" "print") ("set" "set!") ("println" "println")
+  
+  ; Environment
+  .. ("getenv" "getenv") ("file-exists?" "file-exists?")
+
+  ; Environment
+  .. ("getenv" "getenv") ("file-exists?" "file-exists?")
+
+  ; List operations
+  .. ("pair" "cons") ("first" "car") ("last" "last")
+  .. ("head" "ginger-head") ("tail" "cdr") ("cadr" "cadr")
+  .. ("caddr" "caddr") ("cadddr" "cadddr") ("cdddr" "cdddr")
+  .. ("cddr" "cddr") ("set-first" "set-car!") ("set-tail" "set-cdr!")
+  .. ("null?" "null?") ("list?" "list?") ("list" "list")
+  .. ("length" "length") ("append" "append") ("reverse" "reverse")
+  .. ("list-tail" "list-tail") ("list-ref" "list-ref") ("memq" "memq")
+  .. ("memv" "memv") ("member" "member") ("assq" "assq")
+  .. ("assv" "assv") ("assoc" "assoc")
+
+  ; Table operations
+  .. ("table-key?" "table-key?") ("table-set" "table-set!") ("table-get" "table-ref")
+
+  ; Symbols
+  .. ("symbol?" "symbol?") ("symbol->string" "symbol->string") ("string->symbol" "string->symbol")
+
+  ; Characters
+  .. ("char?" "char?") ("char=?" "char=?") ("char<?" "char<?")
+  .. ("char>?" "char>?") ("char<=?" "char<=?") ("char>=?" "char>=?")
+  .. ("char-ci=?" "char-ci=?") ("char-ci<?" "char-ci<?") ("char-ci>?" "char-ci>?")
+  .. ("char-ci<=?" "char-ci<=?") ("char-ci>=?" "char-ci>=?") ("char-alphabetic?" "char-alphabetic?")
+  .. ("char-numeric?" "char-numeric?") ("char-whitespace?" "char-whitespace?") ("char-upper-case?" "char-upper-case?")
+  .. ("char-lower-case?" "char-lower-case?") ("char->integer" "char->integer") ("integer->char" "integer->char")
+  .. ("char-upcase" "char-upcase") ("char-downcase" "char-downcase")
+
+  ; Objects
+  .. ("eqv?" "eqv?") ("eq?" "eq?") ("equal?" "equal?")
+
+  ; Numbers
+  .. ("number?" "number?") ("complex?" "complex?") ("real?" "real?")
+  .. ("rational?" "rational?") ("integer?" "integer?") ("exact?" "exact?")
+  .. ("inexact?" "inexact?") ("zero?" "zero?") ("positive?" "positive?")
+  .. ("negative?" "negative?") ("odd?" "odd?") ("even?" "even?")
+  .. ("max" "max") ("min" "min") ("exp" "exp")
+  .. ("log" "log") ("sin" "sin") ("cos" "cos")
+  .. ("tan" "tan") ("asin" "asin") ("acos" "acos")
+  .. ("atan" "atan") ("sqrt" "sqrt") ("expt" "expt")
+  .. ("make-rectangular" "make-rectangular") ("make-polar" "make-polar") ("real-part" "real-part")
+  .. ("imag-part" "imag-part") ("magnitude" "magnitude") ("angle" "angle")
+  .. ("exact->inexact" "exact->inexact") ("inexact->exact" "inexact->exact") ("number->string" "number->string")
+  .. ("string->number" "string->number")
+  .. ("+" "+") ("-" "-") ("*" "*")
+  .. ("/" "/") ("modulo" "modulo") ("remainder" "remainder")
+  .. ("quotient" "quotient")
+  .. ("numerator" "numerator") ("denomenator" "denomenator") ("lcm" "lcm")
+  .. ("gcd" "gcd") ("floor" "floor") ("ceiling" "ceiling")
+  .. ("truncate" "truncate") ("round" "round") ("=" "=")
+  .. ("<=" "<=") (">=" ">=") ("<" "<")
+  .. (">" ">") ("++" "++!") ("--" "--!")
+
+  ; String functions
+  .. ("string?" "string?") ("make-string" "make-string") ("string" "string")
+  .. ("string-append" "string-append") ("string-length" "string-length") ("string-ref" "string-ref")
+  .. ("string-set" "string-set!") ("string=?" "string=?") ("string-ci=?" "string-ci=?")
+  .. ("substring" "substring") ("string->list" "string->list") ("list->string" "list->string")
+  .. ("string-copy" "string-copy") ("string-fill" "string-fill!") ("string-split" "string-split")
+  .. ("string-join" "string-join")
+
+  ; Vectors
+  .. ("vector?" "vector?") ("make-vector" "make-vector") ("vector" "vector")
+  .. ("vector-length" "vector-length") ("vector-get" "vector-ref") ("vector-set" "vector-set!")
+  .. ("vector->list" "vector->list") ("list->vector" "list->vector") ("vector-fill" "vector-fill!")
+
+  ; Functions
+  .. ("procedure?" "procedure?")
+
+  ; Boolean
+  .. ("boolean?" "boolean?") ("not" "not") ("or" "or") ("and" "and")
+
+  ; Streams
+  .. ("read-char" "read-char") ("input-stream?" "input-port?") ("eos-object?" "eof-object?")
+  .. ("open-input-file" "open-input-file") ("open-output-file" "open-output-file") ("close-input-stream" "close-input-port")
+  .. ("close-output-stream" "close-output-port") ("peek-char" "peek-char")
+
+  ; String ports
+  .. ("open-string" "open-string") ("open-input-string" "open-input-string") ("open-output-string" "open-output-string")
+  .. ("get-output-string" "get-output-string")
+
+  ; Misc
+  .. ("exit" "exit") ("scheme-eval" "eval") ("scheme-read" "read")
+  .. )
+..
+  <group>-add-binding tree-head false (first i) (last i) 'intrinsic
+
+each i (quote (a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z))
+  <group>-add-binding tree-head false (string-append "ascii-" (symbol->string i)) (string-append "#\\" (symbol->string i)) 'variable
+
+each i (quote (0 1 2 3 4 5 6 7 8 9))
+  <group>-add-binding tree-head false (string-append "ascii-" (number->string i)) (string-append "#\\" (number->string i)) 'variable
+
+each i
+  quote ( ("ascii-newline" "#\\newline") ("ascii-tab" "#\\tab") ("ascii-space" "#\\space")
+  .. ("ascii-period" "#\\.") ("ascii-slash" "#\\/") ("ascii-backslash" "#\\\\")
+  .. ("ascii-left-parenthesis" "#\\(") ("ascii-right-parenthesis" "#\\)") ("ascii-underscore" "#\\_")
+  .. ("ascii-plus" "#\\+") ("ascii-minus" "#\\-") ("ascii-mult" "#\\*")
+  .. ("ascii-dollar" "#\\$") ("ascii-at" "#\\@") ("ascii-percent" "#\\%")
+  .. ("ascii-exclamation" "#\\!") ("ascii-less-than" "#\\<") ("ascii-greater-than" "#\\>")
+  .. ("ascii-question" "#\\?") ("ascii-colon" "#\\:") ("ascii-semi-colon" "#\\;")
+  .. ("ascii-single-quote" "#\\'") ("ascii-double-quote" "#\\\"") ("ascii-equals" "#\\=")
+  .. ("ascii-pound" "#\\#")
+
+  ; Deprecated
+  .. ("ascii-return" "#\\return")
+
+  ; Official ascii abbreviations
+  .. ("ascii-nul" "#\\nul") ("ascii-cr" "#\\return") ("ascii-lf" "#\\newline") )
+..
+  <group>-add-binding tree-head false (first i) (last i) 'variable
+
+println "Gingerbread: The Ginger compiler"
+
+define compiler 'gambit
+define print-debug-tree false
+define compile false
+
+define print-version ()
+  define ginger-version "20071009"
+  println ""
+  println "This is ginger, version " ginger-version "."
+  println ""
+  println "Copyright 2007, James Dean Palmer"
+  println ""
+  println "Complete document for Ginger, including Frequently Asked Questions"
+  println "can be found at http://ginger.tiger3k.com/"
+
+define process-arguments (args)
+  if (not (null? args))
+    if (string=? (first args) "--version")
+      print-version
+      exit
+    elsif: (string=? (first args) "--compile")
+      set compile true
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--print-debug-tree")
+      set print-debug-tree true
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--gambit")
+      set compiler 'gambit
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--chicken")
+      set compiler 'chicken
+      process-arguments (tail args)
+    elsif: (string=? (first args) "-o")
+      set output-file-name (first (tail args))
+      process-arguments (tail (tail args))
+    else:
+      set input-file-name (first args)
+      process-arguments (tail args)
+
+process-arguments (tail (argv))
+
+if (eq? compiler 'gambit)
+  <group>-add-binding tree-head false "argv" "command-line" 'intrinsic
+  <group>-add-binding tree-head false "execute" "shell-command" 'intrinsic
+elsif: (eq? compiler 'chicken)
+  <group>-add-binding tree-head false "argv" "argv" 'intrinsic
+  <group>-add-binding tree-head false "execute" "system" 'intrinsic
+
+if (not input-file-name)
+  println "Error: no input file"
+  exit
+
+define comp (string-split input-file-name ascii-period)
+define base-file-name (string-join (reverse (tail (reverse comp))) ".")
+
+if (not output-file-name)
+  set output-file-name (string-append base-file-name ".scm")
+
+println "Gingerbread: Opening file.."
+
+; Read input file
+println "Parsing " input-file-name
+define input (open-input-file input-file-name)
+parse input
+close-input-stream input
+
+if print-debug-tree
+  print-term tree-head
+
+println "Expand includes.."
+include-expand tree-head
+
+println "Inserting bindings.."
+insert-bindings tree-head
+
+println "Inserting immutable calls.."
+insert-calls tree-head false
+
+; Open the file for output.
+set output (open-output-file output-file-name)
+
+println "Writing code.."
+expand tree-head ; Expand into scheme code.
+close-output-stream output ; Close the output file.
+
+if (eq? compile true)
+  if (eq? compiler 'chicken)
+    println "Compiling with Chicken."
+    execute (string-append "csc -d0 -O3 -no-trace -block " output-file-name)
+  elsif: (eq? compiler 'gambit)
+    println "Compiling with Gambit."
+    execute (string-append "gsc -debug -link -cc-options \"-U___SINGLE_HOST -O2\" " base-file-name)
+    execute (string-append "gcc -O3 -I/Users/jdp85/local/include -L/Users/jdp85/local/lib " base-file-name ".c " base-file-name "_.c -lgambc -o " base-file-name)
+
+println "All Done!"
+
+; define-foreign number->GLbyte* (GLbyte) GLbyte* "__result_voidstar = &___arg1;"
+; define-foreign glBegin void (GLenum) "glBegin"

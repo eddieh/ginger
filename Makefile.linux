@@ -1,0 +1,11 @@
+# Makefile.linux -*- Makefile -*-
+
+# Options
+
+# Here we assume that Fink or MacPorts is installed in /sw/ and we
+# should check for additional includes and libraries there.
+
+PLATFORM_CFLAGS =
+PLATFORM_LDFLAGS =
+LIBRARIAN = ar
+LIBRARIAN_FLAGS = rcs

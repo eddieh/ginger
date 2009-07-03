@@ -1,0 +1,2399 @@
+; Copyright 2009 by James Dean Palmer and others.
+;
+; Ginger is free software.  You can redistribute and/or modify
+; this work under ther terms of the Apache License Version 2.0
+; or, at your option, Ginger's amended LGPL 2.1 license.  You may
+; not use this file except in compliance with one of these licenses.
+; You may also obtain a copy of the Apache License at
+;
+;   http://www.apache.org/licenses/LICENSE-2.0
+;
+; You may obtain a copy of Ginger's amended LGPL License at:
+;
+;   http://ging3r.org/licenses/LGPL-2.1.txt
+;
+; Unless required by applicable law or agreed to in writing, 
+; software distributed under the License is distributed on an 
+; "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+; either express or implied. See the License(s) for the specific 
+; language governing permissions and limitations.
+;
+; Please report all bugs and problems to "bugs@ging3r.org".
+
+define ginger-version "20090129"
+define banner "This is Ginger, version 20090129"
+
+define output-c false
+define output-h false
+define output-c-file-name false
+define output-h-file-name false
+define input-file-name false
+define last-char false
+define line 1
+define column 0
+define cbq-indent 0
+
+define second (v)
+  first (tail v)
+
+define third (v)
+  first (tail (tail v))
+
+define fourth (v)
+  first (tail (tail (tail v)))
+
+define fifth (v)
+  first (tail (tail (tail (tail v))))
+
+define sixth (v)
+  first (tail (tail (tail (tail (tail v)))))
+
+define get-char (input)
+  require (input-stream? input)
+  ensure (or (eos-object? result) (char? result))
+  if (not (last-char))
+    ; if its empty then get it from input
+    read-char input
+  else:
+    ; if its not empty then ...
+    if (char? last-char)
+      ; if its just a char then grab it and reset buffer
+      define current-char last-char
+      set last-char false
+      current-char
+    else:
+      ; if its a string then ...
+      define current-char (string-first last-char)
+      if (= (string-length last-char) 2)
+        ; if this is the last time it will be a string
+        set last-char (string-first (string-rest last-char))
+      else:
+        ; otherwise there is more string left over
+        set last-char (string-rest last-char)
+      current-char
+
+define unget-char (input c)
+  require (input-stream? input)
+  if (not (last-char))
+    ; if its empty then just set it
+    set last-char c
+  else:
+    ; if its not empty then add to the frount of it
+    set last-char (new-string c last-char)
+
+define indentation 0
+
+define indent (amount)
+  require (integer? amount)
+  ensure (string? result)
+  if (<= amount 0) ""
+  else: (string-append " " (indent (- amount 1)))
+
+define eos? (input)
+  eos-object? (peek-char input)
+
+define char->base-number (v b)
+  require (integer? b)
+  require (char? v)
+  ensure (number? result)
+  define c
+    if (< b 2)
+      false
+    elsif: (> b 36)
+      false
+    elsif: (>= (char->integer v) (char->integer ascii-a))
+      + (- (char->integer v) (char->integer ascii-a)) 10
+    elsif: (>= (char->integer v) (char->integer ascii-A))
+      + (- (char->integer v) (char->integer ascii-A)) 10
+    elsif: (>= (char->integer v) (char->integer ascii-0))
+      - (char->integer v) (char->integer ascii-0)
+    else: false
+  if (not c) false
+  elsif: (< c b) c
+  else: false
+
+define char-base-numeric? (v b)
+  require (integer? b)
+  require (char? v)
+  if (not (char->base-number v b)) false
+  else: true
+
+define char-eol? (c)
+  require (char? c)
+  if (char=? c ascii-lf) true
+  elsif: (char=? c ascii-cr) true
+  else: false
+
+define char->double-quote-escape (c)
+  require (char? c)
+  if (char=? c ascii-n) "\n"
+  elsif: (char=? c ascii-r) "\r"
+  elsif: (char=? c ascii-double-quote) "\""
+  else: c
+
+define dq-escape (a)
+  if (string=? a "")
+    a
+  else:
+    define b (string-first a)
+    if (char=? b ascii-double-quote)
+      new-string (new-string ascii-backslash b) (dq-escape (string-rest a))
+    else:
+      new-string b (dq-escape (string-rest a))
+
+define new-string (a b)
+  if (and (string? a) (string? b)) (string-append a b)
+  elsif: (and (string? a) (char? b)) (string-append a (string b))
+  elsif: (and (char? a) (string? b)) (string-append (string a) b)
+  elsif: (and (char? a) (char? b)) (string-append (string a) (string b))
+  else: false
+
+define string-first (v)
+  require (string? v)
+  if (= (string-length v) 0) false
+  else: (first (string->list (substring v 0 1)))
+
+define string-last (v)
+  require (string? v)
+  if (= (string-length v) 0) false
+  else: (first (string->list (substring v (- (string-length v) 1) (string-length v))))
+
+; Return everything after the first character in a string.
+define string-rest (v)
+  require (string? v)
+  if (<= (string-length v) 1) ""
+  else: (substring v 1 (string-length v))
+
+; This is a comment
+define noop ()
+  true
+
+; Is the string a boolean?
+define string-boolean? (v)
+  require (string? v)
+  if (or (string=? v "true") (string=? v "false")) true
+  else: false
+
+; Is the string a boolean?
+define string->boolean (v)
+  require (string? v)
+  if (or (string=? v "true") (string=? v "false"))
+    if (string=? v "true") true
+    else: false
+  else: false
+
+; Is the string a boolean?
+define string-ellipses? (v)
+  require (string? v)
+  if (string=? v "..") true
+  else: false
+
+; Is the string composed of only digits 0-9
+define string-numeric? (v)
+  require (string? v)
+  define string-positive-numeric? (v)
+    if (= (string-length v) 0) false
+    elsif: (and (= (string-length v) 1) (char-numeric? (string-first v))) true
+    elsif: (char-numeric? (string-first v)) (string-numeric? (string-rest v))
+    else: false
+  if (and (> (string-length v) 1) (char=? ascii-minus (string-first v)))
+    string-positive-numeric? (string-rest v)
+  else:
+    string-positive-numeric? v
+
+; Is the string composed of only digits valid for a given base b.
+define string->base-number (v b)
+  require (string? v)
+  require (integer? b)
+  define string->base-number-i (v b i)
+    require (string? v)
+    require (integer? b)
+    require (integer? i)
+    if (= (string-length v) 0) false
+    elsif: (and (= (string-length v) 1) (char-base-numeric? (string-first v) b))
+      char->base-number (string-first v) b
+    elsif: (char-base-numeric? (string-first v) b)
+      define n (string->base-number-i (string-rest v) b (- i 1))
+      if (not n) false
+      else: (+ (* (char->base-number (string-first v) b) (expt b (- i 1))) n)
+    else: false
+  string->base-number-i v b (string-length v)
+
+define string-base-numeric? (v b)
+  require (string? v)
+  require (integer? b)
+  if (not (string->base-number v b)) false
+  else: true
+
+define gin-string->integer (v)
+  require (string? v)
+  define v0 (string-split v ascii-underscore)
+  define v1 (first v0)
+  define v2 (tail v0)
+  if (string=? v1 "") false ; _ without anything prefixing it is invalid.
+  elsif: (and (null? v2) (string-numeric? v1)) (string->number v1) ; no base but okay
+  elsif: (null? v2) false ; no base but not numeric
+  elsif: (and (null? (tail v2)) (string-numeric? (first v2)) (string-base-numeric? v1 (string->number (first v2))) )
+    string->base-number v1 (string->number (first v2))  ; base and number are okay
+  else: false
+
+define string-is-integer? (v)
+  require (string? v)
+  if (not (gin-string->integer v)) false
+  else: true
+
+define gin-string->ratio (v)
+  require (string? v)
+  define v0 (string-split v ascii-slash)
+  define v1 (first v0)
+  define v2 (tail v0)
+  if (string=? v1 "") false ; / without anything prefixing it is invalid.
+  elsif: (and (null? v2) (string-is-integer? v1)) (gin-string->integer v1) ; no denomenator but okay
+  elsif: (null? v2) false ; no denomenator but not numeric
+  elsif: (and (null? (tail v2)) (string-is-integer? (first v2)) (string-is-integer? v1)) ; numerator and denomenator
+    / (gin-string->integer v1) (gin-string->integer (first v2))
+  else: false
+
+define string-is-ratio? (v)
+  require (string? v)
+  if (not (gin-string->ratio v)) false
+  else: true
+
+define gin-string->scientific (v)
+  require (string? v)
+  define va false
+  define n1 "0"
+  define n2 "0"
+  define exponent "0"
+  define base "10"
+  define sign 1
+  set va (string-split v ascii-e)
+  if (not (null? (tail va))) ; there IS an exponent
+    if (not (null? (tail (tail va))))
+      ; but there is more than one "e" which is illegal..
+      set exponent false
+    else:
+      set exponent (first (tail va))
+  set va (string-split (first va) ascii-underscore)
+  if (not (null? (tail va))) ; there IS a base
+    ; but there is more than one "_" which is illegal..
+    if (not (null? (tail (tail va))))
+      set base false
+    else:
+        set base (first (tail va))
+  set va (string-split (first va) ascii-period)
+  if (not (null? (tail va))) ; there IS a decimal
+    if (not (null? (tail (tail va))))
+      ; but there is more than one "." which is illegal..
+      set n2 false
+    else:
+      set n2 (first (tail va))
+  set n1 (first va)
+  set va (string-split n1 ascii-minus)
+  if (not (null? (tail va))) ; there IS a minus
+    if (not (null? (tail (tail va))))
+      ; but there is more than one "." which is illegal..
+      set n1 false
+    else:
+      if (not (= (string-length (first va)) 0))
+        set n1 false
+      else:
+        set n1 (first (tail va))
+        set sign -1
+  if (and (not (not n1)) (not (not n2)) (not (not base)) (not (not exponent)) (string-numeric? exponent) (string-numeric? base) (string-base-numeric? n1 (string->number base)) (string-base-numeric? n2 (string->number base)))
+    ; add before decimal to after decimal
+    * (+ (* (string->base-number n1 (string->number base)) (expt (string->number base) (string->number exponent))) (/ (string->base-number n2 (string->number base)) (expt (string->number base) (- (string-length n2) (string->number exponent))))) sign
+  else:
+    false
+
+define string-is-scientific? (v)
+  require (string? v)
+  if (not (gin-string->scientific v)) false
+  else: true
+
+define string-is-rational? (v)
+  require (string? v)
+  if (string-is-ratio? v) true
+  elsif: (string-is-scientific? v) true
+  else: false
+
+define gin-string->rational (v)
+  require (string? v)
+  if (string-is-ratio? v) (gin-string->ratio v)
+  elsif: (string-is-scientific? v) (gin-string->scientific v)
+  else: false
+
+define gin-string->complex (v)
+  require (string? v)
+  define va (string-split v ascii-plus)
+  if (null? (tail va)) false ; + was not found
+  else:
+    define real-part (first va)
+    define vb (string-split (cadr va) ascii-i)
+    if (null? (tail vb)) false ; i was not found
+    else:
+      define imaginary-part (first vb)
+      define rp
+        if (string-is-integer? real-part) (gin-string->integer real-part)
+        elsif: (string-is-ratio? real-part) (gin-string->ratio real-part)
+        elsif: (string-is-scientific? real-part) (gin-string->scientific real-part)
+        else: false
+      define ip
+        if (string-is-integer? imaginary-part) (gin-string->integer imaginary-part)
+        elsif: (string-is-ratio? imaginary-part) (gin-string->ratio imaginary-part)
+        elsif: (string-is-scientific? imaginary-part) (gin-string->scientific imaginary-part)
+        else: false
+      if (or (not rp) (not ip)) false ; either the real-part or imaginary part is not valid
+      else: (+ rp (* ip 1))
+;      else: (+ rp (* ip 0+1i))
+
+define string-is-complex? (v)
+  require (string? v)
+  if (not (gin-string->complex v)) false
+  else: true
+
+define gin-string->symbol (v)
+  require (string? v)
+  define char-legal-symbol? (v)
+    if (char-alphabetic? v) true
+    elsif: (char-numeric? v) true
+    elsif: (char=? v ascii-plus) true
+    elsif: (char=? v ascii-minus) true
+    elsif: (char=? v ascii-mult) true
+    elsif: (char=? v ascii-slash) true
+    elsif: (char=? v ascii-percent) true
+    elsif: (char=? v ascii-dollar) true
+    elsif: (char=? v ascii-at) true
+    elsif: (char=? v ascii-exclamation) true
+    elsif: (char=? v ascii-less-than) true
+    elsif: (char=? v ascii-greater-than) true
+    elsif: (char=? v ascii-equals) true
+    elsif: (char=? v ascii-question) true
+    elsif: (char=? v ascii-question) true
+    elsif: (char=? v ascii-colon) true
+    ; elsif: (char=? v ascii-caret) true
+    else: false
+  define string-legal-symbol? (v)
+    if (= (string-length v) 0) false
+    elsif: (and (= (string-length v) 1) (char-legal-symbol? (string-first v))) true
+    elsif: (char-legal-symbol? (string-first v)) (string-legal-symbol? (string-rest v))
+    else: false
+  if (not (not (string-is-complex? v))) false
+  else:
+    if (string-legal-symbol? v)
+      if (char=? (string-first v) ascii-colon)
+        false
+      else:
+        v
+    else: false
+
+define string-is-symbol? (v)
+  require (string? v)
+  if (not (gin-string->symbol v)) false
+  else: true
+
+define string->label (v)
+  if (< (string-length v) 2) false
+  else:
+    define c (string-is-symbol? (substring v 0 (- (string-length v) 1)))
+    if (and c (char=? (string-last v) ascii-colon)) v
+    else: false
+
+define string-label? (v)
+  require (string? v)
+  if (not (string->label v)) false
+  else: true
+
+define string-colon-command? (v)
+  require (string? v)
+  if (and (eq? (string-first v) ascii-colon) (or (string-is-symbol? (string-rest v)) (= (string-length v) 1))) true
+  else: false
+
+define <term>-new (parent children type parse-indent line column value)
+  vector parent children type parse-indent line column value 0
+
+define <term>-get-parent (obj)
+  vector-get obj 0
+
+define <term>-get-children (obj)
+  vector-get obj 1
+
+define <term>-get-type (obj)
+  vector-get obj 2
+
+define <term>-get-parse-indent (obj)
+  vector-get obj 3
+
+define <term>-get-line (obj)
+  vector-get obj 4
+
+define <term>-get-column (obj)
+  vector-get obj 5
+
+define <term>-get-value (obj)
+  vector-get obj 6
+
+define <term>-get-paren-balance (obj)
+  vector-get obj 7
+
+define <term>-set-parent (obj v)
+  vector-set obj 0 v
+
+define <term>-set-children (obj v)
+  vector-set obj 1 v
+
+define <term>-set-type (obj v)
+  vector-set obj 2 v
+
+define <term>-set-parse-indent (obj v)
+  vector-set obj 3 v
+
+define <term>-set-line (obj v)
+  vector-set obj 4 v
+
+define <term>-set-column (obj v)
+  vector-set obj 5 v
+
+define <term>-set-value (obj v)
+  vector-set obj 6 v
+
+define <term>-set-paren-balance (obj v)
+  vector-set obj 7 v
+
+define <term>-get-real-argument-count (fn)
+  define cnt 0
+  each arg (<term>-get-children (<term>-get-definition-arguments fn))
+    if (not (eq? (<term>-get-type arg) 'label))
+      ++ cnt
+  cnt
+
+define begin-group? (t)
+  define c (<term>-get-children t)
+  if (null? c) false
+  else:
+    if (eq? (<term>-get-type (first c)) 'begin) true
+    else: false
+
+define paren-balanced ()
+  define paren-balanced2 (t)
+    require (not (eq? t false))
+    if (begin-group? t)
+      if (= (<term>-get-paren-balance t) 0) (list)
+      else: t
+    else:
+      paren-balanced2 (<term>-get-parent t)
+  paren-balanced2 tree-current
+
+define paren-add ()
+  define add-paren2 (t)
+    require (not (eq? t false))
+    if (begin-group? t)
+      <term>-set-paren-balance t (+ (<term>-get-paren-balance t) 1)
+    else:
+      add-paren2 (<term>-get-parent t)
+  add-paren2 tree-current
+
+define paren-remove ()
+  define remove-paren2 (t)
+    require (not (eq? t false))
+    if (begin-group? t)
+      <term>-set-paren-balance t (- (<term>-get-paren-balance t) 1)
+    else:
+      remove-paren2 (<term>-get-parent t)
+  remove-paren2 tree-current
+
+define print-term (t)
+  println ""
+  print-term2 t
+  println ""
+  println ""
+  define print-term2 (t)
+    define it (i)
+      if (or (null? i) (null? (first i)))
+        false
+      else:
+        print-term2 (first i)
+        if (not (null? (tail i)))
+          println ""
+        it (tail i)
+    if (eq? (<term>-get-type t) 'residual)
+      print (indent indentation) "(" (<term>-get-type t) " value:'" (print-terms (<term>-get-value t)) "' indent:'" (<term>-get-parse-indent t) "' line:'" (<term>-get-line t) "' "
+    else:
+      print (indent indentation) "(" (<term>-get-type t) " value:'" (<term>-get-value t) "' indent:'" (<term>-get-parse-indent t) "' line:'" (<term>-get-line t) "' "
+    if (not (boolean? (<term>-get-children t)))
+      println ""
+      ++ indentation
+      it (<term>-get-children t)
+      -- indentation
+    print ")"
+
+define print-terms (a)
+  each i a
+    print-term i
+
+define <group>-new (line column)
+  <term>-new false (list) 'group 0 line column false
+
+define <value>-new (value-type value line column)
+  <term>-new false false value-type 0 line column value
+
+define <begin>-new (line column)
+  <term>-new false false 'begin 0 line column false
+
+define <group>-add-child (t c)
+  require (eq? (<term>-get-type t) 'group) ; "Can not add child to non-group."
+  <term>-set-parent c t
+  <term>-set-children t (append (<term>-get-children t) (list c))
+
+define tree-head (<group>-new 0 0)
+define tree-current tree-head
+
+define tree-add (v)
+  <group>-add-child tree-current v
+
+define tree-push ()
+  define g0 (<group>-new line column)
+  tree-add g0
+  set tree-current g0
+
+define tree-pop ()
+  set tree-current (<term>-get-parent tree-current)
+
+define tree-unpop ()
+  set tree-current (last (<term>-get-children tree-current))
+
+define tree-sibling-count ()
+  if (eq? (<term>-get-parent tree-current) false)
+    0
+  else:
+    - (length (<term>-get-children (<term>-get-parent tree-current))) 1
+
+define state-stack (list)
+
+define state-push (s)
+  set state-stack (append state-stack (list s))
+
+define state-top ()
+  last state-stack
+
+define state-pop ()
+  set state-stack (head state-stack)
+
+tree-add (<begin>-new 0 0)
+
+define mangle (t)
+  t
+
+define split-list (lst v)
+  define a (list)
+  define b (list)
+  define middle false
+  each l lst
+    if (eq? l v)
+      set middle true
+    else:
+      if (eq? middle false)
+        set a (append a (list l))
+      else:
+        set b (append b (list l))
+  pair a b
+
+define include-filename (terms)
+  <term>-get-value (second terms)
+
+define open-include-file (filename)
+  define found-include-file false
+  define include-file-path ""
+  if (file-exists? filename)
+    set found-include-file true
+    set include-file-path filename
+  else:
+    define inc-paths (string-split (getenv "GIN_INCLUDE_PATH" "") ascii-colon)
+    while (and (not found-include-file) (not (null? inc-paths)))
+      define path (string-append (first inc-paths) "/" filename)
+      if (file-exists? path)
+        set found-include-file true
+        set include-file-path path
+      set inc-paths (tail inc-paths)
+  if (not found-include-file)
+    println "No file found for include: " filename
+    exit
+  open-input-file include-file-path
+
+define include-expansion (v)
+  define parent (<term>-get-parent v)
+  define parent-parent (<term>-get-parent parent)
+  define terms (<term>-get-children parent)
+  define input (open-include-file (include-filename terms))
+  define old-tree-head tree-head
+  set state-stack (list)
+  set tree-head (<group>-new 0 0)
+  set tree-current tree-head
+  tree-add (<begin>-new 0 0)
+  set line 1
+  set column 0
+  parse input
+  close-input-stream input
+  define tmp (split-list (<term>-get-children parent-parent) parent)
+  <term>-set-children parent-parent (append (first tmp) (tail (<term>-get-children tree-head)) (tail tmp))
+  each child (<term>-get-children parent-parent)
+    <term>-set-parent child parent-parent
+  set tree-head old-tree-head
+
+define flat-functions (list)
+
+define flatten-functions (v)
+  define type (<term>-get-type v)
+  define terms (<term>-get-children v)
+  if (or (<term>-function-definition? v) (<term>-method-definition? v))
+    set flat-functions (append flat-functions (list v))
+  if (eq? type 'group)
+    each i terms
+      flatten-functions i
+
+define local-variables (list)
+define tmp-variables (list)
+
+; TODO - local variable scoping is per function - need to consider code block scopes..
+doc "This is a test.."
+define discover-local-variables (v kind)
+  define index 0
+  define add-local-variable (v type name index val fn)
+    set local-variables (append local-variables (list (list v type name index val fn)))
+  define function v
+  define search (v)
+    define type (<term>-get-type v)
+    define terms (<term>-get-children v)
+    if (eq? type 'group)
+      if (<term>-definition? v)
+        search (first terms)
+      else:
+        each i terms
+          search i
+    elsif: (<term>-register-class-symbol? v)
+      ; register-class <fixnum> w x y z
+      ; should define <fixnum> as a variable.
+      define f (<term>-get-parent v)
+      define var-name (<term>-get-value (second (<term>-get-children f)))
+      if (eq? var-name false)
+        println "DEAD"
+        print-term f
+        exit
+      add-local-variable function 'local var-name index 'class f
+    elsif: (or (<term>-definition-symbol? v) (<term>-each-loop? v))
+      define f (<term>-get-parent v)
+      define var-name (<term>-get-definition-name f)
+      if (or (<term>-function-definition? f) (<term>-method-definition? f))
+        if (eq? var-name false)
+          println "DEAD"
+          print-term f  
+          exit      
+        add-local-variable function 'local var-name index 'function f
+      else:
+        if (eq? var-name false)
+          println "DEAD"
+          print-term f        
+          exit
+        add-local-variable function 'local var-name index 'value f
+      ++ index
+  if (<term>-function-definition? v)
+    search (fourth (<term>-get-children v))
+  elsif: (<term>-method-definition? v)
+    search (fifth (<term>-get-children v))
+  else:
+    search v
+  set index 0
+  if (eq? kind 'function)
+    each i (<term>-get-children (<term>-get-definition-arguments v))
+      if (eq? (<term>-get-type i) 'group)
+        if (eq? (<term>-get-value (first (<term>-get-children i))) false)
+          println "DEAD ARGUMENT 1"
+          print-term i
+          exit
+        add-local-variable function 'argument (<term>-get-value (first (<term>-get-children i))) index 'value v
+        ++ index
+      elsif: (eq? (<term>-get-type i) 'symbol)
+        if (eq? (<term>-get-value i) false)
+          println "DEAD ARGUMENT 2"
+          print-term i
+          exit
+        add-local-variable function 'argument (<term>-get-value i) index 'value v
+        ++ index
+      elsif: (eq? (<term>-get-type i) 'label)
+        ; labels don't get counted as arguments.
+        noop
+      else:
+        ; assertion - this should never happen.
+        println "No valid classification."
+        exit
+
+define name->c-name (v)
+  define t (open-output-string)
+  define p (v)
+    define c (string-first v)
+    define ci (char->integer c)
+    if (and (>= ci 65) (<= ci 90))
+      print t c
+    elsif: (and (>= ci 97) (<= ci 122))
+      print t c
+    elsif: (>= ci 100)
+      print t "_" ci
+    elsif: (>= ci 10)
+      print t "_0" ci
+    else:
+      print t "_00" ci
+    if (> (string-length v) 1)
+      p (string-rest v)
+  if (string? v)
+    p v
+    close-output-stream t
+    get-output-string t
+  else:
+    close-output-stream t
+    "undefined"
+
+define function-prototype-expansion (v kind)
+  define terms (<term>-get-children v)
+  println output-h "typedef struct {"
+  println output-h "Frame* next_frame;"
+  println output-h "Frame* previous_frame;"
+  println output-h "Frame* previous_lexical_frame;"
+  println output-h "GIN_OBJ return_address;"
+  println output-h "GIN_OBJ result;"
+  define c-name "MAIN"
+  if (eq? kind 'function)
+    set c-name (name->c-name (<term>-get-definition-name v))
+  define argument-count 0
+  define local-count 0
+  define tmp-count 0
+  define j 0
+  each i local-variables
+    if (eq? v (first i))
+      if (eq? (second i) 'local)
+        ++ local-count
+      elsif: (eq? (second i) 'argument)
+        ++ argument-count
+  each i tmp-variables
+    if (eq? v (first i))
+      set tmp-count (second i)
+  while (< j argument-count)
+    println output-h "GIN_OBJ arg" j ";"
+    ++ j
+  set j 0
+  while (< j local-count)
+    println output-h "GIN_OBJ loc" j ";"
+    ++ j
+  set j 0
+  while (< j tmp-count)
+    println output-h "GIN_OBJ tmp" j ";"
+    ++ j
+  println output-h "} Frame___" c-name ";"
+  println output-h ""
+  println output-h "#define ALLOCATE_FRAME___" c-name "(t000)  GIN_ALLOCATE(t000, Frame*, sizeof(Frame___" c-name "));"
+  println output-h "#define DEALLOCATE_FRAME___" c-name "(t000)"
+  println output-h ""
+
+define func-def-exp-number 0  ; function definition expansion number
+define function-definition-expansion (v kind)
+  define terms (<term>-get-children v)
+  define name (<term>-get-definition-name v)
+  define c-name "MAIN"
+  if (eq? kind 'function)
+    set c-name (name->c-name name)
+  println output-c "#define fdef___" c-name " " func-def-exp-number
+  println output-c "gin_function_table[" func-def-exp-number "].frame_size = sizeof(Frame___" c-name ");"
+  if (eq? kind 'function)
+    println output-c "gin_function_table[" func-def-exp-number "].code = &&code_" c-name ";"
+  else:
+    println output-c "gin_function_table[" func-def-exp-number "].code = &&main_entry;"
+  println output-c "gin_function_table[" func-def-exp-number "].name = \"" name "\";"
+  ++ func-def-exp-number
+
+define <term>-register-class-symbol? (v)
+  if (and (eq? (<term>-get-type v) 'symbol) (string=? (<term>-get-value v) "register-class"))
+    true
+  else:
+    false
+
+define <term>-definition-symbol? (v)
+  if (and (eq? (<term>-get-type v) 'symbol) (or (string=? (<term>-get-value v) "define") (string=? (<term>-get-value v) "define!")))
+    true
+  else:
+    false
+
+define <term>-each-loop? (v)
+  if (and (eq? (<term>-get-type v) 'symbol) (string=? (<term>-get-value v) "each"))
+    true
+  else:
+    false
+
+define <term>-definition? (f)
+  if (not (eq? (<term>-get-type f) 'group))
+    false
+  else:
+    define terms (<term>-get-children f)
+    if (>= (length terms) 2)
+      if (<term>-definition-symbol? (first terms))
+        true
+      else:
+        false
+    else:
+      false
+
+define <term>-immutable-definition? (f)
+  define terms (<term>-get-children f)
+  define v (first terms)
+  if (and (eq? (<term>-get-type v) 'symbol) (string=? (<term>-get-value v) "define!"))
+    true
+  else:
+    false
+
+define <list>-remove (lst e)
+  if (null? lst) lst
+  elsif: (eq? (first lst) e)
+    <list>-remove (tail lst)
+  else:
+    pair (first lst) (<list>-remove (tail lst))
+
+define <term>-function-definition? (self)
+  if (<term>-definition? self)
+    define terms (<term>-get-children self)
+    if (= (length terms) 4)
+      true
+    else:
+      false
+  else:
+    false
+
+define <term>-method-definition? (self)
+  if (<term>-definition? self)
+    define terms (<term>-get-children self)
+    if (= (length terms) 5)
+      true
+    else:
+      false
+  else:
+    false
+
+define <term>-get-definition-name (self)
+  define terms (<term>-get-children self)
+  if (<term>-method-definition? self)
+    string-append (<term>-get-value (second terms)) "::" (<term>-get-value (third terms))
+  else:
+    <term>-get-value (second terms)
+
+define <term>-get-definition-body (self)
+  define terms (<term>-get-children self)
+  if (<term>-method-definition? self)
+    fifth terms
+  else:
+    fourth terms
+
+define <term>-get-definition-arguments (self)
+  define terms (<term>-get-children self)
+  if (<term>-method-definition? self)
+    fourth terms
+  elsif: (<term>-function-definition? self)
+    third terms
+  else:
+    println "GOT HERE??????"
+    false
+
+define <term>-get-parent-function (f)
+  define get-f (v)
+    if (eq? v false)
+      false
+    else:
+      if (<term>-function-definition? v)
+        v
+      elsif: (<term>-method-definition? v)
+        v
+      else:
+        get-f (<term>-get-parent v)
+  get-f (<term>-get-parent f)
+
+define lexical-path (term function)
+  ; priority
+  ; local variables
+  ; arguments
+  ;
+  define function-name ""
+  define info false
+  define fn false
+  define lexical-path-i (term function)
+    define r false
+    each i local-variables
+      if (eq? (first i) function)
+        ; println "MATCH! CMP(" term "," (third i) ")"
+        if (string=? (third i) term)
+          ; TODO - check if it is a local variable or an argument.
+          if (or (<term>-function-definition? function) (<term>-method-definition? function))
+            set function-name (name->c-name (<term>-get-definition-name function))
+            ; TODO - iff it is a function keep searching until we come to the root,
+            ; then return the best match so far.
+          else:
+            set function-name "MAIN"
+            set fn tree-head
+          if (eq? (second i) 'local)
+            set r "loc"
+          else:
+            set r "arg"
+          set r (string-append r (number->string (fourth i)))
+          set info (fifth i)
+          set fn (sixth i)
+    if (eq? r false)
+      if (eq? function tree-head)
+        false
+      else:
+        define t false
+        if (eq? (<term>-get-parent-function function) false)
+          set t (lexical-path-i term tree-head)
+        else:
+          set t (lexical-path-i term (<term>-get-parent-function function))
+        if (eq? t false)
+          false
+        else:
+          if (string=? (substring t 0 3) "pre")
+            string-append "previous_lexical_frame->" t
+          else:
+            string-append "previous_lexical_frame))->" t
+    else:
+      r
+  define z (lexical-path-i term function)
+  if (not z)
+    false
+  else:
+    if (string=? (substring z 0 3) "pre")
+      list (string-append "((Frame___" function-name " *)(frame->" z) info fn
+    else:
+      list (string-append "((Frame___" function-name " *)(frame))->" z) info fn
+
+define call-number 0
+define func-def-number 1
+define class-number 500
+define function-expansion (v kind)
+  define terms (<term>-get-children v)
+  define function v
+  define function-name "MAIN"
+  define output-delayed-c (open-output-string)
+  if (eq? kind 'function)
+    set function-name (name->c-name (<term>-get-definition-name function))
+    println output-c "BEGIN_FUNCTION(" function-name ")"
+  define tmp-number 0
+  define tmp-number-max 0
+
+  define next-tmp ()
+    ++ tmp-number
+    if (> tmp-number tmp-number-max)
+      set tmp-number-max tmp-number
+
+  define previous-tmp ()
+    -- tmp-number
+
+  define flatten-term (a v)
+    ; Value appears in expression
+    ;   e.g. some-fn value
+    if (eq? (<term>-get-type v) 'symbol)
+      ; lookup lexical path to value
+      define info (lexical-path (<term>-get-value v) function)
+      if (not info)
+        println "** Error - Unbound variable: " (<term>-get-value v) " on line " (<term>-get-line v) "."
+        exit
+      define bound-variable (first info)
+      println output-delayed-c a " = " bound-variable ";"
+    elsif: (eq? (<term>-get-type v) 'integer)
+      ; RHS is a value
+      println output-delayed-c a " = GIN_IM_FROM_INT(" (<term>-get-value v) ");"
+    elsif: (eq? (<term>-get-type v) 'string)
+      println output-delayed-c "GIN_NEW_STR8(" a ",\"" (dq-escape (<term>-get-value v)) "\");"
+    elsif: (eq? (<term>-get-type v) 'rational)
+      println output-delayed-c "GIN_NEW_FLONUM(" a ", (double)" (<term>-get-value v) ");"
+    elsif: (eq? (<term>-get-type v) 'boolean)
+      ; RHS is a value
+      print output-delayed-c a " = GIN_IM_FROM_BOOL("
+      if (<term>-get-value v)
+        print output-delayed-c "1"
+      else:
+        print output-delayed-c "0"
+      println output-delayed-c ");"
+    elsif: (eq? (<term>-get-type v) 'quoted-symbol)
+      println output-delayed-c a " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (<term>-get-value v)) ");"
+    elsif: (eq? (<term>-get-type v) 'label)
+      println output-delayed-c a " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (<term>-get-value v)) ");"
+    else:
+      print output-delayed-c "UNKNOWN-" (<term>-get-value v) "-" (symbol->string (<term>-get-type v))
+
+  define flatten-set (lhs rhs)
+    ; Variable definition
+    ; Value appers in define
+    ;   e.g. define name value
+    define info (lexical-path (<term>-get-value lhs) function)
+    if (not info)
+      println "** Error - Unbound variable: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
+      exit
+    println output-delayed-c "// SET " (<term>-get-value lhs)
+    define bound-variable (first info)
+    if (eq? (<term>-get-type rhs) 'group)
+      ; RHS is an expression
+      flatten rhs
+      println output-delayed-c "GIN_NEW_OBJ(" bound-variable ",((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")"
+    elsif: (eq? (<term>-get-type rhs) 'symbol)
+      ; RHS is a variable
+      define info2 (lexical-path (<term>-get-value rhs) function)
+      if (not info2)
+        println "** Error - Unbound variable: " (<term>-get-value rhs) " on line " (<term>-get-line rhs) "."
+        exit
+      define bound-variable-2 (first info2)
+      println output-delayed-c "GIN_NEW_OBJ(" bound-variable "," bound-variable-2 ")"
+    elsif: (eq? (<term>-get-type rhs) 'integer)
+      ; RHS is a value
+      println output-delayed-c "GIN_NEW_FIXNUM(" bound-variable "," (<term>-get-value rhs) ")"
+    elsif: (eq? (<term>-get-type rhs) 'rational)
+      ; RHS is a value
+      println output-delayed-c "GIN_NEW_FLONUM(" bound-variable ", (double)" (<term>-get-value rhs) ")"
+    elsif: (eq? (<term>-get-type rhs) 'string)
+      ; RHS is a value
+      println output-delayed-c "GIN_NEW_STR8(" bound-variable ",\"" (dq-escape (<term>-get-value rhs)) "\")"
+    elsif: (eq? (<term>-get-type rhs) 'boolean)
+      ; RHS is a value
+      print output-delayed-c "GIN_NEW_BOOL(" bound-variable ","
+      if (<term>-get-value rhs)
+        print output-delayed-c "1"
+      else:
+        print output-delayed-c "0"
+      println output-delayed-c ")"
+    elsif: (eq? (<term>-get-type rhs) 'quoted-symbol)
+      println output-delayed-c bound-variable " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (<term>-get-value rhs)) ");"
+    elsif: (eq? (<term>-get-type rhs) 'label)
+      println output-delayed-c bound-variable " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (<term>-get-value rhs)) ");"
+    else:
+      print output-delayed-c "UNKNOWN-" (<term>-get-value rhs) "-" (symbol->string (<term>-get-type rhs))
+
+  define flatten-list-next (lhs rhs)
+    ; Get the next value (the cdr) of a list
+    define info (lexical-path (<term>-get-value lhs) function)
+    if (not info)
+      println "** Error - Unbound variable: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
+      exit
+    define bound-variable (first info)
+    if (eq? (<term>-get-type rhs) 'symbol)
+      ; RHS is a variable
+      define info2 (lexical-path (<term>-get-value rhs) function)
+      if (not info2)
+        println "** Error - Unbound variable: " (<term>-get-value rhs) " on line " (<term>-get-line rhs) "."
+        exit
+      define bound-variable-2 (first info2)
+      println output-delayed-c "GIN_NEW_OBJ(" bound-variable ",GIN_NIM_GET_F2(" bound-variable-2 "))"
+
+  define flatten (v)
+    define type (<term>-get-type v)
+    if (eq? type 'group)
+      define terms (<term>-get-children v)
+      if (or (<term>-function-definition? v) (<term>-method-definition? v))
+        ; Function definition
+        define info (lexical-path (<term>-get-definition-name v) function)
+        if (not info)
+          println "** Error - Unbound variable: " (<term>-get-definition-name v) " on line " (<term>-get-line v) "."
+          exit
+        define bound-variable (first info)
+        println output-c "GIN_NEW_FN(" bound-variable ", &(gin_function_table[fdef___" (name->c-name (<term>-get-definition-name v)) "]), frame)"
+        ; TODO - OPTIMIZATION - we only care about capturing the value (next line) if it's the last item in this code block.
+        println output-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = " bound-variable ";;;"
+        ++ func-def-number
+      elsif: (<term>-definition? v)
+        flatten-set (second terms) (third terms)
+      elsif: (eq? (<term>-get-type (first terms)) 'begin)
+        println output-delayed-c "// BEGIN (tmp" tmp-number ")"
+        next-tmp
+        each i (tail terms)
+          if (eq? (<term>-get-type i) 'group)
+            flatten i
+        previous-tmp
+
+        ; We need to capture the last value..
+        if (= tmp-number 0)
+          println output-delayed-c "frame->result = ((Frame___" function-name " *)(frame))->tmp0;;"
+        else:
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = ((Frame___" function-name " *)(frame))->tmp" tmp-number ";;"
+
+      elsif: (eq? (<term>-get-type (first terms)) 'symbol)
+        if (string=? (<term>-get-value (first terms)) "require")
+          noop
+
+        elsif: (string=? (<term>-get-value (first terms)) "ensure")
+          noop
+
+        elsif: (string=? (<term>-get-value (first terms)) "noop")
+          noop
+
+        elsif: (string=? (<term>-get-value (first terms)) "repeat")
+
+          flatten (cadr terms)
+          next-tmp
+          ; TODO - for bigger numbers this should use a bignum.
+          println output-delayed-c "for (((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) "=GIN_IM_FROM_INT(0); GIN_IM_TO_INT(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")<(GIN_IM_TO_INT(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) ")); ((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_IM_FROM_INT(GIN_IM_TO_INT(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ") + 1)) {"
+          next-tmp
+          flatten (caddr terms)
+          previous-tmp
+          previous-tmp
+          println output-delayed-c "}"
+
+        elsif: (string=? (<term>-get-value (first terms)) "while")
+
+          flatten (cadr terms)
+          println output-delayed-c "while (GIN_IS_TRUE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+          next-tmp
+          flatten (caddr terms)
+          ;next-tmp
+          previous-tmp
+          flatten (cadr terms)
+          println output-delayed-c "}"
+          ;previous-tmp
+          ;previous-tmp
+          ; TODO - set the right return value..
+
+        elsif: (string=? (<term>-get-value (first terms)) "each")
+          ; TODO - fix var scope
+          ; TODO - change tmp0 to a better name (it's really each-of-list).
+          next-tmp
+          define tmp0 (string-append "((Frame___" function-name " *)(frame))->tmp" (number->string (- tmp-number 1)))
+          flatten (third terms)
+;          define list-info (lexical-path (<term>-get-value (third terms)) function)
+;          define list-bound-variable (first list-info)
+;          println output-delayed-c tmp0 " = " list-bound-variable ";"
+          define info (lexical-path (<term>-get-value (second terms)) function)
+          define bound-variable (first info)
+          println output-delayed-c "if (!GIN_IS_NULL(" tmp0 ")) {" bound-variable " = GIN_NIM_GET_F0(" tmp0 "); }"
+          println output-delayed-c "while (!GIN_IS_NULL(" tmp0 ")) {"
+          next-tmp
+          flatten (fourth terms)  ; each body
+          previous-tmp
+          println output-delayed-c tmp0 " = GIN_NIM_GET_F2(" tmp0 ");"
+          println output-delayed-c "if (!GIN_IS_NULL(" tmp0 "))" bound-variable " = GIN_NIM_GET_F0(" tmp0 ");"
+          println output-delayed-c "}"
+          previous-tmp
+
+        elsif: (string=? (<term>-get-value (first terms)) "if")
+
+          flatten (cadr terms)
+          println output-delayed-c "if (!GIN_IS_FALSE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+          flatten (caddr terms)
+
+          define else-count 1
+          println output-delayed-c "} else {"
+
+          define test (t)
+            if (null? t) (noop)
+            elsif: (null? (first t)) (noop)
+            elsif: (string=? (<term>-get-value (first t)) "elsif:")
+              flatten (cadr t) ; expression (2nd term)
+              println output-delayed-c "if (!GIN_IS_FALSE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+              flatten (caddr t) ; value (3rd term)
+              println output-delayed-c "} else {"
+              ++ else-count
+              test (cdddr t)
+            elsif: (string=? (<term>-get-value (first t)) "else:")
+              flatten (cadr t) ; expression (2nd term)
+              test (cddr t)
+
+          test (cdddr terms)
+
+          while (> else-count 0)
+            print output-delayed-c "}"
+            -- else-count
+          println output-delayed-c ""
+
+        elsif: (string=? (<term>-get-value (first terms)) "or")
+          ; TODO - when macros work, this could be replaced with a macro
+
+          define else-count 0
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_TRUE;"
+          next-tmp
+
+          each i (tail terms)
+            flatten i
+            ++ else-count
+            println output-delayed-c "if (GIN_IS_FALSE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) " = GIN_FALSE;"
+
+          while (> else-count 0)
+            print output-delayed-c "}"
+            -- else-count
+          println output-delayed-c ""
+
+          previous-tmp
+
+        elsif: (string=? (<term>-get-value (first terms)) "set")
+
+          flatten-set (cadr terms) (caddr terms)
+
+        elsif: (string=? (<term>-get-value (first terms)) "++")
+
+          define info (lexical-path (<term>-get-value (second terms)) function)
+          if (not info)
+            println "** Error - Unbound variable: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
+            exit
+          define bound-variable (first info)
+          println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))+1);"
+
+        elsif: (string=? (<term>-get-value (first terms)) "--")
+
+          define info (lexical-path (<term>-get-value (second terms)) function)
+          if (not info)
+            println "** Error - Unbound variable: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
+            exit
+          define bound-variable (first info)
+          println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))-1);"
+
+        elsif: (string=? (<term>-get-value (first terms)) "and")
+          ; TODO - when macros work, this could be replaced with a macro
+
+          define else-count 0
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_FALSE;"
+          next-tmp
+
+          each i (tail terms)
+            flatten i
+            ++ else-count
+            println output-delayed-c "if (GIN_IS_TRUE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) " = GIN_TRUE;"
+
+          while (> else-count 0)
+            print output-delayed-c "}"
+            -- else-count
+          println output-delayed-c ""
+
+          previous-tmp
+
+        elsif: (string=? (<term>-get-value (first terms)) "register-class")
+          define info (lexical-path (<term>-get-value (second terms)) function)
+          if (not info)
+            println "** Error - Unbound variable: " (<term>-get-value (second terms)) " on line " (<term>-get-line (second terms)) "."
+            exit
+          define bound-variable (first info)
+          define base-class-info (lexical-path (<term>-get-value (third terms)) function)
+          if (not base-class-info)
+            println "** Error - Unbound variable: " (<term>-get-value (third terms)) " on line " (<term>-get-line (third terms)) "."
+            exit
+          define bound-base-class (first info)
+          define make-fn-info (lexical-path (<term>-get-value (fourth terms)) function)
+          if (not make-fn-info)
+            println "** Error - Unbound variable: " (<term>-get-value (fourth terms)) " on line " (<term>-get-line (fourth terms)) "."
+            exit
+          define bound-make-fn (first info)
+          define unmake-fn-info (lexical-path (<term>-get-value (fifth terms)) function)
+          if (not unmake-fn-info)
+            println "** Error - Unbound variable: " (<term>-get-value (fifth terms)) " on line " (<term>-get-line (fifth terms)) "."
+            exit
+          define bound-unmake-fn (first info)
+          ++ class-number
+          ; println output-delayed-c "GIN_NEW_CLASSID(" bound-variable "," class-number ")"
+
+          println output-delayed-c "GIN_NEW_CLASS(" bound-variable ",cdef___" (name->c-name (<term>-get-value (second terms))) "," bound-base-class "," bound-make-fn "," bound-unmake-fn ");"
+
+
+        elsif: (string=? (<term>-get-value (first terms)) "inline-c-header")
+          println output-h (<term>-get-value (second terms))
+
+        elsif: (string=? (<term>-get-value (first terms)) "inline-c")
+          each i (tail terms)
+            if (eq? (<term>-get-type i) 'symbol)
+              if (string=? (<term>-get-value i) "result")
+                print output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
+              else:
+                define info (lexical-path (<term>-get-value i) function)
+                if (not info)
+                  println "** Error - Unbound variable: " (<term>-get-value i) " on line " (<term>-get-line i) "."
+                  exit
+                define bound-variable (first info)
+                print output-delayed-c bound-variable
+            elsif: (eq? (<term>-get-type i) 'string)
+              print output-delayed-c (<term>-get-value i)
+            else:
+              println "TODO: inline-c doesn't create temporaries..  preflatten calls used.."
+              exit
+          println output-delayed-c ""
+
+        else:
+          ; Function call
+          define tmp-call-number (- tmp-number 1)
+
+          ; CALL params:
+          ; the lexical context of the function - TODO.. closures won't use the current frame
+          ; function name
+          ; unique seed number - so we can go back to the caller
+          ; result location
+          ; var0 location
+          ; var1 location ..
+          define info (lexical-path (<term>-get-value (first terms)) function)
+          if (not info)
+            println "** Error - Unbound variable: " (<term>-get-value (first terms)) " on line " (<term>-get-line (first terms)) "."
+            exit
+
+          define function-def (third info)
+          define immutable (<term>-immutable-definition? function-def)
+
+          ; TODO - this line is here since mutables don't work as they should.  so we assume immutable
+          ; comment this line out to test the new code..
+          set immutable true
+
+          if (and (not (eq? (second info) 'function)) (= (length terms) 1) immutable)
+            ; it's an immutable value..  we can really do better than this.. TODO: better optimization
+            ; A value returns itself.  In this case we know it's a value and not a function because it's immutable.
+            flatten-term (string-append "((Frame___" function-name " *)(frame))->tmp" (number->string (- tmp-number 1))) (first terms)
+          elsif: (and (eq? (second info) 'function) immutable)
+            ; it's an immutable function..
+            define output-call (open-output-string)
+            println output-call "CALL_ALLOCATE(" (name->c-name (<term>-get-value (first terms))) ");"
+
+            ; The list of parameters as passed to the function
+            define original-parameters (tail terms)
+
+            ; The new list of parameters without names attached
+            define new-parameters (list)
+
+            ; The list of required parameters as extracted from the function signature
+            define required-parameters (list)
+
+            ; The list of optional parameters as extracted from the function signature
+            define optional-parameters (list)
+
+            define anon-first true
+
+            ; Create the required parameters list
+            define has-residual false
+
+            each a (<term>-get-children (<term>-get-definition-arguments function-def))
+              if (and (eq? (<term>-get-type a) 'symbol) (not has-residual))
+                ; The parameter is a symbol and we have not seen a residual keyword.
+                ; So..  We add it as a required parameter.
+                set required-parameters (append required-parameters (list a))
+              elsif: (and (eq? (<term>-get-type a) 'group) (not has-residual))
+                ; The parameter is a group and we have not seen a residual keyword.
+                ; So.. We add the first term as an optional parameter.
+                define t (first (<term>-get-children a))
+                set optional-parameters (append optional-parameters (list a))
+              elsif: (and (eq? (<term>-get-type a) 'label) (string=? (<term>-get-value a) "residual:"))
+                ; We set the residual keyword.  The next symbol won't be added to either list.
+                set has-residual true
+
+            define find-named-parameter (plst a)
+              if (null? plst) false
+              elsif: (and (eq? (<term>-get-type (first plst)) 'label) (string=? (<term>-get-value (first plst)) (string-append a ":")))
+                ; TODO: fails if xxx: is the last term in the list.
+                pair (first plst) (second plst)
+              else:
+                find-named-parameter (tail plst) a
+
+            define remove-named-parameter (plst a)
+              if (null? plst)
+                plst
+              elsif: (and (eq? (<term>-get-type (first plst)) 'label) (string=? (<term>-get-value (first plst)) a))
+                remove-named-parameter (tail (tail plst)) a
+              else:
+                pair (first plst) (remove-named-parameter (tail plst) a)
+
+            ; Fill the required parameters in the new-parameters list.
+            each a required-parameters
+              define named-argument (find-named-parameter original-parameters (<term>-get-value a))
+              ; println named-argument
+              if named-argument
+                ; 1. See if this argument is named in the call.
+                ; if it is, then insert an unnamed call now.
+                ; Then remove it from the old parameters.
+                ; add new-parameters named-argument
+                set new-parameters (append new-parameters (list (tail named-argument)))
+                ; remove original-parameters named-argument
+                set original-parameters (remove-named-parameter original-parameters (<term>-get-value (first named-argument)))
+                set anon-first false
+              elsif: (and (> (length original-parameters) 0) (not (eq? (<term>-get-type (first original-parameters)) 'label)))
+                ; 2. See if there is an unnamed parameter.  It must be this one..
+                ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
+                if (eq? anon-first false)
+                  println "Named arguments must follow unnamed arguments!"
+                  exit
+                set new-parameters (append new-parameters (list (first original-parameters)))
+                set original-parameters (tail original-parameters)
+              else:
+                ; This was a required arg but we didn't find a named term or an anon term that matched.
+                println "Required argument, " (<term>-get-value a) ", missing from call on line " (<term>-get-line (first terms)) "." 
+                exit
+
+            if (> (length required-parameters) (length new-parameters))
+              ; TODO - better output state function, line and which parameters were missing.
+              println "Some required parameters missing"
+              exit
+
+            each a optional-parameters
+              define named-argument (find-named-parameter original-parameters (<term>-get-value (first (<term>-get-children a))))
+              if named-argument
+                set new-parameters (append new-parameters (list (tail named-argument)))
+                set original-parameters (remove-named-parameter original-parameters (<term>-get-value (first named-argument)))
+                set anon-first false
+              elsif: (and (> (length original-parameters) 0) (not (eq? (<term>-get-type (first original-parameters)) 'label)))
+                ; 2. See if there is an unnamed parameter.  It must be this one..
+                ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
+                if (eq? anon-first false)
+                  println "Named arguments must follow unnamed arguments!"
+                  exit
+                set new-parameters (append new-parameters (list (first original-parameters)))
+                set original-parameters (tail original-parameters)
+              else:
+                ; This was an optional argument that was not given..
+                ; original parameters doesn't change. but we add it to new parameters
+                ; TODO - BUG - In the next section when we look up the lexical path of the "default value"
+                ; we look it up using the calling function's lexical scope.  We should look it up using the called
+                ; function's lexical scope.  The difference in behavior would be noticeable when using closures but
+                ; also other common situations.
+                ;
+                ; define z 3
+                ; define print-z ((a z))
+                ;   println a
+                ; define foo ()
+                ;   define z 4
+                ;   print-z
+                ; foo
+                ;
+                ; should print 3! but it prints 4.
+
+                set new-parameters (append new-parameters (list (second (<term>-get-children a))))
+
+            ; The next term must be the residual or nothing..
+            if has-residual
+              ; handle the residual..  The remaining arguments are turned into a list.
+              define d (<term>-new false false 'residual 0 0 0 original-parameters)
+              if (= (length new-parameters) 0)
+                set new-parameters (list d)
+              else:
+                set new-parameters (append new-parameters (list d))
+            elsif: (= (length original-parameters) 0)
+              ; Nothing in the original parameters so do nothing..
+              noop
+            else:
+              println "Too many arguments in function call, " (<term>-get-value (first terms)) ", on line " (<term>-get-line (first terms)) "."
+              exit
+
+            define i 0
+            each ii new-parameters
+              print output-call "((Frame_Narg *)(frame->next_frame))->argn[" i "] = "
+              ++ i
+
+              if (eq? (<term>-get-type ii) 'group)
+                next-tmp
+                print output-call "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
+                flatten ii
+;                previous-tmp
+              elsif: (eq? (<term>-get-type ii) 'string)
+                next-tmp
+                print output-call "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
+                flatten-term (string-append "((Frame___" function-name " *)(frame))->tmp" (number->string (- tmp-number 1))) ii
+;                previous-tmp
+              elsif: (eq? (<term>-get-type ii) 'rational)
+                next-tmp
+                print output-call "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
+                flatten-term (string-append "((Frame___" function-name " *)(frame))->tmp" (number->string (- tmp-number 1))) ii
+;                previous-tmp
+              elsif: (eq? (<term>-get-type ii) 'residual)
+                ; TODO - flatten tmps into a list
+                define list-args (open-output-string)
+                next-tmp
+                next-tmp
+                println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) " = GIN_NULL;"
+                define ri (reverse (<term>-get-value ii))
+                each xx ri
+                  next-tmp
+                  flatten xx
+                  print output-delayed-c "GIN_NEW_PAIR( ((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2)
+                  println output-delayed-c ", " "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ", ((Frame___" function-name " *)(frame))->tmp" (- tmp-number 3) ");"
+                  println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 3) "=" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) ";"
+                  previous-tmp
+                print output-call "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2)
+                previous-tmp
+;                previous-tmp
+              elsif: (eq? (<term>-get-type ii) 'symbol)
+                ; lookup lexical path to value
+                define info (lexical-path (<term>-get-value ii) function)
+                if (not info)
+                  println "** Error - Unbound variable: " (<term>-get-value ii) " on line " (<term>-get-line ii) "."
+                  exit
+                define bound-variable (first info)
+                print output-call bound-variable
+              elsif: (eq? (<term>-get-type ii) 'integer)
+                ; RHS is a value
+                print output-call "GIN_IM_FROM_INT(" (<term>-get-value ii) ")"
+              elsif: (eq? (<term>-get-type ii) 'string)
+                ; TODO - we need a temp value to hold the string..
+                ; RHS is a value
+                ; println output-call "GIN_IM_FROM_STR8(" bound-variable "," (<term>-get-value ii) ")"
+                println output-call "NOT SUPPORTED YET"
+              elsif: (eq? (<term>-get-type ii) 'boolean)
+                ; RHS is a value
+                print output-call "GIN_IM_FROM_BOOL("
+                if (<term>-get-value ii)
+                  print output-call "1"
+                else:
+                  print output-call "0"
+                print output-call ")"
+              elsif: (eq? (<term>-get-type ii) 'quoted-symbol)
+                print output-call "GIN_IM_FROM_SYM(qsdef___" (name->c-name (<term>-get-value ii)) ")"
+              elsif: (eq? (<term>-get-type ii) 'label)
+                print output-call "GIN_IM_FROM_SYM(qsdef___" (name->c-name (<term>-get-value ii)) ")"
+              else:
+                print output-call "UNKNOWN-" (<term>-get-value ii) "-" (symbol->string (<term>-get-type ii))
+              println output-call ";"
+            ++ call-number
+            println output-call "CALL(GIN_NIM_GET_PREVIOUS_LEXICAL_FRAME(" (first info) ")," (name->c-name (<term>-get-value (first terms))) "," call-number ",((Frame___" function-name " *)(frame))->tmp" tmp-call-number ");"
+
+            ; unwind the temporary variables..
+            each ii new-parameters
+              if (or (eq? (<term>-get-type ii) 'group) (eq? (<term>-get-type ii) 'string) (eq? (<term>-get-type ii) 'rational))
+                previous-tmp
+              elsif: (eq? (<term>-get-type ii) 'residual)
+                previous-tmp
+
+            ; print the call.
+            println output-delayed-c (get-output-string output-call)
+          else:
+            ; third case - the value is immutable so we can't be sure if it's a function call or not.
+            ; TODO - optimization - if the value is never set or used an argument we can assume it is immutable and then it falls into case 1 or 2 (most likely).
+            ; In this case we flatten any arguments and pass along with labels to CALLNDYNAMIC
+            ; CALLNDYNAMIC must at RUNTIME figure out the arguments and if it is a VALUE or an OBJECT.
+            ; TODO - optional arguments must be embedded in the called code - NOT part of the pre call.
+            noop
+      else:
+        ; Not a symbol- simply return the value.
+        ; TODO - not quite this simple.. consider infix.. 0 + 5
+        flatten-term (string-append "((Frame___" function-name " *)(frame))->tmp" (number->string (- tmp-number 1))) (first terms)
+    else:
+      ; Not a group so we are flattening an individual term..
+      flatten-term (string-append "((Frame___" function-name " *)(frame))->tmp" (number->string (- tmp-number 1))) v
+    ; Thie ensures NEW_FN appears before other code
+  if (eq? kind 'function)
+;    flatten (cadddr terms)
+
+    flatten (<term>-get-definition-body function)
+    println output-c (get-output-string output-delayed-c)
+    ; println output-c "frame->result = ((Frame___" function-name " *)(frame))->tmp" tmp-number ";"
+    println output-c "END_FUNCTION()"
+    set tmp-variables (append tmp-variables (list (list v tmp-number-max)))
+  else:
+    flatten v
+    println output-c (get-output-string output-delayed-c)
+    ; println output-c "frame->result = ((Frame___" function-name " *)(frame))->tmp" tmp-number ";"
+    ; After the function has been flattened we can now report the required number of tmp vars
+    set tmp-variables (append tmp-variables (list (list tree-head tmp-number-max)))
+
+
+define glob 0
+define glob-stack (list 0)
+
+define glob-push (s)
+  set glob-stack (append glob-stack (list s))
+
+define glob-pop ()
+  set glob-stack (head glob-stack)
+
+define glob-top ()
+  last glob-stack
+
+define glob-parent ()
+  cadr (reverse glob-stack)
+
+define glob-current ()
+  first (reverse glob-stack)
+
+define string-n (v n)
+  if (= n 0)
+    string-first v
+  else:
+    string-n (string-rest v) (- n 1)
+
+define include-group-expansion (v)
+  define terms (<term>-get-children v)
+  define r false
+  each t terms
+    if (eq? (include-expand t) true)
+      set r true
+  r
+
+define include-expand (v)
+  define type (<term>-get-type v)
+  define value (<term>-get-value v)
+  if (eq? type 'group) (include-group-expansion v)
+  else: ; (and (eq? type 'symbol) (string=? value "include")) (include-expansion v)
+    if (eq? type 'symbol)
+      if (string=? value "include") 
+        include-expansion v
+        true
+      else:
+        false
+    else:
+      false
+
+define quoted-symbols (list)
+
+define discover-quoted-symbols (v)
+  define type (<term>-get-type v)
+  define value (<term>-get-value v)
+  if (eq? type 'group)
+    define terms (<term>-get-children v)
+    each t terms
+      discover-quoted-symbols t
+  else:
+    if (or (eq? type 'quoted-symbol) (eq? type 'label))
+      ; TODO - hash would be faster
+      define exists false
+      each i quoted-symbols
+        if (string=? i value)
+          set exists true
+      if (eq? exists false)
+        set quoted-symbols (append quoted-symbols (list value))
+
+define parse (input)
+  define c false
+  define p false
+  define buffer ""
+  define eos false
+  define parse-indent -1
+  define is-quote 0
+  define first-term-on-line true
+  ; 0 = no quote, 1 = buffer is from a quote, 2 = buffer is from an empty quote
+  ; -1 = buffer is a symbol quote, -2 = buffer is from an empty symbol quote
+
+  state-push 'begin
+
+  while (not eos)
+    if (eos? input)
+      set eos true ; terminate next time through the loop
+      set c ascii-space ; set c to space.
+
+      ; if its eos we need to check for paren balence because its usualy done by
+      ; indentation checking but there will be no more lines to check the last line
+      if (not (null? (paren-balanced)))
+        println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis.1"
+        exit
+    else:
+      set c (get-char input) ; get the next character
+
+      ; windows consideration for dual eol's
+      if (and (char=? c ascii-cr) (char=? (peek-char input) ascii-lf))
+        set c (get-char input)
+
+      if (not (char-whitespace? c))
+        if (= parse-indent -1)
+          set parse-indent column
+
+    ; As we read a character we might be in one of several states:
+    ; 1. Colon Quoting
+    ; 2. Double Quoting
+    ; 3. Reading Commands
+
+    if (eq? (state-top) 'colon-quote)
+      ; if we are allready in colon quote state then it can never be the first term on the line
+      set first-term-on-line false
+      if (or (char=? c ascii-left-parenthesis) (char=? c ascii-right-parenthesis) (char-eol? c) (eq? eos true))
+        if (and (char=? p ascii-backslash) (not (char-eol? c)))
+          ; removed the \\ created becuase of the one \ and add the current char ( or )
+          set buffer (substring buffer 0 (- (string-length buffer) 2))
+          set buffer (new-string buffer c)
+        else:
+          ; if p was not a backslash, we have three options:
+          if (char=? c ascii-left-parenthesis)
+
+            ; Option 1 - We encounter a left parenthesis
+            ; The beginning of a command temporarily suspends this colon quote
+            ; Add what we have so far to the concatenation operator
+
+            tree-add (<value>-new 'string buffer line column)
+
+            ; Clear the buffer
+            set buffer ""
+
+            paren-add
+
+            ; Add a new group for the command
+            tree-push
+            <term>-set-parse-indent tree-current parse-indent
+
+            ; And then add commands..
+            state-push 'command
+
+          elsif: (or (char=? c ascii-right-parenthesis) (char-eol? c) (eq? eos true))
+
+            ; Option 2 - we encounter a right parenthesis, eol, or eos
+            ; The end of a colon quote so we need to check for
+            ; colon block quote and if this is one then handle it
+            ; otherwise we need to wrap everything up.
+
+            define exit-colon-quote false
+            if (not (char-eol? c))
+              ; if its a right parenthis or eos
+              set exit-colon-quote true
+              ; if its a right parenthis make sure we ajust the tree to account for it
+              if (char=? c ascii-right-parenthesis)
+                paren-remove
+                ; if there is to many right parens we imeadetly know we should error
+                if (not (null? (paren-balanced)))
+                  if (< (<term>-get-paren-balance (paren-balanced)) 0)
+                    println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis.2"
+                    exit
+            else:
+              define count 0
+              define undo-block-quote-check false
+              ; if we have only been working with a colon-quote
+              if (= cbq-indent 0)
+                ; count all leading spaces
+                while (char=? (peek-char input) ascii-space)
+                  get-char input
+                  ++ count
+                ; if its indented then save the indent
+                if (> count (<term>-get-parse-indent tree-current))
+                  set cbq-indent count
+                  ; if there is something in the buffer then we need to
+                  ; add an eol to it
+                  if (not (= (string-length buffer) 0))
+                    set buffer (new-string buffer ascii-newline)
+                ; since we did not find indentation we undo the last few lines
+                ; and wrap up colon-quote
+                else:
+                  set undo-block-quote-check true
+                  set exit-colon-quote true
+              ; if we have been working with a colon-block-quote
+              else:
+                ; count all leading spaces up to the first colon-block-quote-indent
+                while (and (char=? (peek-char input) ascii-space) (< count cbq-indent))
+                  get-char input
+                  ++ count
+                ; if its still >= the first colon-block-quote-indent then we add a new line
+                ; and continue
+                if (>= count cbq-indent)
+                  if (not (= (string-length buffer) 0))
+                    set buffer (new-string buffer ascii-newline)
+                ; if its not the we reset cbq-indent and un what we did in the last few lines
+                ; and wrap up colon-quote
+                else:
+                  set cbq-indent 0
+                  set undo-block-quote-check true
+                  set exit-colon-quote true
+
+              ; undo the check for colon-block-quoteing
+              if (undo-block-quote-check)
+                while (> count 0)
+                  unget-char input ascii-space
+                  -- count
+
+            ; wraps up colon-quoteing
+            if (exit-colon-quote)
+              ; add buffer to tree and clear it
+              tree-add (<value>-new 'string buffer line column)
+              set buffer ""
+              tree-pop ; pop the string-append
+              tree-pop ; pop the enclosing command
+              state-pop ; pop the colon quote state
+              state-pop ; pop the command state
+
+      else:
+
+        ; Option 3 - Anything else gets added to the buffer
+        ; check to see if its a backslash since string-append
+        ; uses \ for escape chars we just assume all \ are not
+        ; escape chars and conver them to \\.
+
+        if (char=? c ascii-backslash)
+          define dbs (new-string c c)
+          set buffer (new-string buffer dbs)
+        else:
+          set buffer (new-string buffer c)
+
+
+    elsif: (eq? (state-top) 'single-quote)
+
+      if (or (char-whitespace? c) (char=? c ascii-right-parenthesis))
+        ; Push the character back so it can be handled properly next time..
+        unget-char input c
+        ; Set c to the more innocuos space so the eol stuff at the end of the loop
+        ; doesnt trip us up
+        set c ascii-space
+        state-pop
+        ; Set is-quote to one if the buffer has something in it.
+        set is-quote -1
+        if (string=? buffer "")
+          ; If the buffer is empty set is-quote to 2
+          set is-quote -2
+          set buffer "null"
+      else:
+        set buffer (new-string buffer c)
+
+    elsif: (eq? (state-top) 'double-quote)
+
+      if (char=? p ascii-backslash)
+        set buffer (new-string buffer (char->double-quote-escape c))
+        ; Set c to something other than \ so that p doesn't become \ and we escape the next time.
+        set c ascii-space
+      else:
+        if (char=? c ascii-double-quote)
+          ; An ending double quote ends a double quote.
+          state-pop
+          set is-quote 1
+          if (string=? buffer "")
+            set is-quote 2
+            set buffer "null"
+        elsif: (char=? c ascii-backslash)
+          ; eat it.
+          noop
+        else:
+            set buffer (new-string buffer c)
+
+    elsif: (eq? (state-top) 'comment)
+      if (char-eol? c)
+        state-pop ; pop comment state
+        if (and (not (eq? (state-top) 'begin)) (not first-term-on-line))
+          ; this is inline comment so need to unget c and set it to a space
+          ; so the defult code for the line can wrap things up
+          unget-char input c
+          set c ascii-space
+
+    elsif: (or (eq? (state-top) 'begin) (eq? (state-top) 'command))
+
+      if (char=? c ascii-semi-colon)
+        state-push 'comment
+
+      elsif: (char=? c ascii-double-quote)
+        state-push 'double-quote ; FIXME - not quite right?
+
+      elsif: (char=? c ascii-single-quote)
+        state-push 'single-quote
+
+      elsif: (or (char=? c ascii-left-parenthesis) (char=? c ascii-right-parenthesis) (char-whitespace? c))
+
+        if (char=? c ascii-left-parenthesis)
+          if (and (string=? buffer ":") (= is-quote 0))
+            println "Error on line " line ", column " column ": illegal colon-quote."
+            exit
+          else:
+            set buffer "("
+
+        if (char=? c ascii-right-parenthesis)
+          paren-remove
+          if (not (null? (paren-balanced)))
+            if (< (<term>-get-paren-balance (paren-balanced)) 0)
+              println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis.3"
+              exit
+
+        if (and (char-whitespace? c) (not (char-eol? c)) (= (string-length buffer) 0))
+          ; ignore spaces that precede a command
+          noop
+        else:
+          if (and (string=? buffer ":") (= is-quote 0))
+            ; defult colon-quote (:_something) or :_something or (:)
+            ; if whitespace follows a : then do not error but ...
+            if (or (char=? ascii-space c) (char-eol? c) (char=? ascii-right-parenthesis c))
+              ; allthough (:) is useless it should be a valid placeholder
+              unget-char input c ; put the char back
+              if (char=? c ascii-right-parenthesis)
+                ; conter act the paren-remove above because we are going to process it twice
+                paren-add
+                unget-char input ascii-space
+              else:
+                set buffer ":string-append" ; override the buffer with the defult command
+                set p ascii-d ; update p with what it should be
+              set c ascii-space ; reset c to a space
+
+          elsif: (= (string-length buffer) 0)
+            ; There is nothing in the buffer
+            if (char-eol? c)
+              ; Nothing in the buffer and it is an EOL
+              if (and (not (eq? (state-top) 'begin)) (not first-term-on-line))
+              ; if (not (eq? (state-top) 'begin))
+                ; EOL - we need to undo this if we find an ..
+                state-pop
+                tree-pop
+            if (char=? c ascii-right-parenthesis)
+              if (= (tree-sibling-count) 0)
+                <term>-set-parse-indent tree-current parse-indent
+              state-pop
+              tree-pop
+          else:
+            ; TODO - this if statement is not necc?
+            ; if (or (eq? (state-top) 'begin) (eq? (state-top) 'command))
+            if (eq? first-term-on-line true)
+              set first-term-on-line false
+              if (> (string-length buffer) 0)
+                if (< (<term>-get-parse-indent tree-current) parse-indent)
+
+                  ; CASE 1 - The current indentation is more than the previous
+                  ; indentation.  This indicates a code block associated with the
+                  ; previous line.
+
+                  ; println "CASE 1  - " (<term>-get-parse-indent tree-current) " - " parse-indent
+
+                  if (not (null? (paren-balanced)))
+                    println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis.4"
+                    exit
+
+                  if (string-ellipses? buffer)
+                    ; Over indented ellipses don't make any sense!
+                    println "Error on line " line ", column " column ": illegal ellipses indentation."
+                    exit
+
+                  if (string-label? buffer)
+                    ; Over indented labels don't make any sense!
+                    println "Error on line " line ", column " column ": illegal label indentation. (" (<term>-get-parse-indent tree-current) ", " parse-indent ")"
+                    exit
+
+                  ; We need to "continue" the last line with a code block
+                  set tree-current (last (<term>-get-children tree-current))
+
+                  ; We need to account for this by adding an extra state..
+                  state-push 'command
+
+                  ; Add a new group
+                  tree-push
+                  <term>-set-parse-indent tree-current parse-indent
+                  state-push 'begin
+
+                  ; Add a new begin
+                  tree-add (<begin>-new line column)
+
+                  ; Add a group for this command
+                  tree-push
+                  <term>-set-parse-indent tree-current parse-indent
+                  state-push 'command
+
+                elsif: (> (<term>-get-parse-indent tree-current) parse-indent)
+
+                  ; CASE 2 - The current indentation is less than the previous
+                  ; indentation.  We need to "close" some code blocks and
+                  ; begin adding to a different block.
+
+                  ; println "Case 2 - " (<term>-get-parse-indent tree-current) " - " parse-indent
+
+                  ; Keep popping the tree until we get to an indent <= the current
+                  while (< parse-indent (<term>-get-parse-indent tree-current))
+                    if (not (null? (paren-balanced)))
+                      println "Error in code block starting on line " (<term>-get-line (paren-balanced)) ": unbalanced parenthesis.5"
+                      exit
+                    tree-pop
+                    state-pop
+
+                  tree-pop
+                  state-pop
+
+                  ; The indent should now be equal
+                  if (not (= parse-indent (<term>-get-parse-indent tree-current)))
+                    println "Error on line " line ", column " column ": illegal indentation."
+                    println "[ " parse-indent ", " (<term>-get-parse-indent tree-current) "]"
+                    exit
+
+                  ; And we should be at a State.Begin..
+
+                  if (or (string-ellipses? buffer) (string-label? buffer))
+                    tree-unpop
+                    state-push 'command
+                  else:
+                  ; Add a group for this command
+                    tree-push
+                    <term>-set-parse-indent tree-current parse-indent
+                    state-push 'command
+
+                else:
+
+                  ; CASE 3 - Same indentation level
+
+                  ; println "CASE 3 - buffer:  '" buffer "'"
+
+                  if (or (string-ellipses? buffer) (string-label? buffer))
+                    ; undo what was done at the last line ending..
+                    tree-unpop
+                    state-push 'command
+                  else:
+                    if (not (null? (paren-balanced)))
+                      println "Error in code block starting on line " (<term>-get-line tree-current) ": unbalanced parenthesis.6"
+                      exit
+
+                    ; Add a group for this command
+                    tree-push
+                    <term>-set-parse-indent tree-current parse-indent
+                    state-push 'command
+
+            if (= (tree-sibling-count) 0)
+              <term>-set-parse-indent tree-current parse-indent
+            if (> is-quote 0)
+              ; String
+              if (= is-quote 2)
+                set buffer ""
+              tree-add (<value>-new 'string buffer line column)
+              set is-quote 0
+
+            elsif: (< is-quote 0)
+              ; Quoted symbol
+              if (= is-quote -2)
+                set buffer ""
+              tree-add (<value>-new 'quoted-symbol buffer line column)
+              set is-quote 0
+
+            elsif: (string-is-integer? buffer)
+              ; Integer
+              tree-add (<value>-new 'integer (gin-string->integer buffer) line column)
+
+            elsif: (string-is-rational? buffer)
+              ; Rational
+              tree-add (<value>-new 'rational (gin-string->rational buffer) line column)
+
+            elsif: (string-is-complex? buffer)
+              ; Complex
+              tree-add (<value>-new 'rational (gin-string->complex buffer) line column)
+
+            elsif: (string-boolean? buffer)
+              ; Boolean
+              tree-add (<value>-new 'boolean (string->boolean buffer) line column)
+
+            elsif: (string-colon-command? buffer)
+              ; (:something ... ) or :something
+              ; We have already added a group for the line and then a group for the
+              ; begin paren. which is right...
+
+              tree-add (<value>-new 'symbol (gin-string->symbol (string-rest buffer)) line column)
+              tree-push
+              tree-add (<value>-new 'symbol "String::append" line column)
+              state-push 'colon-quote
+              if (char-eol? c)
+                ; reuse eol for colon-quote
+                unget-char input c
+                set c ascii-space
+              else:
+                ; remove spaces between command and string
+                while (char=? ascii-space (peek-char input))
+                  get-char input
+              set buffer ""
+
+            elsif: (string-label? buffer)
+              ; Label
+              ; tree-add (<value>-new 'symbol (string->label buffer) line column)
+              tree-add (<value>-new 'label (string->label buffer) line column)
+
+            elsif: (string-is-symbol? buffer)
+              ; Symbol
+              tree-add (<value>-new 'symbol (gin-string->symbol buffer) line column)
+
+            elsif: (string-ellipses? buffer)
+              ; Ellipses
+              if (= (<term>-get-line tree-current) 0)
+                ; Files that begin with ellipses don't make any sense!
+                println "Error on line " line ", column " column ": illegal ellipses."
+                exit
+
+              noop
+
+            elsif: (char=? c ascii-left-parenthesis)
+              paren-add
+
+              tree-push
+              <term>-set-parse-indent tree-current parse-indent
+              state-push 'command
+
+            else:
+              ; Anything else is an error
+              println "Error on line " line ", column " column ": invalid symbol '" buffer "'."
+              exit
+
+            if (char-eol? c)
+              if (not (eq? (state-top) 'begin))
+                state-pop
+                tree-pop
+
+            if (char=? c ascii-right-parenthesis)
+              state-pop
+              tree-pop
+
+            set buffer ""
+
+      else:
+        set buffer (new-string buffer c)
+
+    if (not (eos-object? input))
+      if (char-eol? c)
+        set line (+ line 1)
+        set column 0
+        set parse-indent -1
+        set first-term-on-line true
+      else:
+        set column (+ column 1)
+
+    set p c
+
+println "Gingerbread: The Ginger compiler"
+
+define make-signature (function)
+  define required-keys (list) ; arg names
+  define required-types (list) ; arg types
+  define optional-keys (list) ; opt names
+  define optional-types (list) ; opt types
+  define optional-default-code (list)
+  define residual false
+  vector required-keys required-types optional-keys optional-default-code residual
+
+define range (i j)
+   if (= i j) (list)
+   else:
+     if (> i j)
+       pair i (range (- i 1) j)
+     else:
+       pair i (range (+ i 1) j)
+
+define compiler 'gambit
+define print-debug-tree false
+define compile false
+define objC false
+define fltk false
+define opengl false
+define cairo false
+define pango false
+
+define print-version ()
+  println ""
+  println banner
+  println ""
+  println "Copyright 2007-2009, James Dean Palmer"
+  println ""
+  println "Complete documentation for Ginger, including Frequently Asked Questions"
+  println "can be found at http://ging3r.org/"
+
+define process-arguments (args)
+  if (not (null? args))
+    if (string=? (first args) "--version")
+      print-version
+      exit
+    elsif: (string=? (first args) "--compile")
+      set compile true
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--objC")
+      set objC true
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--fltk")
+      set fltk true
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--opengl")
+      set opengl true
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--cairo")
+      set cairo true
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--pango")
+      set pango true
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--print-debug-tree")
+      set print-debug-tree true
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--gambit")
+      set compiler 'gambit
+      process-arguments (tail args)
+    elsif: (string=? (first args) "--chicken")
+      set compiler 'chicken
+      process-arguments (tail args)
+    elsif: (string=? (first args) "-o")
+      set output-c-file-name (first (tail args))
+      process-arguments (tail (tail args))
+    else:
+      set input-file-name (first args)
+      process-arguments (tail args)
+
+process-arguments (tail (argv))
+
+if (not input-file-name)
+  println "Error: no input file"
+  exit
+
+define comp (string-split input-file-name ascii-period)
+define base-file-name (string-join (reverse (tail (reverse comp))) ".")
+
+if (not output-c-file-name)
+  if objC
+    set output-c-file-name (string-append base-file-name ".m")
+  elsif: fltk
+    set output-c-file-name (string-append base-file-name ".cxx")
+  else:
+    set output-c-file-name (string-append base-file-name ".c")
+  set output-h-file-name (string-append base-file-name ".h")
+
+println "Inserting auto includes.."
+;(group
+;  (symbol "include")
+;  (string "inc.gin"))
+define std-auto-include-group (<group>-new 0 0)
+<group>-add-child tree-head std-auto-include-group
+<group>-add-child std-auto-include-group (<value>-new 'symbol "include" 0 0)
+<group>-add-child std-auto-include-group (<value>-new 'string "std.gin" 0 0)
+
+println "Gingerbread: Opening file.."
+
+; Read input file
+println "Parsing " input-file-name
+define input (open-input-file input-file-name)
+parse input
+close-input-stream input
+
+if print-debug-tree
+  print-term tree-head
+
+; We continuously expand includes until there are no more to be expanded..
+println "Expand includes.."
+while (include-expand tree-head)
+  noop
+
+; Open the file for output.
+set output-c (open-output-file output-c-file-name)
+set output-h (open-output-file output-h-file-name)
+
+println output-h "#include <stdio.h>"
+println output-h "#include <stdlib.h>"
+println output-h "#include <string.h>"
+println output-h "#define PROG 1"
+println output-h "#include \"ginger.h\""
+
+println output-c "#include \"" output-h-file-name "\""
+
+println "Flatten functions.."
+flatten-functions tree-head
+
+println "Discover local variables.."
+each i flat-functions
+  discover-local-variables i 'function
+
+discover-local-variables tree-head 'main
+
+; ; Print local variables
+; each i local-variables
+; ;  println "var: " (third i) " of type: " (cadr i)
+;   if (eq? (third i) false)
+;     println "FOUND ERROR"
+
+; Discover quoted symbols
+discover-quoted-symbols tree-head
+
+println "Writing quoted symbols.."
+println output-c "char* qsdef[] = {"
+define qdef-index 0
+each i quoted-symbols
+  if (= (string-length i) 1)
+    define n (char->integer (string-ref i 0))
+    println output-c "#define qsdef___" (name->c-name i) " " (number->string n)
+  else:
+    println output-c "\"" i "\","
+    println output-c "#define qsdef___" (name->c-name i) " " (number->string (+ qdef-index 2048))
+    ++ qdef-index
+println output-c "};"
+println output-c "int qsdef_count = " qdef-index ";"
+
+; Discover classes
+define cdef-count 0
+println "Writing class definitions.."
+each i local-variables
+  if (eq? (fifth i) 'class)
+    println output-c "#define cdef___" (name->c-name (third i)) " " (number->string cdef-count)
+    ++ cdef-count
+println output-c "GingerClassDefinition cdef[" (number->string cdef-count) "];"
+println output-c "int cdef_count = " (number->string cdef-count) ";"
+
+println output-c "GLOBALS"
+println output-c "BEGIN_CODE"
+
+println "Writing function definitions"
+;println output-c "calln_i = 0;"
+function-definition-expansion tree-head 'main
+each i flat-functions
+  function-definition-expansion i 'function
+
+;println output-c "goto main_entry;"
+println output-c "MID_CODE"
+
+println "Expand flattened functions"
+each i flat-functions
+  function-expansion i 'function
+
+println "Main..."
+println output-c "main_entry:"
+function-expansion tree-head 'main
+
+println output-c "END_CODE"
+
+println "Expand prototypes"
+function-prototype-expansion tree-head 'main
+each i flat-functions
+  function-prototype-expansion i 'function
+
+; Close the output-c file.
+close-output-stream output-c
+close-output-stream output-h
+
+; Gather information about the environment
+define GIN-C (getenv "GIN_C" "")
+define GIN-CFLAGS (getenv "GIN_CFLAGS" "")
+define GIN-LDFLAGS (getenv "GIN_LDFLAGS" "")
+define GIN-INCLUDE-PATH (getenv "GIN_INCLUDE_PATH" "")
+define GIN-IMPORT-PATH (getenv "GIN_IMPORT_PATH" "")
+
+; TODO - this should be a compiler flag
+; show all warnings
+set GIN-CFLAGS (string-append GIN-CFLAGS " -Wall ")
+;set GIN-LDFLAGS (string-append GIN-LDFLAGS " ")
+
+; TODO - this should be a compiler flag
+; add debugging symbols
+set GIN-CFLAGS (string-append GIN-CFLAGS " -g ")
+;set GIN-LDFLAGS (string-append GIN-LDFLAGS " ")
+
+set GIN-CFLAGS (string-append GIN-CFLAGS " -Ilib ")
+set GIN-LDFLAGS (string-append GIN-LDFLAGS " -Llib -lginger -lgmp ")
+
+; Add mode specific flags.
+if (cairo)
+  println "Using Cairo."
+  set GIN-CFLAGS (string-append GIN-CFLAGS " $(pkg-config --cflags cairo) ")
+  set GIN-LDFLAGS (string-append GIN-LDFLAGS " $(pkg-config --libs cairo) ")
+
+if (pango)
+  println "Using Pango."
+  set GIN-CFLAGS (string-append GIN-CFLAGS " $(pkg-config --cflags pangocairo) ")
+  set GIN-LDFLAGS (string-append GIN-LDFLAGS " $(pkg-config --libs pangocairo) ")
+
+if (and fltk (not opengl))
+  println "Using Fltk."
+  set GIN-CFLAGS (string-append GIN-CFLAGS " `fltk2-config --cxxflags` ")
+  set GIN-LDFLAGS (string-append GIN-LDFLAGS " `fltk2-config --ldflags` ")
+
+if (and fltk opengl)
+  println "Using Fltk with OpenGL."
+  set GIN-CFLAGS (string-append GIN-CFLAGS " `fltk2-config --cxxflags` ")
+  set GIN-LDFLAGS (string-append GIN-LDFLAGS " `fltk2-config --ldflags --use-gl` -lfltk2_glut -framework GLUT ")
+
+if (objC)
+  println "Using ObjC (and Cocoa)."
+  set GIN-LDFLAGS (string-append GIN-LDFLAGS " -framework Cocoa ")
+
+; Compile the program.
+if (eq? compile true)
+  println (string-append "Compiling with " GIN-C)
+  println GIN-CFLAGS
+  println GIN-LDFLAGS
+  if (and fltk (not opengl))
+    execute (string-append GIN-C " " GIN-CFLAGS " -c fltk-support.cxx")
+    execute (string-append GIN-C " " GIN-CFLAGS " -c " output-c-file-name)
+    execute (string-append GIN-C " " GIN-CFLAGS " -o " base-file-name " fltk-support.o " base-file-name ".o " GIN-LDFLAGS)
+  elsif: (and fltk opengl)
+    execute (string-append GIN-C " " GIN-CFLAGS " -c fltk-support.cxx")
+    execute (string-append GIN-C " " GIN-CFLAGS " -c gin-glwindow.cxx")
+    execute (string-append GIN-C " " GIN-CFLAGS " -c " output-c-file-name)
+    execute (string-append GIN-C " -o " base-file-name " fltk-support.o gin-glwindow.o " base-file-name ".o " GIN-LDFLAGS)
+  elsif: pango
+    execute (string-append GIN-C " " GIN-CFLAGS " -c pango-support.c")
+    execute (string-append GIN-C " " GIN-CFLAGS " -c " output-c-file-name)
+    execute (string-append GIN-C " " GIN-CFLAGS " -o " base-file-name " pango-support.o " base-file-name ".o " GIN-LDFLAGS)
+  else:
+    execute (string-append GIN-C " " GIN-CFLAGS " " output-c-file-name " -o " base-file-name " " GIN-LDFLAGS)
+    println (string-append GIN-C " " GIN-CFLAGS " " output-c-file-name " -o " base-file-name " " GIN-LDFLAGS)
+  println "Executable: " base-file-name
+
+println "Done."

@@ -1,0 +1,68 @@
+This is a quick guide to installing Ginger.
+
+1. Install the GNU development toolchain
+----------------------------------------
+
+Specifically, you will need gcc, make, uname and ar.  On Mac OS X 
+these are available once Xcode is installed.  On Windows you must 
+install either cygwin or msys.
+
+2. Install prerequisite libraries:  Cairo, Pango, and GMP
+-------------------------------------------------
+
+Install the libs and headers for each library as appropriate for 
+your OS and development platform.
+
+You must compile GMP as a 32 bit library.  This is accomplished with:
+
+export ABI=32
+./configure
+
+3. Install the Gambit scheme compiler
+-------------------------------------
+
+Get the latest version (4.2.x at this time) for your system.
+
+The Ginger->C compiler is currently not self hosting.  The older 
+Ginger->Scheme compiler is self hosting but needs Gambit to interpret
+the resulting scheme file.
+
+http://dynamo.iro.umontreal.ca/~gambit/wiki/index.php/Distributions
+
+4. Build and install Ginger
+---------------------------
+
+Ginger uses a very minimal configure script you should execute by
+typing:
+
+$ ./configure
+
+You can further set many of the installation defaults by editing
+Makefile.defaults.  And once configured, you can build libginger and ginc 
+by typing:
+
+$ make
+
+And finally you can install Ginger (make sure you are a priveleged user
+if necessary) by typing:
+
+$ make install
+
+5. The Post-Install
+-------------------
+
+Ginger supports several environmental variables you can use to tweak
+ginc compiles.  If these variables are not set, it will default to
+sane settings from the install.
+
+The following shows the bash syntax for setting the four available
+environmental variables.
+
+export GIN_C=g++
+export GIN_LDFLAGS=-L/sw/lib
+export GIN_INCLUDE_PATH=/usr/local/share/ginger
+export GIN_CFLAGS="-I/sw/include -I/usr/include/cairo -I/sw/include/cairo"
+
+You may also need to add /usr/local/bin to your path.
+
+export PATH:$PATH:/usr/local/bin

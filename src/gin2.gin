@@ -1,0 +1,249 @@
+; Copyright 2009 by James Dean Palmer and others.
+;
+; Ginger is free software.  You can redistribute and/or modify
+; this work under ther terms of the Apache License Version 2.0
+; or, at your option, Ginger's amended LGPL 2.1 license.  You may
+; not use this file except in compliance with one of these licenses.
+; You may also obtain a copy of the Apache License at
+;
+;   http://www.apache.org/licenses/LICENSE-2.0
+;
+; You may obtain a copy of Ginger's amended LGPL License at:
+;
+;   http://ging3r.org/licenses/LGPL-2.1.txt
+;
+; Unless required by applicable law or agreed to in writing, 
+; software distributed under the License is distributed on an 
+; "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+; either express or implied. See the License(s) for the specific 
+; language governing permissions and limitations.
+;
+; Please report all bugs and problems to "bugs@ging3r.org".
+
+define ginger-version "20090518"
+define banner (String::append "This is Ginger, version " ginger-version)
+
+define output-c false
+define output-h false
+define output-c-file-name false
+define output-h-file-name false
+define input-file-name false
+
+define print-debug-tree false
+define print-debug-tree-with-includes false
+define print-debug-tree-after-chunk-expand false
+
+define compile false ; aka tangle
+define literate false ; aka weave
+
+define allowed-compile-target (list 'c 'asm)
+define compile-target (first allowed-compile-target)
+
+define allowed-literate-target (list 'pdf 'tex 'html)
+define literate-target (first allowed-literate-target)
+
+define print-version ()
+  println ""
+  println banner
+  println ""
+  println "Copyright 2007-2009, James Dean Palmer"
+  println ""
+  println "Complete documentation for Ginger, including Frequently Asked Questions"
+  println "can be found at http://ging3r.org/"
+
+define process-arguments (args)
+  if (not (Null? args))
+    if (String::eq? (first args) "--version")
+      print-version
+      exit
+    elsif: (String::eq? (first args) "--compile")
+      set compile true
+      process-arguments (tail args)
+    elsif: (String::eq? (first args) "--literate")
+      set literate true
+      process-arguments (tail args)
+    elsif: (String::eq? (String::substring (first args) 0 8) "--target")
+
+      define target null
+      define tmp (String::split (first args) ascii-equals)
+      if (= (length tmp) 2)
+        set target (String->Symbol (second tmp))
+      ; check if user provided a target
+      if (or (Null? target) (eq? false target))
+        println "target not supplied"
+        exit
+      
+      if compile
+        ; check for valid target
+        if (not (contains? allowed-compile-target target))
+          println "target " target " is not supported"
+          exit
+        set compile-target target
+      elsif: literate
+        ; check for valid target
+        if (not (contains? allowed-literate-target target))
+          println "target " target " is not supported"
+          exit
+        set literate-target target
+        
+      process-arguments (tail args)
+
+    elsif: (String::eq? (first args) "--print-debug-tree")
+      set print-debug-tree true
+      process-arguments (tail args)
+    elsif: (String::eq? (first args) "--print-debug-tree-with-includes")
+      set print-debug-tree-with-includes true
+      process-arguments (tail args)
+    elsif: (String::eq? (first args) "--print-debug-tree-after-chunk-expand")
+      set print-debug-tree-after-chunk-expand true
+      process-arguments (tail args)
+    elsif: (String::eq? (first args) "-o")
+      set output-c-file-name (first (tail args))
+      process-arguments (tail (tail args))
+    else:
+      set input-file-name (first args)
+      process-arguments (tail args)
+
+process-arguments (tail (command-line))
+
+if (not input-file-name)
+  println "Error: no input file"
+  exit
+
+println "The Literate Gingerbread Man: Opening file.."
+
+define tree-head (<group>::make 0 0)
+
+println "Inserting auto includes.."
+define std-include (append (<value>::make 'symbol 'include 0 0) (<value>::make 'string "std.gin" 0 0))
+set-first tree-head std-include
+set-tail tree-head (<group>::make 0 0)
+
+; Read input file
+println "Reading " input-file-name
+define input (open-input-file input-file-name)
+read input (tail tree-head)
+close-input-stream input
+
+if print-debug-tree
+  println tree-head
+
+;println "Expand includes.."
+;expand-includes tree-head
+
+if print-debug-tree-with-includes
+  println tree-head
+
+if literate
+  println "Literate (weave) => " literate-target
+  ;println tree-head
+  
+  include "literate.gin"
+  Literate::weave-pdf (base-name input-file-name) tree-head
+
+if compile
+  define expand-chunks (tree)
+    define chunks (Dict::make)
+
+    define chunk-name (node)
+      object->string (first (tail node))
+
+    define chunk? (node)
+      ; TODO - Don't use <term> functions
+      and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'chunk)
+    
+    define discover-chunks (tree)
+      ; find chunks and add them to chunk dict based on names
+      if (Null? tree)
+        null
+      elsif: (chunk? tree)
+        println "Discovered " (chunk-name tree)
+        define chunk-def (first (tail (tail tree)))
+        ;println "  def => " chunk-def
+        Dict::set chunks (chunk-name tree) chunk-def
+      else:
+        ; TODO - make this iterative
+        if (list? (first tree))
+          discover-chunks (first tree)
+        discover-chunks (tail tree)
+        
+        
+    println "Discovering chunks.."
+    discover-chunks tree
+    ;print-dictionary chunks
+
+    define expand-chunk-calls (tree)
+      define chunk-call? (node)
+        if (and (Cons? node) (Cons? (first node)) (Symbol? (first (first node))))
+          eq? (first (first node)) '$
+        ;and (Symbol? (first node)) (eq? (first node) '$)
+      
+      define macro-key (node)
+        String::append 
+        .. "(String::append " 
+        .. (object->string (first (tail (first node)))) 
+        .. " )"        
+        ;String::append "(String::append " (object->string (first (tail node))) " )"
+      
+      define expand-chunk-call (node)
+        println "Expanding chunk: " (macro-key node)
+        
+        define macro-def (Dict::get chunks (macro-key node))
+
+        if (not macro-def)
+          ;println "couldn't find chunck " (macro-key node)
+          println "Error on line " (Dict::get (properties node) 'line) ": couldn't find chunk " (macro-key node) "."
+          exit
+
+        set macro-def (List::duplicate macro-def)
+        define old-tail (tail node) ; (tail (last-cons node))
+        set-first node (first  macro-def)
+        define z (last-cons macro-def)
+        set-tail z old-tail
+        set-tail node (tail macro-def)
+        
+        expand-chunk-calls node ; macro-def
+        
+      if (Null? tree)
+        null
+      else:
+        if (chunk-call? tree)
+          ;println "Found chunk call"
+          ;println tree
+          expand-chunk-call tree
+        ;else:
+        if (list? (first tree)) 
+          expand-chunk-calls (first tree)
+        expand-chunk-calls (tail tree)
+
+    println "Expanding chunks.."
+    expand-chunk-calls (Dict::get chunks "*")
+
+    ; return the new tree
+    Dict::get chunks "*"
+
+  set tree-head (expand-chunks tree-head)
+
+  if print-debug-tree-after-chunk-expand
+    println "Tree after expanding chunks: "
+    println tree-head
+  
+  define base-file-name (base-name input-file-name)
+
+  if (not output-c-file-name)
+    set output-c-file-name (String::append base-file-name ".c")
+    set output-h-file-name (String::append base-file-name ".h")
+
+  ; Open the file for output.
+  set output-c (open-output-file output-c-file-name)
+  set output-h (open-output-file output-h-file-name)
+
+  println "Writing " output-h-file-name
+  println output-h "#include <stdio.h>"
+  println output-h "#include <stdlib.h>"
+  println output-h "#include <string.h>"
+  println output-h "#define PROG 1"
+  println output-h "#include \"ginger.h\""
+
+  println "Writing " output-c-file-name
+  println output-c "#include \"" output-h-file-name "\""

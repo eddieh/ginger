@@ -1,0 +1,31 @@
+include "turtle.gin"
+
+define lt (a)
+  turn (* -1.0 a)
+
+define polygon (n)
+  repeat n
+    forward 1
+    lt (/ 360 n)
+
+define sierpinski (level)
+  if (= level 0)
+    polygon 3
+  else:
+    repeat 3
+      scale 0.5
+      sierpinski (- level 1)
+      scale 2
+      move 1
+      lt (/ 360 3)
+
+; Make it look pretty and centered..
+move -200
+turn 90
+move 150
+turn -90
+scale 400
+
+sierpinski 5
+
+save-as-png "sierpinski.png"

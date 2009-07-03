@@ -1,0 +1,334 @@
+; Copyright 2009 by James Dean Palmer and others.
+;
+; Ginger is free software.  You can redistribute and/or modify
+; this work under ther terms of the Apache License Version 2.0
+; or, at your option, Ginger's amended LGPL 2.1 license.  You may
+; not use this file except in compliance with one of these licenses.
+; You may also obtain a copy of the Apache License at
+;
+;   http://www.apache.org/licenses/LICENSE-2.0
+;
+; You may obtain a copy of Ginger's amended LGPL License at:
+;
+;   http://ging3r.org/licenses/LGPL-2.1.txt
+;
+; Unless required by applicable law or agreed to in writing, 
+; software distributed under the License is distributed on an 
+; "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+; either express or implied. See the License(s) for the specific 
+; language governing permissions and limitations.
+;
+; Please report all bugs and problems to "bugs@ging3r.org".
+
+include "pdf3.gin"
+
+define SYMBOL-FONT ""
+define DOC-FONT ""
+define CODE-FONT ""
+
+define CHUNK-LT "&#9001;" ; "&#10216" ; &lang; &#9001;
+define CHUNK-GT "&#9002;" ; "&#10217" ; &rang; &#9002
+
+define lt ()
+  String::append "<span font_desc=\"Apple Symbols Bold 14\">" CHUNK-LT "</span>"
+define gt ()
+  String::append "<span font_desc=\"Apple Symbols Bold 14\">" CHUNK-GT "</span>"
+
+define Literate::weave-pdf (name tree)
+  println "Weaving PDF named: " name
+  
+  define document (PDF::make-document (String::append name ".pdf"))
+  
+  define weave-tree (tree)
+    define section-count 0
+    
+    define chunk-count 0
+    define chunk-dict (Dict::make)
+    
+    define cite-count 0
+    define biliography-dict (Dict::make)
+
+    define title? (x)
+      and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'title)
+
+    define section? (x)
+      and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'section)
+
+    define doc? (x)
+      and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'doc)
+
+    define Lit::chunk? (x)
+      and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'chunk)
+
+    define code? (node)
+      and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'code)
+
+    define image? (node)
+      and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'image)
+
+    define title (x)
+      first (tail (first (tail x)))
+      
+    define section (x)
+      first (tail (first (tail x)))
+     
+    define doc (x)
+      define string-append? (node)
+        and (Symbol? node) (eq? 'String::append node)
+
+      define math? (node)
+        and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'math)
+
+      define cite? (node)
+        and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'cite)
+      
+      define fmt-doc (x)
+        define str ""
+        define len (String::length x)
+        define i 0
+        while (< i len)
+          
+          ; double newlines break paragraphs in the source, but
+          ;  we only need one to break a paragraph when laying text
+          if (and (Char::eq? (String::get-Char x i) ascii-newline)
+          .. (Char::eq? (String::get-Char x (+ i 1)) ascii-newline))
+            set str (String::append str (Char->String ascii-newline))
+            ++ i
+          
+          ; turn single newlines into spaces so long as the previous
+          ;  character was not a space
+          elsif: (Char::eq? (String::get-Char x i) ascii-newline)
+            if (not (Char::eq? (String::get-Char x (- i 1)) ascii-space))
+              set str (String::append str (Char->String ascii-space))
+          
+          ; eat double spaces 
+          elsif: (Char::eq? (String::get-Char x i) ascii-space)
+            if (not (Char::eq? (String::get-Char x (- i 1)) ascii-space))
+              set str (String::append str (Char->String ascii-space))
+          
+          else:
+            set str (String::append str (Char->String (String::get-Char x i)))
+          
+          ++ i
+        str
+     
+      define nofmt (x)
+        ; used for debugging
+        x
+
+      define nocode (x)
+        ; used for debugging
+        object->string x
+        
+      define nomath (x)
+        ; used for debugging
+        object->string x
+
+      define cite (x)
+        define key (first (tail (first (tail x))))
+        define cite-val (Dict::get biliography-dict key)
+        if (eq? cite-val false)
+          ++ cite-count
+          Dict::set biliography-dict key cite-count
+          set cite-val cite-count
+        String::append "[" (Fixnum->String cite-val) "]"
+
+      define str ""
+      define tmp ""
+      each part (first (tail x))
+        if (string-append? part)
+          noop
+        elsif: (String? part)
+          set tmp (fmt-doc part)
+        elsif: (code? part)
+          set tmp (code part)
+        elsif: (math? part)
+          set tmp (math part)
+        elsif: (cite? part)
+          set tmp (cite part)
+        else:
+          println "Error unsupported " part " in :doc"
+          exit
+        set str (String::append str tmp)
+      str
+     
+    define chunk (x)
+      define name (first (tail node))
+      if (not (eq? name '*))
+        ; get the display name
+        set name (first (tail (first (tail name))))
+      
+      define chunk-num (Dict::get chunk-dict name)
+      if (eq? chunk-num  false)
+        println "Error chunk not found!"
+        exit
+      
+      define def (first (tail (tail x)))
+
+      define fmt-chunk-calls (tree)
+
+        define fmt-chunk-call? (node)
+          if (and (Cons? node) (Cons? (first node)) (Symbol? (first (first node))))
+            eq? (first (first node)) '$
+
+        define fmt-chunk-call (node)
+          define name (object->string (first (tail (first (tail (first node))))))
+          define chunk-call-num (Dict::get chunk-dict name)
+          define fmt-chunk-name (String::append 
+          .. (lt)
+          .. "<span font_desc=\"Serif 12\">"
+          .. name
+          .. " " 
+          .. (Fixnum->String chunk-call-num)
+          .. "</span>"
+          .. (gt)
+          ..)
+          define formatted-chunk-call (list (list fmt-chunk-name))
+          define old-parse-indent (Dict::get (properties (first node)) 'parse-indent)
+          set-properties (first formatted-chunk-call) (Dict::make)
+          Dict::set (properties (first formatted-chunk-call)) 'parse-indent old-parse-indent
+          
+          define old-tail (tail node)
+          set-first node (first formatted-chunk-call)
+          define z (last-cons formatted-chunk-call)
+          set-tail z old-tail
+          set-tail node (tail formatted-chunk-call)
+          
+          fmt-chunk-calls node
+
+        if (Null? tree)          
+          null
+        else:
+          if (fmt-chunk-call? tree)
+            fmt-chunk-call tree
+          if (list? (first tree))
+            fmt-chunk-calls (first tree)
+          fmt-chunk-calls (tail tree)
+
+      fmt-chunk-calls def
+
+      set def (object->pretty-string def)
+
+      String::append
+      .. (lt)
+      .. (object->string name)
+      .. " "
+      .. (Fixnum->String chunk-num)
+      .. (gt) " &#8801;"
+      .. "<span font_desc=\"Inconsolata 12\">"
+      .. def
+      .. "</span>"
+    
+    define escape (x)
+      define str ""
+      define components (String::split x ascii-less-than)
+      define len (length components)
+      if (= len 1)
+        set str x
+      else:
+        define i 1
+        while (< i len)
+          set str (String::append str (nth components i) "&lt;")
+          ++ i
+        if (= i len)
+          set str (String::append str (nth components i))
+      str
+
+    define code (x)
+      define code-str (first (tail (first (tail x))))
+      String::append 
+      .. "<span font_desc=\"Inconsolata 12\">" 
+      .. (escape code-str)
+      .. "</span>"
+    
+    define image (x)
+      second x
+
+    define fmt-math (x)
+      define str ""
+      define len (String::length x)
+      define i 0
+      while (< i len)
+        if (Char::eq? (String::get-Char x i) ascii-caret)
+          set str (String::append str "<sup><i>" (Char->String (String::get-Char x (+ i 1))) "</i></sup>")
+          ++ i
+        else:
+          if (and (Char::alphabetic? (String::get-Char x i)) (not (Char::alphabetic? (String::get-Char x (+ i 1)))))
+            set str (String::append str "<i>" (Char->String (String::get-Char x i)) "</i>")
+          else:
+            set str (String::append str (Char->String (String::get-Char x i)))
+        ++ i
+      str
+
+    define math (x)
+      define math-str (first (tail (first (tail x))))
+      String::append (fmt-math math-str)
+     
+    define bibliography (x)
+      println "bibliography => " x
+
+    ; discover cites
+    ; TODO - read bib file
+    
+    ; discover chunks
+    each node tree
+      if (Lit::chunk? node)
+        define name (first (tail node))
+        if (not (eq? name '*))
+          ; get the display name
+          set name (first (tail (first (tail name))))
+         
+        if (eq? (Dict::get chunk-dict name) false)
+          ++ chunk-count
+          Dict::set chunk-dict name chunk-count
+    
+    each node tree
+      if (title? node)
+        define title-p (PDF::make-paragraph (title node) "Bold 18")
+        Dict::set title-p 'alignment 'center
+        PDF::add-paragraph document title-p
+      
+      elsif: (section? node)
+        ++ section-count
+        define section-str (String::append (Fixnum->String section-count) "&#46;  " (section node))
+        define section-p (PDF::make-paragraph section-str "Bold 12")
+        PDF::add-paragraph document section-p
+
+        ; Add space
+        Dict::set document 'cursor-y (+ (Dict::get document 'cursor-y) 4)
+      
+      elsif: (doc? node)
+        define doc-str (doc node)
+        define doc-p (PDF::make-paragraph doc-str)
+        Dict::set doc-p 'indent 14
+        PDF::add-paragraph document doc-p
+        
+        ; Add space
+        Dict::set document 'cursor-y (+ (Dict::get document 'cursor-y) 12)
+
+      elsif: (Lit::chunk? node)
+        define chunk-str (chunk node)
+        define chunk-p (PDF::make-paragraph chunk-str)
+        PDF::add-paragraph document chunk-p
+      
+      elsif: (code? node)
+        define code-str (code node)
+        define code-p (PDF::make-paragraph code-str)
+        PDF::add-paragraph document code-p
+
+        ; Add space
+        Dict::set document 'cursor-y (+ (Dict::get document 'cursor-y) 12)
+      
+      elsif: (image? node)
+        define image-filename (image node)
+        PDF::add-image document image-filename
+
+      else:
+        ; include & bibliography are skipped
+        println "*** Warning: skipping stuff***"
+        println node
+
+  weave-tree tree
+
+  PDF::close document
+

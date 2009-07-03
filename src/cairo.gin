@@ -1,0 +1,209 @@
+; Copyright 2009 by James Dean Palmer and others.
+;
+; Ginger is free software.  You can redistribute and/or modify
+; this work under ther terms of the Apache License Version 2.0
+; or, at your option, Ginger's amended LGPL 2.1 license.  You may
+; not use this file except in compliance with one of these licenses.
+; You may also obtain a copy of the Apache License at
+;
+;   http://www.apache.org/licenses/LICENSE-2.0
+;
+; You may obtain a copy of Ginger's amended LGPL License at:
+;
+;   http://ging3r.org/licenses/LGPL-2.1.txt
+;
+; Unless required by applicable law or agreed to in writing, 
+; software distributed under the License is distributed on an 
+; "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+; either express or implied. See the License(s) for the specific 
+; language governing permissions and limitations.
+;
+; Please report all bugs and problems to "bugs@ging3r.org".
+
+inline-c-header "#include <cairo/cairo.h>"
+; inline-c-header "#include <cairo-quartz.h>"
+inline-c-header "#include <cairo/cairo-pdf.h>"
+
+define! Cairo-Surface (Type::make "Cairo-Surface")
+
+; The cairo drawing context
+define cairo-create (target)
+  inline-c "GIN_NEW_NIM(" result ");"
+  inline-c "GIN_NIM_SET_FOREIGN(" result ", \
+    (cairo_t *)cairo_create((cairo_surface_t *)GIN_NIM_GET_FOREIGN(" target ")) \
+  );"
+  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type;"
+
+define cairo-destroy (cr) 
+  inline-c "cairo_destroy(GIN_NIM_GET_FOREIGN(" cr "));"
+
+;define cairo-image-surface-create (format width height)
+; ignore the format for now, ARGB32 should be good enough.
+define cairo-image-surface-create (width height)
+  inline-c "GIN_NEW_NIM(" result ");"
+  inline-c "GIN_NIM_SET_FOREIGN(" result ", \
+    (cairo_surface_t *)cairo_image_surface_create(CAIRO_FORMAT_ARGB32, \
+      GIN_IM_TO_INT(" width "), \
+      GIN_IM_TO_INT(" height ") \
+      ));"
+  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type;"
+
+;define cairo-[PDF|PNG|PS|SVG]surface-create
+;  noop
+
+define cairo-pdf-surface-create (filename width height)
+  inline-c "GIN_NEW_NIM(" result ");"
+  inline-c "GIN_NIM_SET_FOREIGN(" result ", \
+    (cairo_surface_t *)cairo_pdf_surface_create(GIN_STR_VALUE(" filename "), \
+      (double)GIN_IM_TO_INT(" width "), \
+      (double)GIN_IM_TO_INT(" height ") \
+      ));"
+  ; TODO - make the next line a function
+  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type;"
+
+define cairo-image-surface-create-from-png (filename)
+  inline-c "GIN_NEW_NIM(" result ");"
+  inline-c "GIN_NIM_SET_FOREIGN(" result ", \
+    (cairo_surface_t *)cairo_image_surface_create_from_png(GIN_STR_VALUE(" filename ")));"
+  ; TODO - make the next line a function
+  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type;"
+
+define cairo-win32-surface-create (hdc)
+  noop
+
+;define cairo-quartz-surface-create (width height)
+;  inline-c "GIN_NEW_NIM(" result ");"
+;  inline-c "GIN_NIM_SET_FOREIGN(" result ", \
+;    (cairo_surface_t *)cairo_quartz_surface_create(CAIRO_FORMAT_ARGB32, \
+;      GIN_IM_TO_INT(" width "), \
+;      GIN_IM_TO_INT(" height ") \
+;      ));"
+
+define cairo-xlib-surface-create (dpy drawable visual width height)
+  noop
+
+define cairo-surface-destroy (surface)
+  inline-c "cairo_surface_destroy(GIN_NIM_GET_FOREIGN(" surface "));"
+
+define <cairo>-image-surface-get-width (surface)
+  inline-c result "= GIN_IM_FROM_INT(cairo_image_surface_get_width(GIN_NIM_GET_FOREIGN(" surface ")));"
+
+define <cairo>-image-surface-get-height (surface)
+  inline-c result "= GIN_IM_FROM_INT(cairo_image_surface_get_height(GIN_NIM_GET_FOREIGN(" surface ")));"
+
+define <cairo>-image-surface-fallback-resolution (surface x-pixels-per-inch y-pixels-per-inch)
+  inline-c "cairo_surface_set_fallback_resolution(GIN_NIM_GET_FOREIGN(" surface "), \
+    (double)GIN_NIM_GET_FLONUM(" x-pixels-per-inch "), \
+    (double)GIN_NIM_GET_FLONUM(" y-pixels-per-inch ") \
+    );"
+
+define <cairo>-user-to-device-x (cr dx)
+  define hack 0
+  inline-c "cairo_user_to_device((cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    (double *)&(" hack "), \
+    NULL \
+  );"
+  ;inline-c "GIN_NEW_FLONUM(" result ", ((double)" hack "));"
+
+define <cairo>-user-to-device-y (cr dy)
+  define hack 0
+  inline-c "cairo_user_to_device((cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    NULL, \
+    (double *)&(" hack ") \
+  );"
+  ;inline-c "GIN_NEW_FLONUM(" result ", ((double)" hack "));"
+
+define <cairo>-translate (cr tx ty)
+  inline-c "cairo_translate( \
+    (cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    GIN_NIM_GET_FLONUM(" tx "), \
+    GIN_NIM_GET_FLONUM(" ty ") \
+    );"
+
+define <cairo>-scale (cr sx sy)
+  inline-c "cairo_scale( \
+    (cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    GIN_NIM_GET_FLONUM(" sx "), \
+    GIN_NIM_GET_FLONUM(" sy ") \
+    );"
+
+define cairo-use-cartesian-coordinate-system (cr width height)
+  ; by default cairo use a flipped coordinate system
+  ; this function will make cairo use a standard cartesian coordinate system
+  <cairo>-translate cr (/ width 2) (/ height 2)  ; move origin to center of surface
+  <cairo>-scale cr 1.0 -1.0 ; make positive y-values advance up (rather than down)
+
+define <cairo>-set-line-width (cr width)
+  inline-c "cairo_set_line_width( \
+    (cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    GIN_NIM_GET_FLONUM(" width ") \
+    );"
+
+define <cairo>-set-source-rgb (cr red green blue)
+  inline-c "cairo_set_source_rgb( \
+    (cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    GIN_NIM_GET_FLONUM(" red "), \
+    GIN_NIM_GET_FLONUM(" green "), \
+    GIN_NIM_GET_FLONUM(" blue ") \
+    );"
+
+define <cairo>-set-source-surface (cr surface x y)
+  inline-c "cairo_set_source_surface( \
+    (cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    (cairo_surface_t *)GIN_NIM_GET_FOREIGN(" surface "), \
+    GIN_NIM_GET_FLONUM(" x "), \
+    GIN_NIM_GET_FLONUM(" y ") \
+    );"
+
+define <cairo>-rectangle (cr x y width height)
+  inline-c "cairo_rectangle( \
+    (cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    GIN_NIM_GET_FLONUM(" x "), \
+    GIN_NIM_GET_FLONUM(" y "), \
+    GIN_NIM_GET_FLONUM(" width "), \
+    GIN_NIM_GET_FLONUM(" height ") \
+    );"
+
+define <cairo>-stroke (cr)
+  inline-c "cairo_stroke((cairo_t *)GIN_NIM_GET_FOREIGN(" cr "));"
+
+define <cairo>-surface-write-to-png (surface filename)
+  inline-c "cairo_surface_write_to_png( \
+    (cairo_surface_t *)GIN_NIM_GET_FOREIGN(" surface "), \
+    GIN_STR_VALUE(" filename ") \
+    );"
+
+define <cairo>-paint (cr)
+  inline-c "cairo_paint((cairo_t *)GIN_NIM_GET_FOREIGN(" cr "));"
+
+define <cairo>-move-to (cr x y)
+  inline-c "cairo_move_to( \
+    (cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    GIN_NIM_GET_FLONUM(" x "), \
+    GIN_NIM_GET_FLONUM(" y ") \
+    );"
+
+define <cairo>-line-to (cr x y)
+  inline-c "cairo_line_to( \
+    (cairo_t *)GIN_NIM_GET_FOREIGN(" cr "), \
+    GIN_NIM_GET_FLONUM(" x "), \
+    GIN_NIM_GET_FLONUM(" y ") \
+    );"
+
+define <cairo>-show-page (cr)
+  inline-c "cairo_show_page(GIN_NIM_GET_FOREIGN(" cr "));"
+
+define Cairo::set-black (cr)
+  <cairo>-set-source-rgb cr 0.0 0.0 0.0
+
+define Cairo::set-white (cr)
+  <cairo>-set-source-rgb cr 1.0 1.0 1.0
+
+define Cairo::set-red (cr)
+  <cairo>-set-source-rgb cr 1.0 0.0 0.0
+
+define Cairo::set-green (cr)
+  <cairo>-set-source-rgb cr 0.0 1.0 0.0
+
+define Cairo::set-blue (cr)
+  <cairo>-set-source-rgb cr 0.0 0.0 1.0

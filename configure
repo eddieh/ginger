@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "PLATFORM=$(uname)" > Makefile.platform
+echo "ARCH=$(uname -p)" >> Makefile.platform
+echo "PLATFORM_RELEASE=$(uname -r)"  >> Makefile.platform
+echo "PLATFORM_VERSION=$(uname -v)" >> Makefile.platform

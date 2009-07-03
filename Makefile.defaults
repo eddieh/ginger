@@ -1,0 +1,23 @@
+# Makefile.defaults -*- Makefile -*-
+
+DESTDIR =
+ifeq ($(PLATFORM),mingw-msys)
+PREFIX ?= c:/devtools
+else
+ifeq ($(PLATFORM),mingw)
+PREFIX ?= c:/devtools
+else
+PREFIX ?= /usr/local
+endif
+endif
+
+BINDIR = $(PREFIX)/bin
+LIBDIR = $(PREFIX)/lib
+INCLUDEDIR = $(PREFIX)/include
+SHAREDIR = $(PREFIX)/share
+GINGERDIR = $(SHAREDIR)/ginger
+
+C_COMPILER ?= gcc
+CPP_COMPILER ?= gcc
+LIBRARIAN ?= ar
+LINKER ?= $(C_COMPILER)

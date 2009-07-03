@@ -1,0 +1,35 @@
+; Test the garbage collector on many objects. Also serves as an
+; foreign object creation example.
+
+; Foreign types need to be added to the type table by using the
+; Type::make function. If the foreign types require a special clean up
+; procedure it must be set.
+define! GCTestType (Type::make "GCTestType")
+inline-c "((GingerType*)(" GCTestType "))->c_unmake = 42;"
+
+;define dummy ()
+;  inline-c "void _unmake(GIN_OBJ x) { printf(\"UNMAKING\\n\"); }"
+
+; The foreign types factory method must set the type after allocating
+; the object.
+define make-gc-test-type ()
+  define t (Type::index GCTestType)
+  inline-c "GIN_NEW_NIM_WITH_CLEANUP(" result ");"
+  inline-c "GIN_NIM_GET_TYPE(" result ") = " t ";"
+
+; Make lots of objects so that we can test the garbage collector.
+define mock-function (n)
+  define tmp false
+  define obj-count 0
+
+  repeat n
+    ; Do something to give the garbage collector a chance to collect.
+    ++ obj-count
+    println obj-count
+    
+    ; Make the objects.
+    set tmp (make-gc-test-type)
+
+println "Before making lots of objects."
+mock-function 100000
+println "After making lots of objects."

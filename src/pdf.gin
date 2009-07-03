@@ -1,0 +1,306 @@
+; Copyright 2009 by James Dean Palmer and others.
+;
+; Ginger is free software.  You can redistribute and/or modify
+; this work under ther terms of the Apache License Version 2.0
+; or, at your option, Ginger's amended LGPL 2.1 license.  You may
+; not use this file except in compliance with one of these licenses.
+; You may also obtain a copy of the Apache License at
+;
+;   http://www.apache.org/licenses/LICENSE-2.0
+;
+; You may obtain a copy of Ginger's amended LGPL License at:
+;
+;   http://ging3r.org/licenses/LGPL-2.1.txt
+;
+; Unless required by applicable law or agreed to in writing, 
+; software distributed under the License is distributed on an 
+; "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+; either express or implied. See the License(s) for the specific 
+; language governing permissions and limitations.
+;
+; Please report all bugs and problems to "bugs@ging3r.org".
+
+include "pango.gin"
+
+define PDF::make-document (filename (paper-size 'us-letter))
+  ; default paper size is 'us-letter
+  ; for now just ignore it, since that's the only paper size
+  ; TODO - add more paper sizes
+  define make-us-letter ()
+    define doc (Dict::make)
+    Dict::set doc 'paper-size 'us-letter
+    Dict::set doc 'width 612
+    Dict::set doc 'height 792
+    Dict::set doc 'top-margin 72
+    Dict::set doc 'left-margin 72
+    Dict::set doc 'right-margin 72
+    Dict::set doc 'bottom-margin 72
+    Dict::set doc 'cursor-x (Dict::get doc 'left-margin)
+    Dict::set doc 'cursor-y (Dict::get doc 'top-margin)
+    Dict::set doc 'cairo-surface (cairo-pdf-surface-create filename (Dict::get doc 'width) (Dict::get doc 'height))
+    Dict::set doc 'cairo-context null
+    doc
+  make-us-letter
+
+define PDF::make-font ((family 'serif) (weight 'normal) (size 12))
+  define family->pango (f)
+    Symbol->String f
+  define weight->pango (w)
+    if (eq? w 'normal) PANGO-WEIGHT-NORMAL
+    else: PANGO-WEIGHT-NORMAL
+  define size->pango (s)
+    * PANGO-SCALE s
+  ; should use dict becuase we need to store the color
+  define font (Pango::font-description-new)
+  Pango::font-description-set-family font (family->pango family)
+  Pango::font-description-set-weight font (weight->pango weight)
+  Pango::font-description-set-absolute-size font (size->pango size)
+  font
+
+define PDF::make-font-from-string (str)
+  define font (Pango::font-description-from-string (str))
+  font
+
+define PDF::make-paragraph (text (font null))
+  define paragraph (Dict::make)
+  if (Null? font)
+    set font (PDF::make-font)
+  elsif: (String? font)
+    set font (PDF::make-font-from-string font)
+  Dict::set paragraph 'font font
+  Dict::set paragraph 'text text
+  paragraph
+
+define printable-boundry-bottom (document)
+  ; TODO - this is a bad name
+  - (Dict::get document 'height) (Dict::get document 'bottom-margin)
+
+define printable-width (document)
+  - (Dict::get document 'width) (+ (Dict::get document 'left-margin) (Dict::get document 'right-margin))
+
+define PDF::add-paragraph (document paragraph)
+  define cursor-x (Dict::get document 'cursor-x)
+  define cursor-y (Dict::get document 'cursor-y)
+  define cr (Dict::get document 'cairo-context)
+  if (Null? cr)
+    set cr (cairo-create (Dict::get document 'cairo-surface))
+    Dict::set document 'cairo-context cr
+
+  define make-layout (paragraph)
+    define layout (Pango::cairo-create-layout cr)
+    
+    ; Set the width to which lines are wrapped
+    define doc-width ()
+      * PANGO-SCALE (Dict::get document 'width)
+    define doc-left-margin ()
+      * PANGO-SCALE (Dict::get document 'left-margin)
+    define doc-right-margin ()
+      * PANGO-SCALE (Dict::get document 'right-margin)
+    define layout-width (- (doc-width) (+ (doc-left-margin) (doc-right-margin)))
+    Pango::layout-set-width layout layout-width
+    
+    ; Set the font
+    Pango::layout-set-font-description layout (Dict::get paragraph 'font)
+    
+    ; Set the text
+    ;Pango::layout-set-text layout (Dict::get paragraph 'text)
+    Pango::layout-set-markup layout (Dict::get paragraph 'text)
+    
+    ; Set the indention of the first line
+    ; Pargraphs that are broken will have the 'follow-on flag
+    ; and should not be indented
+    if (and (Dict::contains? paragraph 'indent) (not (Dict::contains? paragraph 'follow-on)))
+      Pango::layout-set-indent layout (* (Dict::get paragraph 'indent) PANGO-SCALE)
+
+    ; Set the about of space between lines
+    if (Dict::contains? paragraph 'spacing)
+      Pango::layout-set-spacing layout (* (Dict::get paragraph 'spacing) PANGO-SCALE)
+
+    ; Set the justify (should each line be stretched to fill the width of the layout?)
+    if (Dict::contains? paragraph 'justify)
+      Pango::layout-set-justify layout (Dict::get paragraph 'justify)
+    
+    ; Set the alignment
+    if (Dict::contains? paragraph 'alignment)
+      define alignment->pango (alignment)
+        if (eq? alignment 'left) PANGO-ALIGN-LEFT
+        elsif: (eq? alignment 'center) PANGO-ALIGN-CENTER
+        elsif: (eq? alignment 'right) PANGO-ALIGN-RIGHT
+        else: PANGO-ALIGN-LEFT
+      Pango::layout-set-alignment layout (alignment->pango (Dict::get paragraph 'alignment))
+
+    layout
+  
+  define layout (make-layout paragraph)
+
+  define new-cursor-y ()
+    + cursor-y (/ (Pango::layout-get-extents-logical-height layout) PANGO-SCALE)
+
+  define printable-height ()
+    - (Dict::get document 'height) (+ (Dict::get document 'top-margin) (Dict::get document 'bottom-margin))
+
+  define new-page () 
+    <cairo>-show-page cr
+    
+    ; We need a new context
+    cairo-destroy cr
+    set cr null
+    Dict::set document 'cairo-context cr
+
+    ; Reset the cursor for the new page
+    set cursor-y (Dict::get document 'top-margin)
+    Dict::set document 'cursor-y cursor-y    
+  
+  define relative-position-of-break (break)
+    define y (Pango::layout-index-to-y layout break)
+    define rel (+ cursor-y (/ y PANGO-SCALE))
+    rel
+
+  define last-logical-break-not-exceeding-printable-boundry-bottom ()
+    define logical-breaks ()
+      ; find all the logical breaks
+      define breaks (list)
+      define text (Dict::get paragraph 'text)
+      define len (String::length text)
+      define i 0
+      while (< i len)
+        ; Periods are great places to break
+        ;  but period + space is even better
+        if (and (eq? (String::get-Char text i) ascii-period)
+        .. (eq? (String::get-Char text (+ i 1)) ascii-space)) 
+          set breaks (append breaks (list (+ i 1)))
+        ++ i
+      breaks
+    define reverse-breaks (reverse (logical-breaks))
+    ; fixes a crash that happens when there are no logical breaks
+    define break null
+    if (Null? reverse-breaks)
+      set break 0
+    ; find a logical break that doesn't exceed the printable-boundry
+    while (Null? break)
+      if (< (relative-position-of-break (first reverse-breaks)) (printable-boundry-bottom document))
+        set break (first reverse-breaks)
+      else:
+        set reverse-breaks (tail reverse-breaks)
+        if (Null? reverse-breaks)
+          set break 0
+    break
+  
+  define end-of-paragraph ()
+    - (String::length (Dict::get paragraph 'text)) 1
+
+  define slice (p i0 i1)
+    String::substring (Dict::get p 'text) i0 (+ i1 1)
+
+  define set-color (paragraph)
+    define color (Dict::get paragraph 'color)
+    if (eq? color 'red) (Cairo::set-red cr)
+    elsif: (eq? color 'green) (Cairo::set-green cr)
+    elsif: (eq? color 'blue) (Cairo::set-blue cr)
+    elsif: (eq? color 'black) (Cairo::set-black cr)
+    elsif: (eq? color 'white) (Cairo::set-white cr)
+    else: (Cairo::set-black cr)
+
+  ; check for overflow
+  if (> (new-cursor-y) (printable-boundry-bottom document))
+    define i0 0
+    define i1 (last-logical-break-not-exceeding-printable-boundry-bottom)
+    define i2 (+ i1 1)
+    define i3 (end-of-paragraph)
+    ;println i0 " " i1 " " i2 " " i3
+    
+    if (> i1 0)
+      define p1 (PDF::make-paragraph (slice paragraph i0 i1) (Dict::get paragraph 'font))
+      PDF::copy-paragraph-attributes p1 paragraph
+      PDF::add-paragraph document p1
+    else:
+      set i2 0
+    
+    new-page
+    
+    define p2 (PDF::make-paragraph (slice paragraph i2 i3) (Dict::get paragraph 'font))
+    PDF::copy-paragraph-attributes p2 paragraph
+    Dict::set p2 'follow-on true
+    PDF::add-paragraph document p2
+  else:  
+    ; Set color
+    set-color paragraph
+    
+    ;println "Move to: " cursor-x " " cursor-y
+    <cairo>-move-to cr cursor-x cursor-y
+    set cursor-y (new-cursor-y)
+
+    Pango::cairo-show-layout cr layout
+    
+    Dict::set document 'cursor-x cursor-x
+    Dict::set document 'cursor-y cursor-y
+  
+  ; TODO - memory management
+  ;g-object-unref layout
+  ;Pango::font-description-free font
+
+define PDF::add-image (document filename)
+  define cursor-x (Dict::get document 'cursor-x)
+  define cursor-y (Dict::get document 'cursor-y)
+  define cr (Dict::get document 'cairo-context)
+  
+  define image-surface (cairo-image-surface-create-from-png filename)
+
+  define image-height (<cairo>-image-surface-get-height image-surface)
+
+  define add-image-new-cursor-y ()
+    + cursor-y image-height
+
+  define add-image-new-page () 
+    ; the difference between this function and the one in add-paragraph
+    ;  is that this one creates a new context
+    <cairo>-show-page cr
+    
+    ; We need a new context
+    cairo-destroy cr
+    set cr (cairo-create (Dict::get document 'cairo-surface))
+    Dict::set document 'cairo-context cr
+
+    ; Reset the cursor for the new page
+    set cursor-y (Dict::get document 'top-margin)
+    Dict::set document 'cursor-y cursor-y
+
+  ; new page if necessary
+  if (> (add-image-new-cursor-y) (printable-boundry-bottom document)) 
+    add-image-new-page
+  
+  ; center image
+  define image-width (<cairo>-image-surface-get-width image-surface)
+  set cursor-x (/ (- (printable-width document) image-width) 2) 
+  set cursor-x (+ cursor-x (Dict::get document 'left-margin))
+
+  ; draw image
+  <cairo>-set-source-surface cr image-surface (Fixnum->Flonum cursor-x) (Fixnum->Flonum cursor-y)
+  <cairo>-rectangle cr 0.0 0.0 (Fixnum->Flonum image-width) (Fixnum->Flonum image-height)
+  <cairo>-paint cr
+
+  set cursor-y (add-image-new-cursor-y)
+  Dict::set document 'cursor-x (Dict::get document 'left-margin) ; restore cursor-x to margin
+  Dict::set document 'cursor-y cursor-y
+
+define PDF::copy-paragraph-attributes (p paragraph)
+  if (Dict::contains? paragraph 'indent)
+    Dict::set p 'indent (Dict::get paragraph 'indent)
+
+  if (Dict::contains? paragraph 'spacing)
+    Dict::set p 'spacing (Dict::get paragraph 'spacing)
+
+  if (Dict::contains? paragraph 'justify)
+    Dict::set p 'justify (Dict::get paragraph 'justify)
+
+  if (Dict::contains? paragraph 'alignment)
+    Dict::set p 'alignment (Dict::get paragraph 'alignment)
+
+  if (Dict::contains? paragraph 'color)
+    Dict::set p 'color (Dict::get paragraph 'color)
+
+define PDF::close (document)
+  if (not (Null? (Dict::get document 'cairo-context)))
+    cairo-destroy (Dict::get document 'cairo-context)
+  cairo-surface-destroy (Dict::get document 'cairo-surface)
+  

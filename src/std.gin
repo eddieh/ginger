@@ -1,0 +1,3403 @@
+; Copyright 2009 by James Dean Palmer and others.
+;
+; Ginger is free software.  You can redistribute and/or modify
+; this work under ther terms of the Apache License Version 2.0
+; or, at your option, Ginger's amended LGPL 2.1 license.  You may
+; not use this file except in compliance with one of these licenses.
+; You may also obtain a copy of the Apache License at
+;
+;   http://www.apache.org/licenses/LICENSE-2.0
+;
+; You may obtain a copy of Ginger's amended LGPL License at:
+;
+;   http://ging3r.org/licenses/LGPL-2.1.txt
+;
+; Unless required by applicable law or agreed to in writing, 
+; software distributed under the License is distributed on an 
+; "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+; either express or implied. See the License(s) for the specific 
+; language governing permissions and limitations.
+;
+; Please report all bugs and problems to "bugs@ging3r.org".
+
+inline-c-header "#include <math.h>"
+inline-c-header "#include <ctype.h>"
+
+;;; TYPE support
+;;;
+;;; Ginger supports several fundamental types:
+;;; Boolean, Char, Cons, Flonum, Function, Port, Number, String, Symbol, Vector
+
+; Boot strap the type system..
+; Ginger supports the following fundamental types,
+;
+; Boolean
+; Char
+; Symbol
+; 
+
+define Ginger::type-table false
+
+define Type false
+inline-c "GIN_ALLOCATE(" Type ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" Type "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" Type "))->index = GIN_TYPE_TYPE;"
+
+define Cons false
+inline-c "GIN_ALLOCATE(" Cons ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" Cons "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" Cons "))->index = GIN_TYPE_CONS;"
+
+define Integer false
+inline-c "GIN_ALLOCATE(" Integer ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" Integer "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" Integer "))->index = GIN_TYPE_INTEGER;"
+
+define Vector false
+inline-c "GIN_ALLOCATE(" Vector ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" Vector "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" Vector "))->index = GIN_TYPE_VECTOR;"
+
+define String false
+inline-c "GIN_ALLOCATE(" String ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" String "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" String "))->index = GIN_TYPE_STR8;"
+
+define Function false
+inline-c "GIN_ALLOCATE(" Function ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" Function "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" Function "))->index = GIN_TYPE_FUNCTION;"
+
+define Stream false
+inline-c "GIN_ALLOCATE(" Stream ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" Stream "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" Stream "))->index = GIN_TYPE_STREAM;"
+
+define String-Stream false
+inline-c "GIN_ALLOCATE(" String-Stream ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" String-Stream "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" String-Stream "))->index = GIN_TYPE_STRING_STREAM;"
+
+define Flonum false
+inline-c "GIN_ALLOCATE(" Flonum ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" Flonum "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" Flonum "))->index = GIN_TYPE_FLONUM;"
+
+define Dict false
+inline-c "GIN_ALLOCATE(" Dict ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" Dict "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" Dict "))->index = GIN_TYPE_DICT;"
+
+define DictCell false
+inline-c "GIN_ALLOCATE(" DictCell ", GIN_OBJ, sizeof(GingerType));"
+inline-c "((GingerType*)(" DictCell "))->type_index = GIN_TYPE_TYPE;"
+inline-c "((GingerType*)(" DictCell "))->index = GIN_TYPE_DICT_CELL;"
+
+inline-c "GIN_ALLOCATE_WITH_CLEANUP(" Ginger::type-table ", GIN_OBJ, sizeof(GingerVector));"
+inline-c "type_table = " Ginger::type-table ";"
+inline-c "GIN_ALLOCATE(((GingerVector*)(" Ginger::type-table "))->value, GIN_OBJ*, sizeof(GIN_OBJ)*11);"
+inline-c "((GingerVector*)(" Ginger::type-table "))->type_index = GIN_TYPE_VECTOR;"
+inline-c "((GingerVector*)(" Ginger::type-table "))->length = 11;"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[0] = " Type ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[1] = " Cons ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[2] = " Integer ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[3] = " Vector ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[4] = " String ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[5] = " Function ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[6] = " Stream ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[7] = " String-Stream ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[8] = " Flonum ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[9] = " Dict ";"
+inline-c "((GingerVector*)(" Ginger::type-table "))->value[10] = " DictCell ";"
+
+define Type make (name)
+  define new-type false
+  inline-c "GIN_ALLOCATE(" new-type ", GIN_OBJ, sizeof(GingerType));"
+  inline-c "((GingerType*)(" new-type "))->type_index = GIN_TYPE_TYPE;"
+  define len (Vector::length Ginger::type-table)
+  inline-c "((GingerType*)(" new-type "))->index = " len ";"
+;  inline-c "((GingerType*)(" new-type "))->make = 0;"
+;  inline-c "((GingerType*)(" new-type "))->unmake = 0;"
+  inline-c "((GingerType*)(" new-type "))->c_make = 0;"
+  inline-c "((GingerType*)(" new-type "))->c_unmake = 0;"
+  Vector::push Ginger::type-table new-type
+  new-type
+
+define Type index (self)
+  inline-c result " = ((GingerType*)(" self "))->index;"
+
+define Type eq? (a b)
+  inline-c result "= GIN_IM_FROM_BOOL(" a " == " b ");"
+
+define Type? (a)
+  Type::eq? (type a) Type
+
+; Now that the type system is bootstrapped, we can define other built-in types..
+
+define! Symbol (Type::make "Symbol")   ; 11
+define! Binary (Type::make "Binary")   ; 12
+define! Boolean (Type::make "Boolean") ; 13
+define! Null (Type::make "Null")       ; 14
+define! Char (Type::make "Char")       ; 15
+define! Bcons (Type::make "Bcons")
+; define! Fixnum (Type::make "Fixnum")
+
+define Ginger::immediate? (self)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IS_IM(" self "));"
+
+define Ginger::im-type (self)
+  ; Faster approach?
+  ; 1. invert bits
+  ; 2. BSF to get least significant one (platforms with clz would require reverse order)
+  ; 3. Use result as index into table to get type
+  define test false
+  inline-c test " = GIN_IM_FROM_BOOL(GIN_IS_IM_INT(" self "));"
+  if (test)
+    Integer
+  else:
+    inline-c test " = GIN_IM_FROM_BOOL(GIN_IS_IM_SYM(" self "));"
+    if (test)
+      Symbol
+    else:
+      inline-c test " = GIN_IM_FROM_BOOL(GIN_IS_IM_BINARY(" self "));"
+      if (test)
+        Binary
+      else:
+        inline-c test " = GIN_IM_FROM_BOOL(GIN_IS_IM_CHAR16(" self "));"
+        if (test)
+          Char
+        else:
+          inline-c test " = GIN_IM_FROM_BOOL(GIN_IS_IM_CHAR8(" self "));"
+          if (test)
+            Char
+          else:
+            inline-c test " = GIN_IM_FROM_BOOL(GIN_IS_IM_BOOL(" self "));"
+            if (test)
+              Boolean
+            else:
+              Null
+
+define Ginger::im->Binary (self)
+  ; Faster approach?
+  ; 1. invert bits
+  ; 2. BSF to get least significant one (platforms with clz would require reverse order)
+  ; 3. Shift right that many bits, use shift to compute goto to place in an appropriate binary
+  define t (Ginger::im-type self)
+  define r false
+  if (Type::eq? t Integer)
+    Integer->Binary self
+  elsif: (Type::eq? t Symbol)
+    Symbol->Binary self
+  elsif: (Type::eq? t Binary)
+    self
+  elsif: (Type::eq? t Char)
+    Char->Binary self
+  elsif: (Type::eq? t Boolean)
+    Boolean->Binary t
+  elsif: (Type::eq? t Null)
+    Null->Binary t
+
+define Ginger::nim-type (self)
+  inline-c result " = GIN_NIM_GET_TYPE(" self ");"
+
+; type responds with the most exact type object
+
+define! type (self)
+  if (Ginger::immediate? self)
+    Ginger::im-type self
+  else:
+    Vector::get Ginger::type-table (Ginger::nim-type self)
+
+define type-of (term)
+  ;inline-c result " = GIN_IM_FROM_INT(GIN_NIM_GET_TYPE(" term "));"
+  if (Null? term) "null"
+  elsif: (list? term) "list"
+  elsif: (Cons? term) "cons"
+  elsif: (String? term) "string"
+  elsif: (Binary? term) "binary"
+  elsif: (Function? term) "function"
+  elsif: (Char? term) "char"
+  elsif: (Boolean? term) "boolean"
+  elsif: (Fixnum? term) "fixnum"
+  elsif: (Integer? term) "interger"
+  elsif: (Flonum? term) "flonum"
+;  elsif: (Stream? term) "stream"
+;  elsif: (String-Stream? term) "string-stream"
+  elsif: (Vector? term) "vector"
+  elsif: (Dict? term) "dict"
+;  elsif: (Class? term) "class"
+  elsif: (Symbol? term) "symbol"
+  else: "foreign"
+
+define object->string (term)
+  define output ""
+
+  if (Null? term) (set output (String::append output "null"))
+  elsif: (list? term)
+    set output (String::append output "(")
+    each i term
+      set output (String::append output (object->string i) " ")
+    set output (String::append output ")")
+  elsif: (Cons? term)
+    set output (String::append output "(" (object->string (first term)) " . . " (object->string (tail term)) ")")
+  elsif: (String? term) (set output (String::append output term))
+  elsif: (Binary? term) (set output (String::append (Binary->String term)))
+  elsif: (Function? term) (set output (String::append (Function->String term)))
+  elsif: (Char? term) (set output (String::append (Char->String term)))
+  elsif: (Boolean? term) (set output (String::append (Boolean->String term)))
+  elsif: (Fixnum? term) (set output (String::append (Fixnum->String term)))
+  elsif: (Integer? term) (set output (String::append (Fixnum->String term)))
+  elsif: (Flonum? term) (set output (String::append (Flonum->String term)))
+;  elsif: (Stream? term) (set output (String::append (Stream->String term)))
+;  elsif: (String-Stream? term) (set output (String::append (String-Stream->String term)))
+  elsif: (Vector? term) (set output (String::append (Vector->String term)))
+  elsif: (Dict? term) (set output (String::append (Dict->String term)))
+;  elsif: (Class? term) (set output (String::append (class-to-str term)))
+  elsif: (Symbol? term) (set output (String::append (Symbol->String term)))
+  else: (set output (String::append (Foreign->String term)))
+  
+  output
+
+; TODO - should this be part of literate.gin?
+;  that is the only place it is used so far
+;  and there are a few things that are specific 
+;  to literate.gin
+define object->pretty-string (term)
+  define list-count -1
+  define parse-indent 0
+  
+  define object->pretty-string-internal (term)
+    
+    define output ""
+    if (Null? term) (set output (String::append output "null"))
+    elsif: (list? term)
+      
+      if (or (> (Dict::get (properties term) 'parse-indent) parse-indent)
+      .. (< (Dict::get (properties term) 'parse-indent) parse-indent))
+        set parse-indent (Dict::get (properties term) 'parse-indent)
+        set list-count -1
+        define i 0
+        while (< i parse-indent)
+          set output (String::append output " ")
+          ++ i
+
+      if (= list-count 0)
+        set output (String::append output "\\n")
+        
+        define i 0
+        while (< i parse-indent)
+          set output (String::append output " ")
+          ++ i
+
+      if (> list-count 0)
+        set output (String::append output "(")
+      ++ list-count
+      
+      ; keep track of the number of terms and the current term 
+      ;   that is being printed. we don't need a space if we are
+      ;   on the last term.
+      define num-terms (length term)
+      define term-count 0
+
+      ; save the if block's indention
+      define if-block-indent 0
+      if (eq? (first term) 'if)
+        set if-block-indent (Dict::get (properties term) 'parse-indent)
+      
+      each i term
+        
+        ; add indention for these
+        if (or (eq? i "else:") (eq? i "elsif:"))
+          define inx 0
+          while (< inx if-block-indent)
+            set output (String::append output " ")
+            ++ inx
+
+        ++ term-count
+        if (or (= term-count num-terms)
+        .. (or (eq? (nth term (+ term-count 1)) "else:") (eq? (nth term (+ term-count 1)) "elsif:")))
+          set output (String::append output (object->pretty-string-internal i))
+        else:
+          set output (String::append output (object->pretty-string-internal i) " ")
+      
+      -- list-count 
+      if (= list-count -1)
+        set output (String::append output "\\n")
+      else:
+        if (> list-count 0)
+          set output (String::append output ")")
+
+    elsif: (Cons? term)
+      set output (String::append output 
+      .. "(" 
+      .. (object->pretty-string-internal (first term)) 
+      .. " . . " 
+      .. (object->pretty-string-internal (tail term))
+      .. ")")
+    elsif: (String? term) (set output (String::append output term))
+    elsif: (Binary? term) (set output (String::append (Binary->String term)))
+    elsif: (Function? term) (set output (String::append (Function->String term)))
+    elsif: (Char? term) (set output (String::append (Char->String term)))
+    elsif: (Boolean? term) (set output (String::append (Boolean->String term)))
+    elsif: (Fixnum? term) (set output (String::append (Fixnum->String term)))
+    elsif: (Integer? term) (set output (String::append (Fixnum->String term)))
+    elsif: (Flonum? term) (set output (String::append (Flonum->String term)))
+    ;elsif: (Stream? term) (set output (String::append (Stream->String term)))
+    ;elsif: (String-Stream? term) (set output (String::append (String-Stream->String term)))
+    elsif: (Vector? term) (set output (String::append (Vector->String term)))
+    elsif: (Dict? term) (set output (String::append (Dict->String term)))
+    ;elsif: (Class? term) (set output (String::append (class-to-str term)))
+    elsif: (Symbol? term) 
+      
+      if (eq? term '<)
+        ; TODO - this only makes sense for printing to html or using pango
+        ; we don't want to do this if we are printing to the shell or something else
+        ; (this is a hack)
+        set output (String::append "&lt;")
+      else:
+        set output (String::append (Symbol->String term))
+        
+    else: (set output (String::append (Foreign->String term)))
+    
+    output
+  
+  object->pretty-string-internal term
+
+
+;;;
+;;; CONSTANTS
+;;;
+
+; Lowercase ASCII characters
+define ascii-a (inline-c "GIN_NEW_CHAR8(" result ", 'a')")
+define ascii-b (inline-c "GIN_NEW_CHAR8(" result ", 'b')")
+define ascii-c (inline-c "GIN_NEW_CHAR8(" result ", 'c')")
+define ascii-d (inline-c "GIN_NEW_CHAR8(" result ", 'd')")
+define ascii-e (inline-c "GIN_NEW_CHAR8(" result ", 'e')")
+define ascii-f (inline-c "GIN_NEW_CHAR8(" result ", 'f')")
+define ascii-g (inline-c "GIN_NEW_CHAR8(" result ", 'g')")
+define ascii-h (inline-c "GIN_NEW_CHAR8(" result ", 'h')")
+define ascii-i (inline-c "GIN_NEW_CHAR8(" result ", 'i')")
+define ascii-j (inline-c "GIN_NEW_CHAR8(" result ", 'j')")
+define ascii-k (inline-c "GIN_NEW_CHAR8(" result ", 'k')")
+define ascii-l (inline-c "GIN_NEW_CHAR8(" result ", 'l')")
+define ascii-m (inline-c "GIN_NEW_CHAR8(" result ", 'm')")
+define ascii-n (inline-c "GIN_NEW_CHAR8(" result ", 'n')")
+define ascii-o (inline-c "GIN_NEW_CHAR8(" result ", 'o')")
+define ascii-p (inline-c "GIN_NEW_CHAR8(" result ", 'p')")
+define ascii-q (inline-c "GIN_NEW_CHAR8(" result ", 'q')")
+define ascii-r (inline-c "GIN_NEW_CHAR8(" result ", 'r')")
+define ascii-s (inline-c "GIN_NEW_CHAR8(" result ", 's')")
+define ascii-t (inline-c "GIN_NEW_CHAR8(" result ", 't')")
+define ascii-u (inline-c "GIN_NEW_CHAR8(" result ", 'u')")
+define ascii-v (inline-c "GIN_NEW_CHAR8(" result ", 'v')")
+define ascii-w (inline-c "GIN_NEW_CHAR8(" result ", 'w')")
+define ascii-x (inline-c "GIN_NEW_CHAR8(" result ", 'x')")
+define ascii-y (inline-c "GIN_NEW_CHAR8(" result ", 'y')")
+define ascii-z (inline-c "GIN_NEW_CHAR8(" result ", 'z')")
+
+; Uppercase ASCII characters
+define ascii-A (inline-c "GIN_NEW_CHAR8(" result ", 'A')")
+define ascii-B (inline-c "GIN_NEW_CHAR8(" result ", 'B')")
+define ascii-C (inline-c "GIN_NEW_CHAR8(" result ", 'C')")
+define ascii-D (inline-c "GIN_NEW_CHAR8(" result ", 'D')")
+define ascii-E (inline-c "GIN_NEW_CHAR8(" result ", 'E')")
+define ascii-F (inline-c "GIN_NEW_CHAR8(" result ", 'F')")
+define ascii-G (inline-c "GIN_NEW_CHAR8(" result ", 'G')")
+define ascii-H (inline-c "GIN_NEW_CHAR8(" result ", 'H')")
+define ascii-I (inline-c "GIN_NEW_CHAR8(" result ", 'I')")
+define ascii-J (inline-c "GIN_NEW_CHAR8(" result ", 'J')")
+define ascii-K (inline-c "GIN_NEW_CHAR8(" result ", 'K')")
+define ascii-L (inline-c "GIN_NEW_CHAR8(" result ", 'L')")
+define ascii-M (inline-c "GIN_NEW_CHAR8(" result ", 'M')")
+define ascii-N (inline-c "GIN_NEW_CHAR8(" result ", 'N')")
+define ascii-O (inline-c "GIN_NEW_CHAR8(" result ", 'O')")
+define ascii-P (inline-c "GIN_NEW_CHAR8(" result ", 'P')")
+define ascii-Q (inline-c "GIN_NEW_CHAR8(" result ", 'Q')")
+define ascii-R (inline-c "GIN_NEW_CHAR8(" result ", 'R')")
+define ascii-S (inline-c "GIN_NEW_CHAR8(" result ", 'S')")
+define ascii-T (inline-c "GIN_NEW_CHAR8(" result ", 'T')")
+define ascii-U (inline-c "GIN_NEW_CHAR8(" result ", 'U')")
+define ascii-V (inline-c "GIN_NEW_CHAR8(" result ", 'V')")
+define ascii-W (inline-c "GIN_NEW_CHAR8(" result ", 'W')")
+define ascii-X (inline-c "GIN_NEW_CHAR8(" result ", 'X')")
+define ascii-Y (inline-c "GIN_NEW_CHAR8(" result ", 'Y')")
+define ascii-Z (inline-c "GIN_NEW_CHAR8(" result ", 'Z')")
+
+; ASCII numbers
+define ascii-0 (inline-c "GIN_NEW_CHAR8(" result ", '0')")
+define ascii-1 (inline-c "GIN_NEW_CHAR8(" result ", '1')")
+define ascii-2 (inline-c "GIN_NEW_CHAR8(" result ", '2')")
+define ascii-3 (inline-c "GIN_NEW_CHAR8(" result ", '3')")
+define ascii-4 (inline-c "GIN_NEW_CHAR8(" result ", '4')")
+define ascii-5 (inline-c "GIN_NEW_CHAR8(" result ", '5')")
+define ascii-6 (inline-c "GIN_NEW_CHAR8(" result ", '6')")
+define ascii-7 (inline-c "GIN_NEW_CHAR8(" result ", '7')")
+define ascii-8 (inline-c "GIN_NEW_CHAR8(" result ", '8')")
+define ascii-9 (inline-c "GIN_NEW_CHAR8(" result ", '9')")
+
+; Other characters
+define ascii-newline (inline-c "GIN_NEW_CHAR8(" result ", '\\n')")
+define ascii-tab (inline-c "GIN_NEW_CHAR8(" result ", '\\t')")
+
+define ascii-space (inline-c "GIN_NEW_CHAR8(" result ", ' ')")
+define ascii-exclamation (inline-c "GIN_NEW_CHAR8(" result ", '!')") ; bang
+define ascii-double-quote (inline-c "GIN_NEW_CHAR8(" result ", '\"')") ;quotation
+define ascii-pound (inline-c "GIN_NEW_CHAR8(" result ", '#')") ; hash, number sign
+define ascii-dollar (inline-c "GIN_NEW_CHAR8(" result ", '$')")
+define ascii-percent (inline-c "GIN_NEW_CHAR8(" result ", '%')")
+define ascii-and (inline-c "GIN_NEW_CHAR8(" result ", '&')") ; ampersand
+define ascii-single-quote (inline-c "GIN_NEW_CHAR8(" result ", '\\'')") ; apostrophe
+
+define ascii-left-parenthesis (inline-c "GIN_NEW_CHAR8(" result ", '(')") ; left paren
+define ascii-right-parenthesis (inline-c "GIN_NEW_CHAR8(" result ", ')')") ; right paren
+define ascii-asterik (inline-c "GIN_NEW_CHAR8(" result ", '*')") ; mult, times, multiply
+define ascii-plus (inline-c "GIN_NEW_CHAR8(" result ", '+')") 
+define ascii-comma (inline-c "GIN_NEW_CHAR8(" result ", ',')")
+define ascii-minus (inline-c "GIN_NEW_CHAR8(" result ", '-')") ; hyphen, dash
+define ascii-period (inline-c "GIN_NEW_CHAR8(" result ", '.')") ; full stop, dot
+define ascii-slash (inline-c "GIN_NEW_CHAR8(" result ", '/')") ; div, division
+
+define ascii-colon (inline-c "GIN_NEW_CHAR8(" result ", ':')")
+define ascii-semi-colon (inline-c "GIN_NEW_CHAR8(" result ", ';')")
+define ascii-less-than (inline-c "GIN_NEW_CHAR8(" result ", '<')")
+define ascii-greater-than (inline-c "GIN_NEW_CHAR8(" result ", '>')")
+define ascii-equal (inline-c "GIN_NEW_CHAR8(" result ", '=')")
+define ascii-question (inline-c "GIN_NEW_CHAR8(" result ", '?')") ; question mark
+define ascii-at (inline-c "GIN_NEW_CHAR8(" result ", '@')")
+
+define ascii-left-bracket (inline-c "GIN_NEW_CHAR8(" result ", '[')") ; square bracket
+define ascii-backslash (inline-c "GIN_NEW_CHAR8(" result ", '\\\\')")
+define ascii-right-bracket (inline-c "GIN_NEW_CHAR8(" result ", ']')") ; square bracket
+define ascii-caret (inline-c "GIN_NEW_CHAR8(" result ", '^')") ; circumflex accent
+define ascii-underscore (inline-c "GIN_NEW_CHAR8(" result ", '_')") ; underline, understrike
+define ascii-grave-accent (inline-c "GIN_NEW_CHAR8(" result ", '`')") ; backtick, backquote
+
+define ascii-left-brace (inline-c "GIN_NEW_CHAR8(" result ", '{')") ; curly brace
+define ascii-vertical-bar (inline-c "GIN_NEW_CHAR8(" result ", '|')") ; pipe, broken bar
+define ascii-right-brace (inline-c "GIN_NEW_CHAR8(" result ", '}')") ; curly brace
+define ascii-tilde (inline-c "GIN_NEW_CHAR8(" result ", '~')")
+
+; Deprecated
+define ascii-return (inline-c "GIN_NEW_CHAR8(" result ", '\\n')")
+
+; Official ASCII abbreviations
+define ascii-null (inline-c "GIN_NEW_CHAR8(" result ", '\\0')")
+define ascii-cr (inline-c "GIN_NEW_CHAR8(" result ", '\\r')")
+define ascii-lf (inline-c "GIN_NEW_CHAR8(" result ", '\\f')")
+
+define null (inline-c result " = GIN_NULL;")
+
+; Now lets bootstrap the symbol systems
+define Ginger::symbol->string (Vector::make)
+define Ginger::string->symbol (Dict::make)
+
+define Ginger::Symbol->Number (s)
+  inline-c result " = GIN_IM_FROM_INT(GIN_IM_TO_SYM(" s "));"
+
+; Does not check if string is a valid symbol.
+define Ginger::String->Symbol (a)
+  ; require (!= (length a) 0)
+  if (= (String::length a) 1)
+    define n (Char->Integer (String::get-Char a 0))
+    inline-c n " = GIN_IM_FROM_SYM(GIN_IM_TO_INT(" n "));"
+    n
+  elsif: (not (eq? (Dict::get Ginger::string->symbol a) false))
+    Dict::get Ginger::string->symbol a
+  else:
+    define n (+ (Vector::length Ginger::symbol->string) 2048)
+    inline-c n " = GIN_IM_FROM_SYM(GIN_IM_TO_INT(" n "));"
+    Dict::set Ginger::string->symbol a n
+    Vector::push Ginger::symbol->string a
+    n
+
+define Ginger::Symbol->String (s)
+  define n (Ginger::Symbol->Number s)
+  ; assert n < Vector::length + 2048
+  if (>= n 2048)
+    Vector::get Ginger::symbol->string (- n 2048)
+  else:
+    if (< n 128)
+      ; ascii.
+      String::string (Integer->Char n)
+    elsif: (< n 2047)
+      ; 2 byte utf
+      println "Not implemented."
+      exit
+    else:
+      ; Reserved..
+      println "Not implemented."
+      exit
+
+define Ginger::bootstrap-symbols ()
+  define symbol-count 0
+  define i 0
+  inline-c symbol-count "=GIN_IM_FROM_INT(qsdef_count);"
+  while (< i symbol-count)
+    define s false
+    inline-c "GIN_NEW_STR8(" s ",qsdef[GIN_IM_TO_INT(" i ")]);"
+    Ginger::String->Symbol s
+    ++ i
+
+Ginger::bootstrap-symbols
+
+; Similar to eqv? in Scheme.  No analogs of eq? or equal? are part of the Ginger std lib.
+define eq? (a b)
+  if (and (Type? a) (Type? b))
+    Type::eq? a b
+  elsif: (and (Number? a) (Number? b))
+    = a b
+  elsif: (and (Symbol? a) (Symbol? b))
+    Symbol::eq? a b
+  elsif: (and (String? a) (String? b))
+    String::eq? a b
+  elsif: (and (Binary? a) (Binary? b))
+    Binary::eq? a b
+  elsif: (and (Char? a) (Char? b))
+    Char::eq? a b
+  elsif: (and (Boolean? a) (Boolean? b))
+    inline-c result "= GIN_IM_FROM_BOOL(GIN_IM_TO_BOOL(" a ") == GIN_IM_TO_BOOL(" b "));"
+  else:
+    inline-c result "= GIN_IM_FROM_BOOL(" a " == " b ");"
+
+;;; BINARY - UNTYPED MEMORY
+;;;
+;;; This is the most basic type.  Other datastructures may be defined in terms of Binaries
+
+define Binary make (len)
+  ; The require should be some kind of system related limit on len..
+  ; Perhaps it should be related to Fixnum as I am not fond of binaries used to represent
+  ; the length of even bigger binaries.  If based on 20bit Fixnum, that would give
+  ; a maximum bit length of 2097151 or approx. 262KB which seems fairly reasonable.
+  require (Ginger::immediate? len)
+  define r false
+  if (> len 25)
+    define byte-len false
+    define t (Type::index Binary)
+    inline-c "if ((GIN_IM_TO_INT(" len ") % 8) == 0) { " byte-len " = GIN_IM_FROM_INT(GIN_IM_TO_INT(" len ")/8); } else { " byte-len " = GIN_IM_FROM_INT((GIN_IM_TO_INT(" len ")/8)+1); }"
+    inline-c "GIN_ALLOCATE(" r ",void*,sizeof(GingerBinary)+GIN_IM_TO_INT(" byte-len "));"
+    inline-c "GIN_NIM_GET_TYPE(" r ") = " t ";"
+    inline-c "((GingerBinary*)" r ")->length = GIN_IM_TO_INT(" len ");"
+  else:
+    inline-c r " = GIN_IM_FROM_BINARY(0, GIN_IM_TO_INT(" len "));"
+  r
+
+define Binary? (a)
+  if (Ginger::immediate? a)
+    inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_IM_BINARY(" a "));"
+  else:
+    if (Type::eq? (type a) Binary)
+      true
+    else:
+      false
+
+define Binary->Integer (a)
+  if (Ginger::immediate? a)
+    inline-c result "= GIN_IM_FROM_INT(GIN_IM_TO_BINARY_SIGNED(" a "));"
+  else:
+    0
+
+define Binary length (a)
+  if (Ginger::immediate? a)
+    inline-c result "= GIN_IM_FROM_INT(GIN_IM_TO_BINARY_LENGTH(" a "));"
+  else:
+    inline-c result "= GIN_IM_FROM_INT(((GingerBinary*)" a ")->length);"
+
+define Binary + (a b)
+  define len 0
+  define len-a (Binary::length a)
+  define len-b (Binary::length b)
+  inline-c "if (GIN_IM_TO_INT(" len-a ") > GIN_IM_TO_INT(" len-b ")) { " len " = " len-a "; } else { " len " = " len-b "; };"
+  define r (Binary::make len)
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    inline-c r " = GIN_IM_FROM_BINARY((GIN_IM_TO_BINARY_SIGNED(" a ") + GIN_IM_TO_BINARY_SIGNED(" b ")),GIN_IM_TO_INT(" len "));"
+    r
+  else:
+    define d 0
+    define a-d 0
+    define b-d 0
+    inline-c d " = GIN_IM_FROM_INT((GIN_IM_TO_INT(" len ") / 32) + 1);"
+    inline-c a-d " = GIN_IM_FROM_INT((GIN_IM_TO_INT(" len-a ") / 32) + 1);"
+    inline-c b-d " = GIN_IM_FROM_INT((GIN_IM_TO_INT(" len-b ") / 32) + 1);"
+    define k 0
+    ; sign = 0 - should be positive
+    ; sign = 1 - should be negative
+    ; sign = 2 - don't care
+    define sign 0
+    define accum 0
+
+    if (and (not (Ginger::immediate? a)) (Ginger::immediate? b))
+      noop
+      false
+    elsif: (and (Ginger::immediate? a) (not (Ginger::immediate? b)))
+      noop
+      false
+    else:
+      inline-c " for (" k "= GIN_IM_FROM_INT(0); GIN_IM_TO_INT(" k ") < GIN_IM_TO_INT(" d "); " k " = GIN_IM_FROM_INT(GIN_IM_TO_INT(" k ") + 1)) { \
+        if ((((GingerBinary*)" a ")->value[GIN_IM_TO_INT(" k ")] > 0) && \
+            (((GingerBinary*)" b ")->value[GIN_IM_TO_INT(" k ")] > 0)) " sign " = GIN_IM_FROM_INT(0); \
+        else if ((((GingerBinary*)" a ")->value[GIN_IM_TO_INT(" k ")] < 0) && \
+            (((GingerBinary*)" b ")->value[GIN_IM_TO_INT(" k ")] < 0)) " sign " = GIN_IM_FROM_INT(1); \
+        else " sign " = GIN_IM_FROM_INT(2); \
+        if ((GIN_IM_TO_INT(" a-d ") > 0) && (GIN_IM_TO_INT(" b-d ") > 0)) { \
+          ((GingerBinary*)" r ")->value[GIN_IM_TO_INT(" k ")] = \
+            ((GingerBinary*)" a ")->value[GIN_IM_TO_INT(" k ")] + \
+            ((GingerBinary*)" b ")->value[GIN_IM_TO_INT(" k ")] + GIN_IM_TO_INT(" accum "); \
+        } \
+        if ((GIN_IM_TO_INT(" a-d ") > 0) && (GIN_IM_TO_INT(" b-d ") == 0)) { \
+          ((GingerBinary*)" r ")->value[GIN_IM_TO_INT(" k ")] = \
+            ((GingerBinary*)" a ")->value[GIN_IM_TO_INT(" k ")] + GIN_IM_TO_INT(" accum "); \
+        } \
+        if ((GIN_IM_TO_INT(" a-d ") == 0) && (GIN_IM_TO_INT(" b-d ") > 0)) { \
+          ((GingerBinary*)" r ")->value[GIN_IM_TO_INT(" k ")] = \
+            ((GingerBinary*)" b ")->value[GIN_IM_TO_INT(" k ")] + GIN_IM_TO_INT(" accum "); \
+        } \
+        " accum " = GIN_IM_FROM_INT(0); \
+        if ((((GingerBinary*)" r ")->value[GIN_IM_TO_INT(" k ")] < 0) && (GIN_IM_TO_INT( " sign " ) == 0)) " accum " = GIN_IM_FROM_INT(1); \
+        if ((((GingerBinary*)" r ")->value[GIN_IM_TO_INT(" k ")] > 0) && (GIN_IM_TO_INT( " sign " ) == 1)) " accum " = GIN_IM_FROM_INT(1); \
+        " a-d " = GIN_IM_FROM_INT(GIN_IM_TO_INT(" a-d ") - 1); \
+        " b-d " = GIN_IM_FROM_INT(GIN_IM_TO_INT(" b-d ") - 1); \
+      };"
+      r
+
+define Binary - (a b)
+  define len 0
+  define len-a (Binary::length a)
+  define len-b (Binary::length b)
+  inline-c "if (GIN_IM_TO_INT(" len-a ") > GIN_IM_TO_INT(" len-b ")) { " len " = " len-a "; } else { " len " = " len-b "; };"
+  define r (Binary::make len)
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    inline-c r " = GIN_IM_FROM_BINARY((GIN_IM_TO_BINARY(" a ") - GIN_IM_TO_BINARY(" b ")),GIN_IM_TO_INT(" len "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary * (a b)
+  define len (max (Binary::length a) (Binary::length b))
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    inline-c result " = GIN_IM_FROM_BINARY((GIN_IM_TO_BINARY(" a ") * GIN_IM_TO_BINARY(" b ")),GIN_IM_TO_INT(" len "));"
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary / (a b)
+  define len (max (Binary::length a) (Binary::length b))
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    inline-c result " = GIN_IM_FROM_BINARY((GIN_IM_TO_BINARY(" a ") / GIN_IM_TO_BINARY(" b ")),GIN_IM_TO_INT(" len "));"
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary > (a b)
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    define r false
+    inline-c r " = GIN_IM_FROM_BOOL(GIN_IM_TO_BINARY_SIGNED(" a ") > GIN_IM_TO_BINARY_SIGNED(" b "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary >= (a b)
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    define r false
+    inline-c r " = GIN_IM_FROM_BOOL(GIN_IM_TO_BINARY_SIGNED(" a ") >= GIN_IM_TO_BINARY_SIGNED(" b "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary < (a b)
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    define r false
+    inline-c r " = GIN_IM_FROM_BOOL(GIN_IM_TO_BINARY_SIGNED(" a ") < GIN_IM_TO_BINARY_SIGNED(" b "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary <= (a b)
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    define r false
+    inline-c r " = GIN_IM_FROM_BOOL(GIN_IM_TO_BINARY_SIGNED(" a ") <= GIN_IM_TO_BINARY_SIGNED(" b "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary eq? (a b)
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    define r false
+    inline-c r " = GIN_IM_FROM_BOOL(GIN_IM_TO_BINARY_SIGNED(" a ") == GIN_IM_TO_BINARY_SIGNED(" b "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary != (a b)
+  if (and (Ginger::immediate? a) (Ginger::immediate? b))
+    define r false
+    inline-c r " = GIN_IM_FROM_BOOL(GIN_IM_TO_BINARY_SIGNED(" a ") != GIN_IM_TO_BINARY_SIGNED(" b "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary << (a amt)
+  if (Ginger::immediate? a)
+    define len-a (Binary::length a)
+    define r false
+    inline-c r " = GIN_IM_FROM_BINARY(GIN_IM_TO_BINARY(" a ") << GIN_IM_TO_INT(" amt "), GIN_IM_TO_INT(" len-a "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary <<< (a amt)
+  if (Ginger::immediate? a)
+    define len-a (Binary::length a)
+    define r false
+    inline-c r " = GIN_IM_FROM_BINARY(GIN_IM_TO_BINARY_SIGNED(" a ") << GIN_IM_TO_INT(" amt "), GIN_IM_TO_INT(" len-a "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary >> (a amt)
+  if (Ginger::immediate? a)
+    define len-a (Binary::length a)
+    define r false
+    inline-c r " = GIN_IM_FROM_BINARY(GIN_IM_TO_BINARY(" a ") >> GIN_IM_TO_INT(" amt "), GIN_IM_TO_INT(" len-a "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary >>> (a amt)
+  if (Ginger::immediate? a)
+    define len-a (Binary::length a)
+    define r false
+    inline-c r " = GIN_IM_FROM_BINARY(GIN_IM_TO_BINARY_SIGNED(" a ") >> GIN_IM_TO_INT(" amt "), GIN_IM_TO_INT(" len-a "));"
+    r
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+
+define Binary->String (a)
+  define len (Binary::length a)
+  define i len
+  define r (String::make i)
+  if (Ginger::immediate? a)
+    while (> i 0)
+      define b false
+      inline-c b " = GIN_IM_FROM_CHAR8(((((unsigned long)(GIN_IM_TO_BINARY(" a "))) << (32 - GIN_IM_TO_INT(" i "))) >> 31) + 48);"
+      String::set-Char r (- len i) b
+      -- i
+  else:
+    ; TODO:
+    println "NIM Binaries not supported yet"
+    exit
+  r
+
+define bin (residual: r)
+  ; TODO:
+  println "NIM Binaries not supported yet"
+  exit
+
+;;;
+;;; MATH
+;;;
+
+; Functions in this section should work on the entire numeric tower
+
+; define! e          2.7182818284590452353602874713526624977572
+; define! one/e      0.3678794411714423215955237701614608674458
+; define! e2         7.3890560989306502272304274605750078131803 ; e^2
+; define! epi/4      2.1932800507380154565597696592787382234616 ; e^
+; define! log2e      1.44269504088896340735992468100189214
+; define! log10e     0.434294481903251827651128918916605082
+; define! ln2        0.6931471805599453094172321214581765680755
+; define! ln3        1.0986122886681096913952452369225257046475
+; define! lnpi       1.1447298858494001741434273513530587116473
+; define! ln10       2.3025850929940456840179914546843642076011
+; define! one/ln2    1.4426950408889634073599246810018921374266
+; define! one/ln10   0.4342944819032518276511289189166050822944
+; define! pi         3.1415926535897932384626433832795028841972
+define pi 3.14159265
+; define! pi/2       1.57079632679489661923132169163975144
+; define! pi/4       0.785398163397448309615660845819875721
+; define! one/pi     0.3183098861837906715377675267450287240689
+; define! two/pi     0.636619772367581343075535053490057448
+; define! two/sqrtpi 1.12837916709551257389615890312154517
+; define! sqrtpi     1.7724538509055160272981674833411451827975
+; define! pi2        9.8696044010893586188344909998761511353137 ; pi^2
+; define! degree     0.0174532925199432957692369076848861271344
+; define! gamma1/2   1.7724538509055160272981674833411451827975
+; define! gamma1/3   2.6789385347077476336556929409746776441287
+; define! gamma2/3   1.3541179394264004169452880281545137855193
+; define! sqrt2      1.4142135623730950488016887242096980785697
+; define! sqrt3      1.7320508075688772935274463415058723669428
+; define! sqrt5      2.2360679774997896964091736687312762354406
+; define! sqrt10     3.1622776601683793319988935444327185337196
+; define! cubert2    1.2599210498948731647672106072782283505703
+; define! cubert3    1.4422495703074083823216383107801095883919
+; define! fourthrt2  1.4422495703074083823216383107801095883919
+; define! one/sqrt2  0.707106781186547524400844362104849039
+; define! phi        1.6180339887498948482045868343656381177203
+; define! lnphi      0.4812118250596034474977589134243684231352
+; define! one/lnphi  0.4812118250596034474977589134243684231352
+; define! euler      0.5772156649015328606065120900824024310422
+; define! eeuler     1.7810724179901979852365041031071795491696 ; e^euler
+; define! sin1       0.8414709848078965066525023216302989996226
+; define! cos1       0.5403023058681397174009366074429766037323
+; define! zeta3      1.2020569031595942853997381615114499907650
+
+define + (a b)
+  if (and (Fixnum? a) (Fixnum? b))
+    Fixnum::+ a b
+  elsif: (and (Integer? a) (Integer? b))
+    Integer::+ a b
+
+define - (a b)
+  if (and (Fixnum? a) (Fixnum? b))
+    Fixnum::- a b
+  elsif: (and (Integer? a) (Integer? b))
+    Integer::- a b
+
+define * (a b)
+  if (and (Fixnum? a) (Fixnum? b))
+    Fixnum::* a b
+  elsif: (and (Integer? a) (Integer? b))
+    Integer::* a b
+
+define / (a b)
+  if (and (Fixnum? a) (Fixnum? b))
+    Fixnum::/ a b
+  elsif: (and (Integer? a) (Integer? b))
+    Integer::/ a b
+
+define < (a b)
+  if (and (Fixnum? a) (Fixnum? b))
+    Fixnum::< a b
+  elsif: (and (Integer? a) (Integer? b))
+    Integer::< a b
+
+define <= (a b)
+  if (and (Fixnum? a) (Fixnum? b))
+    Fixnum::<= a b
+  elsif: (and (Integer? a) (Integer? b))
+    Integer::<= a b
+
+define > (a b)
+  if (and (Fixnum? a) (Fixnum? b))
+    Fixnum::> a b
+  elsif: (and (Integer? a) (Integer? b))
+    Integer::> a b
+
+define >= (a b)
+  if (and (Fixnum? a) (Fixnum? b))
+    Fixnum::>= a b
+  elsif: (and (Integer? a) (Integer? b))
+    Integer::>= a b
+
+define = (a b)
+  if (and (Fixnum? a) (Fixnum? b))
+    Fixnum::= a b
+  elsif: (and (Integer? a) (Integer? b))
+    Integer::= a b
+
+define max (a b)
+  if (> a b) a
+  else: b
+
+define min (a b)
+  if (< a b) a
+  else: b
+
+define abs (a)
+  inline-c "if (GIN_IM_TO_SIGNED_INT(" a ") >= 0)" result "=" a "; else " result "= GIN_IM_FROM_INT(-1*GIN_IM_TO_SIGNED_INT(" a "));"
+
+define modulo (a b)
+  inline-c result "=GIN_IM_FROM_INT(GIN_IM_TO_SIGNED_INT(" a ") % GIN_IM_TO_SIGNED_INT(" b "));"
+
+define zero? (a)
+  inline-c result "=GIN_IM_FROM_BOOL(GIN_IM_TO_SIGNED_INT(" a ") == 0);"
+
+define positive? (a)
+  inline-c result "=GIN_IM_FROM_BOOL(GIN_IM_TO_SIGNED_INT(" a ") >= 0);"
+
+define negative? (a)
+  inline-c result "=GIN_IM_FROM_BOOL(GIN_IM_TO_SIGNED_INT(" a ") < 0);"
+
+define odd? (a)
+  inline-c result "=GIN_IM_FROM_BOOL((GIN_IM_TO_SIGNED_INT(" a ") % 2) == 1);"
+
+define even? (a)
+  inline-c result "=GIN_IM_FROM_BOOL((GIN_IM_TO_SIGNED_INT(" a ") % 2) == 0);"
+
+define remainder (a b)
+  modulo a b
+  
+define gcd (a b)
+  if (= b 0)
+    a
+  else:
+    gcd b (remainder a b)
+
+define Number? (a)
+  or (Integer? a) (Flonum? a)
+
+define nocall (a)
+  inline-c result " = " a ";"
+
+; TODO
+; quotient  
+; lcm
+; numerator
+; denominator
+; floor
+; ceiling
+; truncate
+; round
+; rationalize
+; exp
+; log
+
+define degree->radian (d)
+  * d (/ pi 180)
+
+define sin (t)
+  ;   inline-c "GIN_NEW_FLONUM(" result ", sin(GIN_NIM_GET_FLONUM(" t ")));"
+  noop
+
+define cos (t)
+  ;  inline-c "GIN_NEW_FLONUM(" result ", cos(GIN_NIM_GET_FLONUM(" t ")));"
+  noop 
+
+; tan
+; asin
+; acos
+; atan
+; sqrt
+
+define expt (a b)
+  if (and (Integer? a) (Integer? b))
+    set a (Integer->Flonum a)
+    set b (Integer->Flonum b)
+
+    inline-c result "= GIN_IM_FROM_INT((int)pow(GIN_NIM_GET_FLONUM(" a "), GIN_NIM_GET_FLONUM(" b ")));"
+  else:
+    if (Integer? a)
+      set a (Integer->Flonum a)
+    if (Integer? b)
+      set b (Integer->Flonum b)
+    inline-c "GIN_NEW_FLONUM(" result ", pow(GIN_NIM_GET_FLONUM(" a "), GIN_NIM_GET_FLONUM(" b ")));"
+
+; make-rectangular
+; make-polar
+; real-part
+; imag-part
+; magnitude
+; angle
+; number->string
+; string->number
+
+;;;
+;;; Fixnum
+;;;
+
+define Fixnum::make (residual: r)
+  if (Null? r)
+    inline-c "GIN_NEW_FIXNUM(" result ", 0)" 
+  else:
+    define t (first r)
+    inline-c "GIN_NEW_FIXNUM(" result ", GIN_IM_TO_SIGNED_INT(" t "))"
+
+define Fixnum? (a)
+  if (Ginger::immediate? a)
+    inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_IM_INT(" a "));"
+  else:
+    false
+
+define Fixnum->Binary (a)
+  inline-c result "= GIN_IM_FROM_BINARY(GIN_IM_TO_SIGNED_INT(" a "),20);"
+
+define! Fixnum->String (a)
+  inline-c result " = fmt_long(GIN_IM_TO_SIGNED_INT(" a "));"
+
+define! Fixnum->Flonum (a)
+  inline-c "GIN_NEW_FLONUM(" result ", (double)GIN_IM_TO_SIGNED_INT(" a "));"
+
+define! Fixnum->Char (a)
+  inline-c result "= GIN_IM_FROM_CHAR8((char)(GIN_IM_TO_SIGNED_INT(" a ")));"
+
+define! Fixnum + (a b)
+  inline-c result " = GIN_IM_FROM_INT(GIN_IM_TO_SIGNED_INT(" a ") + GIN_IM_TO_SIGNED_INT(" b "));"
+
+define! Fixnum - (a b)
+  inline-c result " = GIN_IM_FROM_INT(GIN_IM_TO_SIGNED_INT(" a ") - GIN_IM_TO_SIGNED_INT(" b "));"
+
+define! Fixnum / (a b)
+  inline-c result " = GIN_IM_FROM_INT(GIN_IM_TO_SIGNED_INT(" a ") / GIN_IM_TO_SIGNED_INT(" b "));"
+
+define! Fixnum * (a b)
+  inline-c result " = GIN_IM_FROM_INT(GIN_IM_TO_SIGNED_INT(" a ") * GIN_IM_TO_SIGNED_INT(" b "));"
+
+define! Fixnum < (a b)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IM_TO_SIGNED_INT(" a ") < GIN_IM_TO_SIGNED_INT(" b "));"
+
+define! Fixnum > (a b)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IM_TO_SIGNED_INT(" a ") > GIN_IM_TO_SIGNED_INT(" b "));"
+
+define! Fixnum >= (a b)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IM_TO_SIGNED_INT(" a ") >= GIN_IM_TO_SIGNED_INT(" b "));"
+
+define! Fixnum <= (a b)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IM_TO_SIGNED_INT(" a ") <= GIN_IM_TO_SIGNED_INT(" b "));"
+
+define! Fixnum = (a b)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IM_TO_SIGNED_INT(" a ") == GIN_IM_TO_SIGNED_INT(" b "));"
+
+;;; INTEGERS
+;;;
+
+define Integer? (a)
+  if (Fixnum? a)
+    true
+  else:
+    if (Type::eq? (type a) Integer)
+      true
+    else:
+      false
+
+define Integer->Binary (a)
+  if (Fixnum? a)
+    Fixnum->Binary a
+  else:
+    ; TODO
+    println "Bignums not supported yet"
+    exit
+
+define Integer->String (a)
+  if (Fixnum? a)
+    Fixnum->String a
+  else:
+    ; TODO
+    println "Bignums not supported yet"
+    exit
+
+define Integer->Flonum (a)
+  if (Fixnum? a)
+    Fixnum->Flonum a
+  else:
+    ; TODO
+    println "Bignums not supported yet"
+    exit
+
+define Integer->Char (a)
+  Fixnum->Char a
+
+define! Integer + (a b)
+  ; TODO - take care of overflow
+  define r (Binary::+ (Integer->Binary a) (Integer->Binary b))
+  Binary->Integer r
+
+define! Integer - (a b)
+  ; TODO - take care of overflow
+  define r (Binary::- (Integer->Binary a) (Integer->Binary b))
+  Binary->Integer r
+
+define! Integer * (a b)
+  ; TODO - take care of overflow
+  define r (Binary::* (Integer->Binary a) (Integer->Binary b))
+  Binary->Integer r
+
+define! Integer / (a b)
+  ; TODO - take care of overflow
+  define r (Binary::/ (Integer->Binary a) (Integer->Binary b))
+  Binary->Integer r
+
+define Integer < (a b)
+  Binary::< (Integer->Binary a) (Integer->Binary b)
+
+define Integer <= (a b)
+  Binary::<= (Integer->Binary a) (Integer->Binary b)
+
+define Integer > (a b)
+  Binary::> (Integer->Binary a) (Integer->Binary b)
+
+define Integer >= (a b)
+  Binary::>= (Integer->Binary a) (Integer->Binary b)
+
+define Integer = (a b)
+  Binary::eq? (Integer->Binary a) (Integer->Binary b)
+    
+;;; FLONUMS
+;;;
+
+define Flonum? (a)
+  if (Type::eq? (type a) Flonum) true
+  else: false
+
+define Flonum->Binary (a)
+  println "Flonum->Binary not implemented"
+  exit
+;  inline-c result "= GIN_IM_FROM_INT((int)GIN_NIM_GET_FLONUM(" a "));"
+
+define! Flonum->String (a)
+  inline-c result " = fmt_double(GIN_NIM_GET_FLONUM(" a "));"
+
+define Flonum->Integer (a)
+  ; TODO - check for overflow
+  inline-c result "= GIN_IM_FROM_INT((int)GIN_NIM_GET_FLONUM(" a "));"
+
+define! Flonum + (a b)
+  inline-c "GIN_NIM_SET_FLONUM(" result ", GIN_NIM_GET_FLONUM(" a ") + GIN_NIM_GET_FLONUM(" b "));"
+
+define! Flonum - (a b)
+  inline-c "GIN_NIM_SET_FLONUM(" result ", GIN_NIM_GET_FLONUM(" a ") + GIN_NIM_GET_FLONUM(" b "));"
+
+define! Flonum / (a b)
+  inline-c "GIN_NIM_SET_FLONUM(" result ", GIN_NIM_GET_FLONUM(" a ") / GIN_NIM_GET_FLONUM(" b "));"
+
+define! Flonum * (a b)
+  inline-c "GIN_NIM_SET_FLONUM(" result ", GIN_NIM_GET_FLONUM(" a ") * GIN_NIM_GET_FLONUM(" b "));"
+
+;;;
+;;; BOOLEANS
+;;;
+
+define Boolean? (a)
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_BOOL(" a "));"
+
+define Boolean->Binary (a)
+  inline-c result "= GIN_IM_FROM_BINARY(GIN_IM_TO_BOOL(" a "),22);"
+
+define Boolean->String (a)
+  if (eq? a true) 
+    "true"
+  else:
+    "false"
+
+define not (a)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IS_FALSE(" a "));"
+
+;;;
+;;; PAIRS and LISTS
+;;;
+
+define Cons? (a)
+  or (Type::eq? (type a) Cons) (Type::eq? (type a) Bcons)
+
+define bcons? (a)
+  Type::eq? (type a) Bcons
+
+define Null? (a)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IS_NULL(" a "));"
+
+define empty? (a)
+  ; TODO - empty is not really the sama as null
+  Null? a
+
+define list? (a)
+  if (Cons? a)
+    if (Null? (tail a)) true
+    else: (list? (tail a))
+  else:
+    false
+
+define pair (a b)
+  inline-c "GIN_NEW_PAIR(" result "," a "," b ");" 
+
+define cons (a b c)
+  inline-c "GIN_NEW_CONS(" result "," a "," b "," c ");" 
+
+define bcons (a b c)
+  define t (Type::index Bcons)
+  inline-c "GIN_NEW_CONS(" result "," a "," b "," c ");" 
+  inline-c "GIN_NIM_GET_TYPE(" result ") = " t ";"
+
+define first (a)
+  inline-c result "= GIN_NIM_GET_F0(" a ");"
+
+define properties (a)
+  inline-c result "= GIN_NIM_GET_F1(" a ");"
+
+define tail (a)
+  if (Cons? a)
+    inline-c result "= GIN_NIM_GET_F2(" a ");"
+  else:
+    println "Bad argument to tail"
+    exit
+
+define set-first (p a)
+  inline-c "GIN_NIM_SET_F0(" p "," a ");"
+
+define set-properties (p a)
+  inline-c "GIN_NIM_SET_F1(" p "," a ");"
+
+define set-tail (p a)
+  inline-c "GIN_NIM_SET_F2(" p "," a ");"
+
+define second (a)
+  first (tail a)
+
+define third (a)
+  first (tail (tail a))
+
+define fourth (a)
+  first (tail (tail (tail a)))
+
+define fifth (a)
+  first (tail (tail (tail (tail a))))
+
+define sixth (a)
+  first (tail (tail (tail (tail (tail a)))))
+
+define seventh (a)
+  first (tail (tail (tail (tail (tail (tail a))))))
+
+define eigth (a)
+  first (tail (tail (tail (tail (tail (tail (tail a)))))))
+
+define ninth (a)
+  first (tail (tail (tail (tail (tail (tail (tail (tail a))))))))
+
+define nth (a i)
+  if (= i 1)
+    first a
+  else:
+    nth (tail a) (- i 1)
+
+define nth-pair (a i)
+  if (= i 1)
+    a
+  else:
+    nth-pair (tail a) (- i 1)
+
+define length (a)
+  if (Null? a)
+    0
+  else:
+    + 1 (length (tail a))
+
+define last-cons (c)
+  if (Null? (tail c))
+    c
+  else:
+    last-cons (tail c)
+
+define append (a b)
+  ; TODO - currently destructive. fix it.
+  ; TODO - should be residual?
+  if (Null? a)
+    b
+  else:
+    define t (last-cons a)
+    set-tail t b
+    a
+
+define reverse (a)
+  ; TODO - provide built in faster implementation!
+  if (Null? a)
+    a
+  else:
+    append (reverse (tail a)) (list (first a))
+
+define list (residual: r)
+  r
+
+define contains? (lst a)
+  if (Null? lst) false
+  elsif: (eq? (first lst) a) true
+  else: (contains? (tail lst) a)
+
+define split-list (lst v)
+  define a (list)
+  define b (list)
+  define middle false
+  each l lst
+    if (eq? l v)
+      set middle true
+    else:
+      if (eq? middle false)
+        set a (append a (list l))
+      else:
+        set b (append b (list l))
+  pair a b
+
+define List::duplicate (lst)
+  if (Null? lst) null
+  else:
+    pair (first lst) (List::duplicate (tail lst))
+
+;;; CHARACTERS
+;;;
+
+define Char? (a)
+  if (Ginger::immediate? a)
+    inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_CHAR8(" a "));"
+  else:
+    false
+
+define Char->Binary (a)
+  inline-c result "= GIN_IM_FROM_BINARY(GIN_IM_TO_CHAR8(" a "),22);"
+
+define Char->String (a)
+  String::string a
+
+define Char->Integer (a)
+  inline-c result "= GIN_IM_FROM_INT((long)(GIN_IM_TO_CHAR8(" a ")));"
+
+define Char eq? (a b)
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IM_TO_CHAR8(" a ") == GIN_IM_TO_CHAR8(" b "));"
+
+define Char alphabetic? (a)
+  inline-c result "= GIN_IM_FROM_BOOL(isalpha(GIN_IM_TO_CHAR8(" a ")));"
+
+define Char numeric? (a)
+  inline-c result "= GIN_IM_FROM_BOOL(isdigit(GIN_IM_TO_CHAR8(" a ")));"
+
+define Char whitespace? (a)
+  inline-c result "= GIN_IM_FROM_BOOL(isspace(GIN_IM_TO_CHAR8(" a ")));"
+
+define Char upper-case? (a)
+  ; TODO
+  println "upper-case? is not implemented"
+  exit
+
+define Char lower-case? (a)
+  ; TODO
+  println "lower-case? is not implemented"
+  exit
+
+define Char upcase (a)
+  ; TODO
+  println "upcase is not implemented"
+  exit
+
+define Char downcase (a)
+  ; TODO
+  println "downcase is not implemented"
+  exit
+
+
+;;; SYMBOLS
+;;;
+
+define Symbol? (a)
+  if (Ginger::immediate? a)
+    inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_IM_SYM(" a "));"
+  else:
+    false
+
+define Symbol->Binary (a)
+  inline-c result "= GIN_IM_FROM_BINARY(GIN_IM_TO_SYM(" a "),22);"
+
+define Symbol->String (a)
+  Ginger::Symbol->String a
+
+define Symbol eq? (a b)
+;  inline-c "print_bits32(" a ");"
+;  inline-c "print_bits32(" b ");"
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IM_TO_SYM(" a ") == GIN_IM_TO_SYM(" b "));"
+
+;;; STRINGS
+;;;
+
+define String make (size)
+  define t null
+  inline-c "GIN_NEW_EMPTY_STR8(" t ");"
+  inline-c "GIN_ALLOCATE(GIN_STR_VALUE(" t "),char*,sizeof(char)*(GIN_IM_TO_INT(" size ")+1));"
+  inline-c "GIN_STR_LENGTH(" t ") = GIN_IM_TO_INT(" size ");"
+  t
+
+define String string (residual: r)
+  define t null
+  inline-c "GIN_NEW_EMPTY_STR8(" t ");"
+  define size (length r)
+  define j 0
+  inline-c "GIN_ALLOCATE(GIN_STR_VALUE(" t "),char*,sizeof(char)*(GIN_IM_TO_INT(" size ")+1));"
+  inline-c "GIN_STR_LENGTH(" t ") = GIN_IM_TO_INT(" size ");"
+  each i r
+    inline-c "GIN_STR_VALUE(" t ")[GIN_IM_TO_INT(" j ")] = (char)GIN_IM_TO_CHAR8(" i ");"
+    ++ j
+  inline-c "GIN_STR_VALUE(" t ")[GIN_IM_TO_INT(" size ")] = 0;"
+  t
+
+define String join (string-list (delimiter " ") (grammar 'infix))
+  ; delimiter defaults to a single space " "
+  ; ignore grammar: default to SRFI 13 infix behavior
+  ; TODO - Add grammar options
+  define z ""
+  define len (length string-list)
+  define loop-count 0
+  while (< loop-count (- len 1))
+    define str (nth string-list (+ loop-count 1))
+    set z (String::append z str delimiter)
+    ++ loop-count
+  if (< loop-count len)
+    set z (String::append z (last string-list))
+  z
+
+define String? (a)
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_STR8(" a "));"
+
+define String->Binary (a)
+  ; TODO
+  println "String->Binary not implemented"
+  exit
+
+define String length (a)
+  inline-c result "= GIN_IM_FROM_INT(GIN_STR_LENGTH(" a "));"
+
+define String get-Char (a k)
+  inline-c result "= GIN_IM_FROM_CHAR8(GIN_STR_VALUE(" a ")[GIN_IM_TO_INT(" k ")]);"
+
+define String first (a)
+  String::get-Char a 0
+
+define String last (a)
+  String::get-Char a (- (String::length a) 1)
+
+define String set-Char (a k c)
+
+  inline-c "GIN_STR_VALUE(" a ")[GIN_IM_TO_INT(" k ")] = GIN_IM_TO_CHAR8(" c ");"
+
+define String eq? (a b)
+  if (= (String::length a) (String::length b))
+    inline-c result "= GIN_IM_FROM_BOOL(strncmp(GIN_STR_VALUE(" a "), GIN_STR_VALUE(" b "), GIN_STR_LENGTH(" a ")) == 0);"
+  else:
+    false
+
+define String compare (a b (with-locale false) (with-case true))
+  ; TODO
+  println "String::compare not implemented."
+  exit
+
+define String substring (a i j)
+  ; where:
+  ;  a = the string
+  ;  i = the start position
+  ;  j = the number of characters to get (including i)
+  define t false
+  define total-length (- j i)
+  inline-c "GIN_NEW_EMPTY_STR8(" result ");"
+  inline-c "GIN_ALLOCATE(GIN_STR_VALUE(" result "), char*, sizeof(char)*(GIN_IM_TO_INT(" total-length ") + 1));"
+  inline-c "strncpy(&(GIN_STR_VALUE(" result ")[0]),&(GIN_STR_VALUE(" a ")[GIN_IM_TO_INT(" i ")]),GIN_IM_TO_INT(" total-length "));"
+  inline-c "GIN_STR_VALUE(" result ")[GIN_IM_TO_INT(" total-length ")] = 0;"
+  inline-c "GIN_STR_LENGTH(" result ") = GIN_IM_TO_INT(" total-length ");"
+  
+define String append (residual: r)
+  define total-length 0
+  define z false
+  each i r
+    set total-length (+ (String::length i) total-length)
+  inline-c "GIN_NEW_EMPTY_STR8(" z ");"
+  inline-c "GIN_ALLOCATE(GIN_STR_VALUE(" z "),char*,sizeof(char)*(GIN_IM_TO_INT(" total-length ")+1));"
+  inline-c "GIN_STR_LENGTH(" z ") = GIN_IM_TO_INT(" total-length ");"
+  define j 0
+  each i r
+    inline-c "strncpy(&(GIN_STR_VALUE(" z ")[GIN_IM_TO_INT(" j ")]),GIN_STR_VALUE(" i "),GIN_STR_LENGTH(" i "));"
+    set j (+ j (String::length i))
+  inline-c "GIN_STR_VALUE(" z ")[GIN_IM_TO_INT(" total-length ")] = 0;"
+  z
+
+define String::put-string (s)
+  println "String::put-string"
+  define len (String::length s)
+  define i 0
+  while (< i len)
+    inline-c "printf(\"%c\", GIN_STR_VALUE(" s ")[GIN_IM_TO_INT(" i ")]);"
+    ++ i
+  println len i
+  println ""
+
+define String replace (target replacement)
+  define len (String::length target)
+  println "String::replace - Not implemented yet!"
+
+define String split (str ch)
+  define len (String::length str)
+  define split (a b)
+    if (>= b len)
+      if (= a b) (list "")
+      else: (pair (String::substring str a b) null)
+    elsif: (Char::eq? ch (String::get-Char str b))
+      if (= a b)
+        pair "" (split (+ 1 a) (+ 1 b))
+      else:
+        pair (String::substring str a b) (split (+ 1 b) (+ 1 b))
+    else:
+      split a (+ 1 b)
+  split 0 0
+
+; Path functions
+define base-name (str)
+  define comp (String::split str ascii-period)
+  define base-file-name (String::join (reverse (tail (reverse comp))) ".")
+  base-file-name
+
+
+;;; Vectors
+;;;
+;;; Ginger vectors, unlike Scheme's, are dynamic arrays.
+
+; TODO: define! Vector make ((size -1) residual: r)
+define Vector make (residual: r)
+  define size (length r)
+  define tmp 0
+  define j 0
+  inline-c "GIN_ALLOCATE(" tmp ", GIN_OBJ, sizeof(GingerVector));"
+  inline-c "((GingerVector*)(" tmp "))->type_index = GIN_TYPE_VECTOR;"
+  inline-c "((GingerVector*)(" tmp "))->length = GIN_IM_TO_INT(" size ");"
+  if (> size 0)
+    inline-c "GIN_ALLOCATE(((GingerVector*)(" tmp "))->value, GIN_OBJ*, sizeof(GIN_OBJ)*(GIN_IM_TO_INT(" size ")));"
+    each i r
+      inline-c "((GingerVector*)(" tmp "))->value[GIN_IM_TO_INT(" j ")] = " i ";"
+      ++ j
+  else:
+    inline-c "((GingerVector*)(" tmp "))->value = 0;"
+  tmp
+
+define Vector push (self a)
+  define tmp false
+  inline-c "GIN_ALLOCATE(" tmp ", GIN_OBJ, sizeof(GIN_OBJ)*(((GingerVector*)(" self "))->length + 1));"
+  inline-c "memcpy(" tmp ", ((GingerVector*)(" self "))->value, sizeof(GIN_OBJ)*(((GingerVector*)(" self "))->length));"
+  inline-c "((GingerVector*)(" self "))->value = (GIN_OBJ*)(" tmp ");"
+  inline-c "((GingerVector*)(" self "))->value[((GingerVector*)(" self "))->length] = " a ";"
+  inline-c "((GingerVector*)(" self "))->length++;"
+
+define Vector? (self)
+  Type::eq? (type self) Vector
+
+define Vector get (self index)
+  inline-c result " = ((GingerVector*)(" self "))->value[GIN_IM_TO_INT(" index ")];"
+
+define Vector set (self index value)
+  inline-c "((GingerVector*)(" self "))->value[GIN_IM_TO_INT(" index ")] = " value ";"
+  true
+
+define Vector length (self)
+  inline-c result " = GIN_IM_FROM_INT(((GingerVector*)(" self "))->length);"
+
+define Vector->list (self)
+  println "Vector->list is not implemented."
+  exit
+
+define Vector fill (self value)
+  println "Vector::fill is not implemented."
+  exit
+
+define Vector->String (a)
+  ; TODO - this should use Vector->list (but Vector->list isn't implemented)
+  ;   this also needs all the other to-str functions because a vector can
+  ;   hold anything
+  "*vector*"
+
+;;; DICTS
+;;;
+
+define Dict make (residual: d)
+  define dict 0
+  inline-c "GIN_ALLOCATE(" dict ", void*, sizeof(GingerDictionary));"
+  inline-c "GIN_NIM_GET_TYPE(" dict ") = GIN_TYPE_DICT;"
+  ; arguments should be [key1 value1 ... keyN valueN]
+  define len (length d)
+  if (not (= (modulo len 2) 0))
+    println "dict: not provided with an even number of key-value pairs"
+    exit
+  
+  define loop-count 0
+  while (< loop-count len)
+    define key (nth d (+ loop-count 1))
+    define value (nth d (+ loop-count 2))
+    Dict::set dict key value
+    set loop-count (+ loop-count 2)
+
+  dict
+
+define Dict->String (a)
+  define b false
+  inline-c b " = fmt_ulong((unsigned long)" a ");"
+  String::append "#[Dict " b "]"
+
+define Dict? (self)
+  Type::eq? (type self) Dict
+
+define Dict->keys (self)
+  inline-c result " = gin_dict_keys(" self ", 1);"
+
+define Dict set (self key value)
+  define i (pair key value)
+  inline-c "gin_dict_insert(" self ", " i ");"
+
+define Dict get (self key)
+  define r 0
+  inline-c r "= gin_dict_contains(" self ", " key ");"
+  if (Cons? r)
+    tail r
+  else:
+    false
+
+define Dict contains? (self key)
+  define r 0
+  inline-c r "= gin_dict_contains(" self ", " key ");"
+  if (Cons? r)
+    true
+  else:
+    false
+
+define Dict remove (d key)
+  ; TODO
+  println "Dict::remove not implemented."
+  exit
+
+define Dict clear (d)
+  ; TODO
+  println "Dict::clear not implemented."
+  exit
+  
+define Dict size (d)
+  ; TODO
+  println "Dict::size not implemented."
+  exit
+
+;;; FUNCTIONS
+;;;
+
+define Function? (self)
+  Type::eq? (type self) Function
+
+define Function->String (a)
+  ; TODO - print function name
+  "#[Function ***]"
+
+;;; MISC
+;;;
+
+define Null->Binary (a)
+  0
+
+define Foreign->String (a)
+  define b false
+  inline-c b " = fmt_ulong((unsigned long)" a ");"
+  inline-c "slag_analyze(mm, " a ");"
+  String::append "#[Foreign " b "]"
+
+;;; STREAMS
+;;;
+
+; Scheme R5RS style ports (only in Ginger they're streams)
+
+define current-input-stream 0
+define current-output-stream 0
+
+define input-stream (inline-c result "= GIN_IM_FROM_INT(GIN_INPUT_STREAM_MODE);")
+define output-stream (inline-c result "= GIN_IM_FROM_INT(GIN_OUTPUT_STREAM_MODE);")
+
+define input-stream? (obj)
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_INPUT_STREAM(" obj "));"
+
+define output-stream? (obj)
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_OUTPUT_STREAM(" obj "));"
+
+define open-file (filename mode)
+  ; This function is not in R5RS
+  if (eq? mode input-stream)
+    inline-c "GIN_NEW_STREAM(" result ", fopen(GIN_STR_VALUE(" filename "), \"r\"), 1);"
+  else:
+    inline-c "GIN_NEW_STREAM(" result ", fopen(GIN_STR_VALUE(" filename "), \"w\"), 0);"
+
+define open-input-file (filename)
+  set current-input-stream (open-file filename input-stream)
+
+define open-output-file (filename)
+  ; R5RS: If a file with the given name already exists, the effect is unspecified.
+  ; In our case an existing file is truncated to zero length.
+  set current-output-stream (open-file filename output-stream)
+
+define close-stream (stream)
+  ; This function is not in R5RS
+  ; C doesn't really make a distinction between 
+  ; read/write when closing a file but R5RS does.
+  ; Ignore close on string streams.
+  ; TODO - fclose returns an integer (ignore it?)
+  inline-c "if (GIN_IS_STREAM(" stream ")) fclose(GIN_NIM_GET_STREAM(" stream  "));"
+
+define close-input-stream (stream)
+  close-stream stream
+
+define close-output-stream (stream)
+  close-stream stream
+
+define read-char ((stream current-input-stream))
+  inline-c " \
+    if (GIN_IS_STREAM(" stream ")) \
+      " result "= GIN_IM_FROM_CHAR8(fgetc(GIN_NIM_GET_STREAM(" stream "))); \
+    if (GIN_IS_STRING_STREAM(" stream ")) { \
+      if (GIN_NIM_GET_STRING_STREAM_LENGTH(" stream ") == GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")) { \
+        " result "= GIN_IM_FROM_CHAR8(EOF); \
+      } else { \
+        " result "= GIN_IM_FROM_CHAR8(GIN_STR_VALUE(" stream ")[GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")]); \
+        GIN_NIM_SET_STRING_STREAM_POSITION(" stream ",((long)GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")+1)); \
+      } \
+    }"
+
+define peek-char ((stream current-input-stream))
+  define c 0
+  inline-c " \
+    if (GIN_IS_STREAM(" stream ")) { \
+      " c "= GIN_IM_FROM_CHAR8(fgetc(GIN_NIM_GET_STREAM(" stream "))); \
+      " result "= GIN_IM_FROM_CHAR8(ungetc( \
+      GIN_IM_TO_CHAR8(" c "), \
+      GIN_NIM_GET_STREAM(" stream "))); \
+    } \
+    if (GIN_IS_STRING_STREAM(" stream ")) { \
+      if (GIN_NIM_GET_STRING_STREAM_LENGTH(" stream ") == GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")) { \
+        " result "= GIN_IM_FROM_CHAR8(EOF); \
+      } else \
+        " result "= GIN_IM_FROM_CHAR8(GIN_STR_VALUE(" stream ")[GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")]); \
+    }"
+
+define unget-char (stream c)
+  inline-c " \
+    if (GIN_IS_STREAM(" stream ")) { \
+      " result "= GIN_IM_FROM_CHAR8(ungetc( \
+      GIN_IM_TO_CHAR8(" c "), \
+      GIN_NIM_GET_STREAM(" stream "))); \
+    } else if (GIN_IS_STRING_STREAM(" stream ")) { \
+      GIN_NIM_SET_STRING_STREAM_POSITION(" stream ",((long)GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")-1)); \
+      GIN_STR_VALUE(" stream ")[GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")] = GIN_IM_TO_CHAR8(" c "); \
+      " result "= GIN_IM_FROM_CHAR8(GIN_STR_VALUE(" stream ")[GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")]); \
+    } "
+
+define eof-object? (obj)
+  inline-c result "= GIN_IM_FROM_BOOL(" obj " == GIN_IM_FROM_CHAR8(EOF));"
+
+define char-ready? (stream)
+  println "char-ready? is not implemented."
+  exit
+
+define newline ((stream current-output-stream))
+  write-char stream ascii-newline
+
+define write-char (stream char)
+  ; TODO - fputc returns integer (ignore it?)
+  ; TODO - if this function isn't working correctly it's because 
+  ;  compiling with -Wall was warning about not having parentheses
+  ;  around shifts with + or -. I put a bunch of parens around the
+  ;  shifts to shut the compiler up. They are likely wrong...
+  ;  (We need more test coverage)
+  inline-c " \
+    if (GIN_IS_STREAM(" stream ")) \
+      fputc(GIN_IM_TO_CHAR8(" char "), GIN_NIM_GET_STREAM(" stream ")); \
+    if (GIN_IS_STRING_STREAM(" stream ")) { \
+      GIN_NEW_EMPTY_STRING_STREAM(" result ", GIN_OUTPUT_STREAM_MODE); \
+      GIN_STR_VALUE(" result ") = GIN_STR_VALUE(" stream "); \
+      GIN_ALLOCATE(GIN_STR_VALUE(" stream "),char*,sizeof(char)*(((GIN_NIM_GET_STRING_STREAM_LENGTH(" stream ")) + 1))); \
+      strncpy(&(GIN_STR_VALUE(" stream ")[0]),GIN_STR_VALUE(" result "),GIN_NIM_GET_STRING_STREAM_LENGTH(" stream ")); \
+      GIN_NIM_SET_STRING_STREAM_LENGTH(" stream ", ((GIN_NIM_GET_STRING_STREAM_LENGTH(" stream ")) + 1)); \
+      GIN_STR_VALUE(" stream ")[GIN_NIM_GET_STRING_STREAM_LENGTH(" stream ")-1] = (char)GIN_IM_TO_CHAR8(" char "); \
+      GIN_NIM_SET_STRING_STREAM_POSITION(" stream ",((long)GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")+1)); \
+    }"
+
+; Seek & Tell for random-acess streams
+define SEEK-SET 0
+define SEEK-CUR 1
+define SEEK-END 2
+define stream-seek (stream offset whence)
+  ; whence one of SEEK_SET (offset from start [only positive numbers make sense])
+  ; SEEK_CUR (offset from current position [+/- distance from position])
+  ; SEEK_END (offset from end [only negative numbers make sense])
+  ; TODO - fseek returns an integer (ignore it?)
+  inline-c " \
+    if (GIN_IS_STREAM(" stream ")) \
+      fseek(GIN_NIM_GET_STREAM(" stream "), \
+        GIN_IM_TO_INT(" offset "), \
+        GIN_IM_TO_INT(" whence ") \
+        ); \
+    if (GIN_IS_STRING_STREAM(" stream ")) { \
+      if (GIN_IM_TO_INT(" whence ") == SEEK_SET) GIN_NIM_SET_STRING_STREAM_POSITION(" stream ", GIN_IM_TO_INT(" offset ")); \
+      if (GIN_IM_TO_INT(" whence ") == SEEK_CUR) \
+        GIN_NIM_SET_STRING_STREAM_POSITION(" stream ", \
+          ((long)GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")+GIN_IM_TO_INT(" offset "))); \
+      if (GIN_IM_TO_INT(" whence ") == SEEK_END) \
+        GIN_NIM_SET_STRING_STREAM_POSITION(" stream ", \
+          ((long)GIN_NIM_GET_STRING_STREAM_LENGTH(" stream ")+GIN_IM_TO_INT(" offset "))); \
+    }"
+
+define stream-tell (stream)
+  inline-c " \
+   if (GIN_IS_STREAM(" stream ")) \
+     " result "= GIN_IM_FROM_INT(ftell(GIN_NIM_GET_STREAM(" stream "))); \
+   if (GIN_IS_STRING_STREAM(" stream ")) \
+     " result "= GIN_IM_FROM_INT(GIN_NIM_GET_STRING_STREAM_POSITION(" stream "));"
+
+;;; Streams (see SRFI 6)
+;;;
+
+define Stream? (a)
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_STREAM(" a "));"
+
+define String-Stream? (a)
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_STRING_STREAM(" a "));"
+
+define Stream->String (a)
+  define b false
+  inline-c b " = fmt_ulong((unsigned long)" a ");"
+  String::append "#[Stream " b "]"
+
+define String-Stream->String (a)
+  define b false
+  inline-c b " = fmt_ulong((unsigned long)" a ");"
+  String::append "#[String-Stream " b "]"
+
+define open-input-string (str)
+  ; Takes a string and returns an input port
+  ; delivers characters from the string.
+  inline-c "GIN_NEW_STRING_STREAM(" result ", GIN_STR_VALUE(" str "), GIN_INPUT_STREAM_MODE);"
+
+define open-output-string ()
+  ; Returns an output port that will accumulate
+  ; characters for retrieval by get-output-string.
+  inline-c "GIN_NEW_EMPTY_STRING_STREAM(" result ", GIN_OUTPUT_STREAM_MODE);"
+
+define get-output-string (out-stream)
+  ; Given an output port created by open-output-string,
+  ; returns a string consisting of the characters that 
+  ; have been output to the port so far.
+  inline-c "GIN_NEW_STR8(" result ", GIN_STR_VALUE(" out-stream "));"
+
+define string-output-stream? (stream)
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_OUTPUT_STREAM(" stream ")&&GIN_IS_STRING_STREAM(" stream "));"
+
+; Environment
+define getenv (name (default ""))
+  inline-c result "= gin_getenv(" name ", " default ");"
+
+define file-exists? (filename)
+  inline-c result "= gin_file_exists(" filename ");"
+
+
+; todo - make this an intrinsic and optimize it for each.
+define range (i j)
+   if (= i j) (list)
+   else:
+     if (> i j)
+       pair i (range (- i 1) j)
+     else:
+       pair i (range (+ i 1) j)
+
+; print-term, print and println are for human readable output
+define print-term (residual: z)
+  define output false
+  define term false
+
+  if (and (eq? (length z) 2) (Stream? (first z)))
+    set output (first z)
+    set term (second z)
+  elsif: (eq? (length z) 1)
+    set term (first z)
+  else:
+    println "Invalid number of terms to display."
+    exit
+
+  define print-primitive (term)
+    if (eq? output false)
+      inline-c "fprintf(stdout,\"%s\", GIN_STR_VALUE(" term "));"
+    else:
+      if (String-Stream? output)
+        println "print-term String-Stream not implemented."
+        exit
+      else:
+        inline-c "fprintf(GIN_NIM_GET_STREAM(" output "),\"%s\", GIN_STR_VALUE(" term "));"
+
+  if (Null? term) (print-primitive "null")
+  elsif: (list? term)
+    print-primitive "("
+    each i term
+      print-term i
+      print-primitive " "
+    print-primitive ")"
+  elsif: (Cons? term)
+    print-primitive "("
+    print-term (first term)
+    print-primitive " . . "
+    print-term (tail term)
+    print-primitive ")"
+  elsif: (String? term) 
+    print-primitive term
+  elsif: (Binary? term) (print-primitive (Binary->String term))
+  elsif: (Function? term) (print-primitive (Function->String term))
+  elsif: (Char? term) (print-primitive (Char->String term))
+  elsif: (Boolean? term) (print-primitive (Boolean->String term))
+  elsif: (Fixnum? term) (print-primitive (Fixnum->String term))
+  elsif: (Integer? term) (print-primitive (Fixnum->String term))
+  elsif: (Flonum? term) (print-primitive (Flonum->String term))
+;  elsif: (Stream? term) (print-primitive (Stream->String term))
+;  elsif: (String-Stream? term) (print-primitive (String-Stream->String term))
+  elsif: (Vector? term) (print-primitive (Vector->String term))
+  elsif: (Dict? term) (print-primitive (Dict->String term))
+;  elsif: (Class? term) (print-primitive (class-to-str term))
+  elsif: (Symbol? term) (print-primitive (Symbol->String term))
+  else: (print-primitive (Foreign->String term))
+
+define print (residual: terms)
+  if (and (> (length terms) 0) (Stream? (first terms)))
+    each i (tail terms)
+      print-term (first terms) i
+  else:
+    each i terms
+      print-term i
+
+define println (residual: terms)
+  if (and (> (length terms) 0) (Stream? (first terms)))
+    each i (tail terms)
+      print-term (first terms) i
+    print-term (first terms) ascii-newline
+  else:
+    each i terms
+      print-term i
+    print-term ascii-newline
+
+; write-term, write and writeln are for human readable output
+define write-term (residual: z)
+  define output false
+  define term false
+
+  if (and (eq? (length z) 2) (Stream? (first z)))
+    set output (first z)
+    set term (second z)
+  elsif: (eq? (length z) 1)
+    set term (first z)
+  else:
+    println "Invalid number of terms to display."
+    exit
+
+  define write-primitive (term)
+    if (eq? output false)
+      inline-c "fprintf(stdout,\"%s\", GIN_STR_VALUE(" term "));"
+    else:
+      if (String-Stream? output)
+        println "write-term String-Stream not implemented."
+        exit
+      else:
+        inline-c "fprintf(GIN_NIM_GET_STREAM(" output "),\"%s\", GIN_STR_VALUE(" term "));"
+
+  if (Null? term) (write-primitive "null")
+  elsif: (list? term)
+    write-primitive "("
+    each i term
+      write-term i
+      write-primitive " "
+    write-primitive ")"
+  elsif: (Cons? term)
+    write-primitive "("
+    write-term (first term)
+    write-primitive " . . "
+    write-term (tail term)
+    write-primitive ")"
+  elsif: (String? term) 
+    write-primitive "\""
+    write-primitive term
+    write-primitive "\""
+  elsif: (Binary? term) (write-primitive (Binary->String term))
+  elsif: (Function? term) (write-primitive (Function->String term))
+  elsif: (Char? term) (write-primitive (Char->String term))
+  elsif: (Boolean? term) (write-primitive (Boolean->String term))
+  elsif: (Fixnum? term) (write-primitive (Fixnum->String term))
+  elsif: (Integer? term) (write-primitive (Fixnum->String term))
+  elsif: (Flonum? term) (write-primitive (Flonum->String term))
+;  elsif: (Stream? term) (write-primitive (Stream->String term))
+;  elsif: (String-Stream? term) (write-primitive (String-Stream->String term))
+  elsif: (Vector? term) (write-primitive (Vector->String term))
+  elsif: (Dict? term) (write-primitive (Dict->String term))
+;  elsif: (Class? term) (write-primitive (class-to-str term))
+  elsif: (Symbol? term) (write-primitive (Symbol->String term))
+  else: (write-primitive (Foreign->String term))
+
+define write (residual: terms)
+  if (and (> (length terms) 0) (Stream? (first terms)))
+    each i (tail terms)
+      write-term (first terms) i
+  else:
+    each i terms
+      write-term i
+
+define writeln (residual: terms)
+  if (and (> (length terms) 0) (Stream? (first terms)))
+    each i (tail terms)
+      write-term (first terms) i
+    write-term (first terms) ascii-newline
+  else:
+    each i terms
+      write-term i
+    write-term ascii-newline
+
+define print-properties (cell)
+  println "{"
+  println "  parent => " (<term>::get cell 'parent)
+  println "  head => " (<term>::get cell 'head)
+  println "  type => " (<term>::get cell 'type)
+  println "  paren-balance => " (<term>::get cell 'paren-balance)
+  println "  parse-indent => " (<term>::get cell 'parse-indent)
+  println "  line => " (<term>::get cell 'line)
+  println "  column => " (<term>::get cell 'column)
+  println "  begin => " (<term>::get cell 'begin)
+  println "}"
+
+define print-dictionary (dict)
+  ; TODO - this causes a bus error, why?
+  println "{"
+  each key (Dict->keys dict)
+    println "  " key " => " (Dict::get dict key)
+  println "}"
+
+define apply (fn args)
+  inline-c "CALLNDYNAMIC(" fn ", next_seed, " result ", " args ");"
+  inline-c "next_seed++;"
+
+define command-line ()
+  define i 0
+  define r null
+  inline-c i " = GIN_IM_FROM_INT(gin_argc);"
+  while (> i 0)
+    define str false
+    -- i
+    inline-c "GIN_NEW_STR8(" str ",gin_argv[GIN_IM_TO_INT(" i ")]);"
+    set r (pair str r)
+  r
+
+define exit ()
+  inline-c "exit(0);"
+
+define <term> make (parent type parse-indent line column value)
+  cons value (Dict::make 'parent parent 'head null 'type type 'paren-balance 0 'parse-indent parse-indent 'line line 'column column 'begin false) null
+
+define <term> get-value (obj)
+  first obj
+
+define <term> get-children (obj)
+  tail obj
+
+define <term> set-value (obj value)
+  set-first obj value
+
+define <term> set-children (obj children)
+  set-tail obj children
+
+define <term> get (obj key)
+  if (Null? (properties obj)) false
+  elsif: (eq? (properties obj) false) false
+  else:
+    Dict::get (properties obj) key
+
+define <term> set (obj key value)
+  Dict::set (properties obj) key value
+
+; TODO: REWRITE THESE A BIT
+
+define <term> function-definition? (self)
+  if (<term>::definition? self)
+    define terms (<term>::get-children self)
+    if (= (length terms) 4)
+      true
+    else:
+      false
+  else:
+    false
+
+define <term> method-definition? (self)
+  if (<term>::definition? self)
+    define terms (<term>::get-children self)
+    if (= (length terms) 5)
+      true
+    else:
+      false
+  else:
+    false
+
+define <term> get-definition-name (self)
+  define terms (<term>::get-children self)
+  if (<term>::method-definition? self)
+    String::append (<term>::get-value (second terms)) "::" (<term>::get-value (third terms))
+  else:
+    <term>::get-value (second terms)
+
+define <term> get-definition-body (self)
+  define terms (<term>::get-children self)
+  if (<term>::method-definition? self)
+    fifth terms
+  else:
+    fourth terms
+
+define <term> get-definition-arguments (self)
+  define terms (<term>::get-children self)
+  if (<term>::method-definition? self)
+    fourth terms
+  elsif: (<term>::function-definition? self)
+    third terms
+  else:
+    false
+
+define <term> get-parent-function (f)
+  define get-f (v)
+    if (eq? v false)
+      false
+    else:
+      if (<term>::function-definition? v)
+        v
+      elsif: (<term>::method-definition? v)
+        v
+      else:
+        get-f (<term>::get v 'parent)
+  get-f (<term>::get f 'parent)
+
+define <term> definition-symbol? (v)
+  if (and (eq? (<term>::get v 'type) 'symbol) (or (String::eq? (<term>::get-value v) "define") (String::eq? (<term>::get-value v) "define!")))
+    true
+  else:
+    false
+
+define <term> each-loop? (v)
+  if (and (eq? (<term>::get v 'type) 'symbol) (String::eq? (<term>::get-value v) "each"))
+    true
+  else:
+    false
+
+define <term> definition? (f)
+  if (not (eq? (<term>::get f 'type) 'group))
+    false
+  else:
+    define terms (<term>::get-children f)
+    if (>= (length terms) 2)
+      if (<term>::definition-symbol? (first terms))
+        true
+      else:
+        false
+    else:
+      false
+
+define <term> immutable-definition? (f)
+  define terms (<term>::get-children f)
+  define v (first terms)
+  if (and (eq? (<term>::get v 'type) 'symbol) (String::eq? (<term>::get-value v) "define!"))
+    true
+  else:
+    false
+
+; TODO - for this to work, we need to embed at least the function signatures in C.
+define fix-parameters (function-def residual: r)
+
+  define original-parameters (tail r)
+  define function (first r)
+
+  ; The new list of parameters without names attached
+  define new-parameters (list)
+
+  ; The list of required parameters as extracted from the function signature
+  define required-parameters (list)
+
+  ; The list of optional parameters as extracted from the function signature
+  define optional-parameters (list)
+
+  define anon-first true
+
+  ; Create the required parameters list
+  define has-residual false
+
+  each a (<term>::get-children (<term>::get-definition-arguments function-def))
+    if (and (eq? (<term>::get a 'type) 'symbol) (not has-residual))
+      ; The parameter is a symbol and we have not seen a residual keyword.
+      ; So..  We add it as a required parameter.
+      set required-parameters (append required-parameters (list a))
+    elsif: (and (eq? (<term>::get a 'type) 'group) (not has-residual))
+      ; The parameter is a group and we have not seen a residual keyword.
+      ; So.. We add the first term as an optional parameter.
+      define t (first (<term>::get-children a))
+      set optional-parameters (append optional-parameters (list a))
+    elsif: (and (eq? (<term>::get a 'type) 'label) (String::eq? (<term>::get-value a) "residual:"))
+      ; We set the residual keyword.  The next symbol won't be added to either list.
+      set has-residual true
+
+  define find-named-parameter (plst a)
+    if (Null? plst) false
+    elsif: (and (eq? (<term>::get (first plst) 'type) 'label) (String::eq? (<term>::get-value (first plst)) (String::append a ":")))
+      ; TODO: fails if xxx: is the last term in the list.
+      pair (first plst) (second plst)
+    else:
+      find-named-parameter (tail plst) a
+
+;   define remove-named-parameter (plst a)
+;     if (Null? plst)
+;       plst
+;     elsif: (and (eq? (<term>::get (first plst) 'type) 'label) (String::eq? (<term>::get-value (first plst)) a))
+;       remove-named-parameter (tail (tail plst)) a
+;     else:
+;       pair (first plst) (remove-named-parameter (tail plst) a)
+
+;   ; Fill the required parameters in the new-parameters list.
+;   each a required-parameters
+;     define named-argument (find-named-parameter original-parameters (<term>::get-value a))
+;     ; println named-argument
+;     if named-argument
+;       ; 1. See if this argument is named in the call.
+;       ; if it is, then insert an unnamed call now.
+;       ; Then remove it from the old parameters.
+;       ; add new-parameters named-argument
+;       set new-parameters (append new-parameters (list (tail named-argument)))
+;       ; remove original-parameters named-argument
+;       set original-parameters (remove-named-parameter original-parameters (<term>::get-value (first named-argument)))
+;       set anon-first false
+;     elsif: (and (> (length original-parameters) 0) (not (eq? (<term>::get (first original-parameters) 'type) 'label))) 
+;       ; 2. See if there is an unnamed parameter.  It must be this one..
+;       ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
+;       if (eq? anon-first false)
+;         println "Named arguments must follow unnamed arguments!"
+;         exit
+;       set new-parameters (append new-parameters (list (first original-parameters)))
+;       set original-parameters (tail original-parameters)
+;     else:
+;       ; This was a required arg but we didn't find a named term or an anon term that matched.
+;       println "No matching term found (req)"
+;       exit
+
+;   if (> (length required-parameters) (length new-parameters))
+;     ; TODO - better output state function, line and which parameters were missing.
+;     println "Some required parameters missing"
+;     exit
+
+;   ; TODO - Make this a LOT simpler - pass a zero for each parameter.  Let the function fill out the parameter IF it's zero.
+;   each a optional-parameters
+;     define named-argument (find-named-parameter original-parameters (<term>::get-value (first (<term>::get-children a))))
+;     if named-argument
+;       set new-parameters (append new-parameters (list (tail named-argument)))
+;       set original-parameters (remove-named-parameter original-parameters (<term>::get-value (first named-argument)))
+;       set anon-first false
+;     elsif: (and (> (length original-parameters) 0) (not (eq? (<term>::get (first original-parameters) 'type) 'label))) 
+;       ; 2. See if there is an unnamed parameter.  It must be this one..
+;       ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
+;       if (eq? anon-first false)
+;         println "Named arguments must follow unnamed arguments!"
+;         exit
+;       set new-parameters (append new-parameters (list (first original-parameters)))
+;       set original-parameters (tail original-parameters)
+;     else:
+;       ; This was an optional argument that was not given..
+;       ; original parameters doesn't change. but we add it to new parameters
+;       ; TODO - BUG - In the next section when we look up the lexical path of the "default value"
+;       ; we look it up using the calling function's lexical scope.  We should look it up using the called
+;       ; function's lexical scope.  The difference in behavior would be noticeable when using closures but
+;       ; also other common situations.
+;       ;
+;       ; define z 3
+;       ; define print-z ((a z))
+;       ;   println a
+;       ; define foo ()
+;       ;   define z 4
+;       ;   print-z
+;       ; foo
+;       ;
+;       ; should print 3! but it prints 4.
+
+;       set new-parameters (append new-parameters (list (second (<term>::get-children a))))
+
+;   ; The next term must be the residual or nothing..
+;   if has-residual
+;     ; handle the residual..  The remaining arguments are turned into a list.
+;     define d (<term>::make false 'residual 0 0 0 original-parameters)
+;     if (= (length new-parameters) 0)
+;       set new-parameters (list d)
+;     else:
+;       set new-parameters (append new-parameters (list d))
+;   elsif: (= (length original-parameters) 0)
+;     ; Nothing in the original parameters so do nothing..
+;     noop
+;   else:
+;     println "Assertion - No residual and there are left over terms.."
+;     exit
+;   ; NOW..  use CALLNDYNAMIC and pass these parameters..
+
+define ascii-mult ascii-asterik
+define ascii-equals ascii-equal
+
+define head (a)
+  first a
+
+define last (a)
+  nth a (length a)
+
+define last-char false
+define get-char (input)
+  require (input-stream? input)
+  ensure (or (eos-object? result) (Char? result))
+  if (not (last-char))
+    ; if its empty then get it from input
+    read-char input
+  else:
+    ; if its not empty then ...
+    if (Char? last-char)
+      ; if its just a char then grab it and reset buffer
+      define current-char last-char
+      set last-char false
+      current-char
+    else:
+      ; if its a string then ...
+      define current-char (String::first last-char)
+      if (= (String::length last-char) 2)
+        ; if this is the last time it will be a string
+        set last-char (String::first (String::rest last-char))
+      else:
+        ; otherwise there is more string left over
+        set last-char (String::rest last-char)
+      current-char
+
+; define unget-char (input c)
+;   require (input-stream? input)
+;   if (not (last-char))
+;     ; if its empty then just set it
+;     set last-char c
+;   else:
+;     ; if its not empty then add to the frount of it
+;     set last-char (new-string c last-char)
+
+define Char->digit (v (b 10))
+  require (Integer? b)
+  require (Char? v)
+  ensure (Number? result)
+  define c
+    if (< b 2)
+      false
+    elsif: (> b 36)
+      false
+    elsif: (>= (Char->Integer v) (Char->Integer ascii-a))
+      + (- (Char->Integer v) (Char->Integer ascii-a)) 10
+    elsif: (>= (Char->Integer v) (Char->Integer ascii-A))
+      + (- (Char->Integer v) (Char->Integer ascii-A)) 10
+    elsif: (>= (Char->Integer v) (Char->Integer ascii-0))
+      - (Char->Integer v) (Char->Integer ascii-0)
+    else: false
+  if (not c) false
+  elsif: (< c b) c
+  else: false
+
+define Char digit? (v b)
+  require (Integer? b)
+  require (Char? v)
+  if (not (Char->digit v b)) false
+  else: true
+
+define eos-object? (obj)
+  inline-c result "= GIN_IM_FROM_BOOL(" obj " == GIN_IM_FROM_CHAR8(EOF));"
+
+define eos? (input)
+  eos-object? (peek-char input)
+
+define Char eol? (c)
+  require (Char? c)
+  if (Char::eq? c ascii-lf) true
+  elsif: (Char::eq? c ascii-cr) true
+  elsif: (Char::eq? c ascii-newline) true  ; could be a \n 
+  else: false
+
+define new-string (a b)
+  if (and (String? a) (String? b)) (String::append a b)
+  elsif: (and (String? a) (Char? b)) (String::append a (String::string b))
+  elsif: (and (Char? a) (String? b)) (String::append (String::string a) b)
+  elsif: (and (Char? a) (Char? b)) (String::append (String::string a) (String::string b))
+  else: false
+
+; Return everything after the first character in a string.
+define String rest (v)
+  require (String? v)
+  if (<= (String::length v) 1) ""
+  else: (String::substring v 1 (String::length v))
+
+define String Boolean? (v)
+  require (String? v)
+  if (or (String::eq? v "true") (String::eq? v "false")) true
+  else: false
+
+; Is the string a Boolean?
+define String->Boolean (v)
+  require (String? v)
+  if (or (String::eq? v "true") (String::eq? v "false"))
+    if (String::eq? v "true") true
+    else: false
+  else: false
+
+define String ellipses? (v)
+  require (String? v)
+  if (String::eq? v "..") true
+  else: false
+
+; Is the string composed of only digits 0-9
+define String numeric? (v)
+  require (String? v)
+  define string-positive-numeric? (v)
+    if (= (String::length v) 0) false
+    elsif: (and (= (String::length v) 1) (Char::numeric? (String::first v))) true
+    elsif: (Char::numeric? (String::first v)) (String::numeric? (String::rest v))
+    else: false
+  if (and (> (String::length v) 1) (Char::eq? ascii-minus (String::first v)))
+    string-positive-numeric? (String::rest v)
+  else:
+    string-positive-numeric? v
+
+; Is the string composed of only digits valid for a given base b.
+define String->digits (v (base 10))
+  require (String? v)
+  require (Integer? base)
+  define string->raw-integer-i (v b i)
+    require (String? v)
+    require (Integer? b)
+    require (Integer? i)
+    if (= (String::length v) 0) false
+    elsif: (and (= (String::length v) 1) (Char::digit? (String::first v) b))
+      Char->digit (String::first v) b
+    elsif: (Char::digit? (String::first v) b)
+      define n (string->raw-integer-i (String::rest v) b (- i 1))
+      if (not n) false
+      else: (+ (* (Char->digit (String::first v) b) (expt b (- i 1))) n)
+    else: false
+  string->raw-integer-i v base (String::length v)
+
+define String::digits? (v b)
+  require (String? v)
+  require (Integer? b)
+  if (not (String->digits v b)) false
+  else: true
+
+define String->Integer (v)
+  require (String? v)
+  define v0 (String::split v ascii-underscore)
+  define v1 (first v0)
+  define v2 (tail v0)
+  if (String::eq? v1 "") false ; _ without anything prefixing it is invalid.
+  elsif: (and (Null? v2) (String::numeric? v1)) 
+    if (Char::eq? (String::first v1) ascii-minus)
+      * -1 (String->digits (String::rest v1)) ;if -ve number
+    else:
+      String->digits v1 ; no base but okay
+  elsif: (Null? v2) false ; no base but not numeric
+  elsif: (and (Null? (tail v2)) (String::numeric? (first v2))  )
+    if (and (Char::eq? (String::first v1) ascii-minus) (String::digits? (String::rest v1) (String->digits (first v2))))
+      * -1 (String->digits (String::rest v1) (String->digits (first v2))) ;if -ve number
+    elsif: (String::digits? v1 (String->digits (first v2)))
+      String->digits v1 (String->digits (first v2))  ; base and number are okay
+  else: false
+
+define String Integer? (v)
+  require (String? v)
+  if (not (String->Integer v)) false
+  else: true
+
+define String->Ratio (v)
+  require (String? v)
+  define v0 (String::split v ascii-slash)
+  define v1 (first v0)
+  define v2 (tail v0)
+  if (String::eq? v1 "") false ; / without anything prefixing it is invalid.
+  elsif: (and (Null? v2) (String::Integer? v1)) (String->Integer v1) ; no denomenator but okay
+  elsif: (Null? v2) false ; no denomenator but not numeric
+  elsif: (and (Null? (tail v2)) (String::Integer? (first v2)) (String::Integer? v1)) ; numerator and denomenator
+    / (String->Integer v1) (String->Integer (first v2))
+  else: false
+
+define String Ratio? (v)
+  require (String? v)
+  if (not (String->Ratio v)) false
+  else: true
+
+define String->Scientific (v)
+  require (String? v)
+  define va false
+  define n1 "0"
+  define n2 "0"
+  define n3 "0"
+  define exponent "0"
+  define base "10"
+  define sign 1
+  set va (String::split v ascii-e)
+  if (not (Null? (tail va))) ; there IS an exponent
+    if (not (Null? (tail (tail va))))
+      ; but there is more than one "e" which is illegal..
+      set exponent false
+    else:
+      set exponent (first (tail va))
+  set va (String::split (first va) ascii-underscore)
+  if (not (Null? (tail va))) ; there IS a base
+    ; but there is more than one "_" which is illegal..
+    if (not (Null? (tail (tail va))))
+      set base false
+    else:
+        set base (first (tail va))
+  set va (String::split (first va) ascii-period)
+  if (not (Null? (tail va))) ; there IS a decimal
+    if (not (Null? (tail (tail va))))
+      ; but there is more than one "." which is illegal..
+      set n2 false
+    else:
+      set n2 (first (tail va))
+  set n1 (first va)
+  set va (String::split n1 ascii-minus)
+  if (not (Null? (tail va))) ; there IS a minus
+    if (not (Null? (tail (tail va))))
+      ; but there is more than one "." which is illegal..
+      set n1 false
+    else:
+      if (not (= (String::length (first va)) 0))
+        set n1 false
+      else:
+        set n1 (first (tail va))
+        set sign -1
+  if (and (not (not n1)) (not (not n2)) (not (not base)) (not (not exponent)) (String::numeric? exponent) (String::numeric? base) (String::digits? n1 (String->digits base)) (String::digits? n2 (String->digits base)))
+    ; add before decimal to after decimal
+    * (+ (* (String->digits n1 (String->digits base)) (expt (String->digits base) (String->digits exponent))) (/ (String->digits n2 (String->digits base)) (expt (String->digits base) (- (String::length n2) (String->digits exponent))))) sign
+  else:
+    false
+
+define String scientific? (v)
+  require (String? v)
+  if (not (String->Scientific v)) false
+  else: true
+
+define String Rational? (v)
+  require (String? v)
+  if (String::Ratio? v) true
+  elsif: (String::scientific? v) true
+  else: false
+
+define String->Rational (v)
+  require (String? v)
+  if (String::Ratio? v) (String->Ratio v)
+  elsif: (String::scientific? v) (String->Scientific v)
+  else: false
+
+define String->Complex (v)
+  require (String? v)
+  if (< (String::length v) 3)
+    false
+  else:
+    define va (String::split v ascii-plus)
+    if (Null? (tail va)) false ; + was not found
+    else:
+      define real-part (first va)
+      define vb (String::split (second va) ascii-i)
+      if (Null? (tail vb)) false ; i was not found
+      else:
+        define imaginary-part (first vb)
+        define rp
+          if (String::Integer? real-part) (String->Integer real-part)
+          elsif: (String::Ratio? real-part) (String->Ratio real-part)
+          elsif: (String::scientific? real-part) (String->Scientific real-part)
+          else: false
+        define ip
+          if (String::Integer? imaginary-part) (String->Integer imaginary-part)
+          elsif: (String::Ratio? imaginary-part) (String->Ratio imaginary-part)
+          elsif: (String::scientific? imaginary-part) (String->Scientific imaginary-part)
+          else: false
+        if (or (not rp) (not ip)) false ; either the real-part or imaginary part is not valid
+        else: (+ rp (* ip 1))
+;        else: (+ rp (* ip 0+1i))
+
+define String Complex? (v)
+  require (String? v)
+  if (not (String->Complex v)) false
+  else: true
+
+; TODO: This should return a symbol - not a string!!
+define String->Symbol (v)
+  require (String? v)
+  define char-legal-symbol? (v)
+    if (Char::alphabetic? v) true
+    elsif: (Char::numeric? v) true
+    elsif: (Char::eq? v ascii-plus) true
+    elsif: (Char::eq? v ascii-minus) true
+    elsif: (Char::eq? v ascii-mult) true
+    elsif: (Char::eq? v ascii-slash) true
+    elsif: (Char::eq? v ascii-percent) true
+    elsif: (Char::eq? v ascii-dollar) true
+    elsif: (Char::eq? v ascii-at) true
+    elsif: (Char::eq? v ascii-exclamation) true
+    elsif: (Char::eq? v ascii-less-than) true
+    elsif: (Char::eq? v ascii-greater-than) true
+    elsif: (Char::eq? v ascii-equals) true
+    elsif: (Char::eq? v ascii-question) true
+    elsif: (Char::eq? v ascii-question) true
+    elsif: (Char::eq? v ascii-colon) true
+    ; elsif: (Char::eq? v ascii-caret) true
+    else: false
+  define string-legal-symbol? (v)
+    if (= (String::length v) 0) false
+    elsif: (and (= (String::length v) 1) (char-legal-symbol? (String::first v))) true
+    elsif: (char-legal-symbol? (String::first v)) (string-legal-symbol? (String::rest v))
+    else: false
+  if (not (not (String::Complex? v))) false
+  else:
+    if (string-legal-symbol? v)
+      if (Char::eq? (String::first v) ascii-colon)
+        false
+      else:
+        Ginger::String->Symbol v
+    else: false
+
+define String Symbol? (v)
+  require (String? v)
+  if (not (String->Symbol v)) false
+  else: true
+
+define String->Label (v)
+  if (< (String::length v) 2) false
+  else:
+    define c (String::Symbol? (String::substring v 0 (- (String::length v) 1)))
+    if (and c (Char::eq? (String::last v) ascii-colon)) v
+    else: false
+
+define String Label? (v)
+  require (String? v)
+  if (not (String->Label v)) false
+  else: true
+
+define String colon-command? (v)
+  require (String? v)
+  if (and (eq? (String::first v) ascii-colon) (or (String::Symbol? (String::rest v)) (= (String::length v) 1))) true
+  else: false
+
+define include-filename (terms)
+  first (tail terms)
+
+define open-include-file (filename)
+  define found-include-file false
+  define include-file-path ""
+  if (file-exists? filename)
+    set found-include-file true
+    set include-file-path filename
+  else:
+    define inc-paths (String::split (getenv "GIN_INCLUDE_PATH" "") ascii-colon)
+    while (and (not found-include-file) (not (Null? inc-paths)))
+      define path (String::append (first inc-paths) "/" filename)
+      if (file-exists? path)
+        set found-include-file true
+        set include-file-path path
+      set inc-paths (tail inc-paths)
+  if (not found-include-file)
+    println "No file found for include: " filename
+    exit
+  open-input-file include-file-path
+
+define expand-includes (tree)
+  ; TODO - make sure include in quoted list does not expand
+
+  define include? (node)
+    and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'include)
+
+  define expand-include (node)
+    ; TODO - Test if '(include "hello") get's expanded
+    println "Expanding " (include-filename node)
+    define input (open-include-file (include-filename  node))
+    define tmp (read input)
+    expand-includes tmp
+    set-first node (first tmp) ; replace (include "file.gin) with expand tree
+    set-tail node (tail tmp)
+    close-input-stream input
+
+  if (Null? tree) 
+    false
+  elsif: (include? tree) 
+    expand-include tree
+  else: 
+    ; TODO - make this iterative
+    if (list? (first tree)) (expand-includes (first tree))
+    expand-includes (tail tree)
+
+define <group>::make (line column)
+  <term>::make null 'group 0 line column false
+
+define <begin>::make (line column)
+  <term>::make null 'begin 0 line column false
+
+define tree-add-X (v)
+  noop
+
+define <value>::make (value-type value line column)
+  <term>::make null value-type -1 line column value
+
+define read (input (tree-head null))
+
+  define line 1
+  define column 0
+  define cbq-indent 0
+
+  define state-stack (list)
+
+  define state-push (s)
+    set state-stack (append state-stack (list s))
+
+  define state-top ()
+    last state-stack
+
+  define state-pop ()
+    if (= (length state-stack) 1)
+      println "Error: Can't have empty state stack"
+      exit
+    else:
+      set-tail (nth-pair state-stack (- (length state-stack) 1)) null  
+
+  define begin-group? (t)
+    if (eq? (<term>::get t 'begin) true)
+      true
+    else: false
+
+  define paren-balanced ()
+    define paren-balanced2 (t)
+      require (not (eq? t false))
+      if (begin-group? t)
+        if (= (<term>::get t 'paren-balance) 0) (list)
+        else: t
+      else:
+        paren-balanced2 (<term>::get (<term>::get t 'parent) 'head)
+    paren-balanced2 tree-current
+
+  define paren-add ()
+    define add-paren2 (t)
+      require (not (eq? t false))
+      if (begin-group? t)
+        <term>::set t 'paren-balance (+ (<term>::get t 'paren-balance) 1)
+      else:
+        add-paren2 (<term>::get (<term>::get t 'parent) 'head)
+    add-paren2 tree-current
+
+  define paren-remove ()
+    define remove-paren2 (t)
+      require (not (eq? t false))
+      if (begin-group? t)
+        <term>::set t 'paren-balance (- (<term>::get t 'paren-balance) 1)
+      else:
+        remove-paren2 (<term>::get (<term>::get t 'parent) 'head)
+    remove-paren2 tree-current
+ 
+  if (Null? tree-head) (set tree-head (<group>::make 0 0))
+  define tree-current tree-head
+  define tree-current-cell tree-head
+  define tree-current-cell-free true
+
+  define tree-add (v)
+    ; If the current cell is empty use it, otherwise add a new one.
+    if (tree-current-cell-free)
+      set tree-current-cell-free false
+      ; Use the value
+      set-first tree-current-cell (first v)
+      ; Merge dictionaries... TODO: do more attributes?
+      <term>::set tree-current-cell 'type (<term>::get v 'type)
+    else:
+      set-tail tree-current-cell v
+      set tree-current-cell v
+    <term>::set tree-current-cell 'head tree-current
+
+  define tree-push ()
+    define g0 false
+    if (tree-current-cell-free)
+      set g0 tree-current-cell
+      <term>::set g0 'parent (<term>::get tree-current-cell 'parent)
+    else:
+      set g0 (<group>::make line column)
+      <term>::set g0 'parent tree-current-cell
+    define g1 (<group>::make line column)
+    <term>::set g0 'head g0
+    <term>::set g1 'head g1
+    set-first g0 g1
+    tree-add g0
+    <term>::set g1 'parent g0
+
+    set tree-current g1
+    set tree-current-cell g1
+    set tree-current-cell-free true
+
+  define tree-pop ()
+    if (not (eq? (<term>::get tree-current 'parent) null))
+      set tree-current-cell (<term>::get tree-current 'parent)
+      set tree-current (<term>::get tree-current-cell 'head)
+      set tree-current-cell-free false
+    else:
+      println "Could not find parent."
+      exit
+
+  define tree-unpop ()
+    set tree-current (last tree-current)
+    set tree-current-cell (last-cons tree-current)
+
+  define tree-set-begin ()
+    <term>::set tree-current 'begin true
+
+  define tree-sibling-count ()
+    - (length tree-current) 1
+
+  if (String? input)
+    set input (String::append input (String::string ascii-newline))
+    set input (open-input-string input)
+
+  define c false
+  define p false
+  define buffer ""
+  define eos false
+  define parse-indent -1
+  define is-quote 0
+  define first-term-on-line true
+  ; 0 = no quote, 1 = buffer is from a quote, 2 = buffer is from an empty quote
+  ; -1 = buffer is a symbol quote, -2 = buffer is from an empty symbol quote
+
+  state-push 'begin
+  tree-set-begin
+
+  while (not eos)
+    if (eos? input)
+      set eos true ; terminate next time through the loop
+      set c ascii-space ; set c to space.
+
+      ; if its eos we need to check for paren balence because its usualy done by
+      ; indentation checking but there will be no more lines to check the last line
+      if (not (Null? (paren-balanced)))
+        println "Error in code block starting on line " (<term>::get tree-current 'line) ": unbalanced parenthesis.1"
+        exit
+    else:
+      set c (get-char input) ; get the next character
+
+      ; windows consideration for dual eol's
+      if (and (Char::eq? c ascii-cr) (Char::eq? (peek-char input) ascii-lf))
+        set c (get-char input)
+
+      if (not (Char::whitespace? c))
+        if (= parse-indent -1)
+          set parse-indent column
+
+    ; As we read a character we might be in one of several states:
+    ; 1. Colon Quoting
+    ; 2. Double Quoting
+    ; 3. Reading Commands
+
+    define current-state (state-top)
+    ; println "C=" c
+    ; println "buffer=" buffer
+
+    if (eq? current-state 'colon-quote)
+      ; if we are allready in colon quote state then it can never be the first term on the line
+      set first-term-on-line false
+      if (or (Char::eq? c ascii-left-parenthesis) (Char::eq? c ascii-right-parenthesis) (Char::eol? c) (eq? eos true))
+        if (and (Char::eq? p ascii-backslash) (not (Char::eol? c)))
+          ; removed the \\ created becuase of the one \ and add the current char ( or )
+          set buffer (String::substring buffer 0 (- (String::length buffer) 2))
+          set buffer (new-string buffer c)
+        else:
+          ; if p was not a backslash, we have three options:
+          if (Char::eq? c ascii-left-parenthesis)
+
+            ; Option 1 - We encounter a left parenthesis
+            ; The beginning of a command temporarily suspends this colon quote
+            ; Add what we have so far to the concatenation operator
+
+            tree-add (<value>::make 'string buffer line column)
+
+            ; Clear the buffer
+            set buffer ""
+
+            paren-add
+
+            ; Add a new group for the command
+            tree-push
+            <term>::set tree-current 'parse-indent parse-indent
+
+            ; And then add commands..
+            state-push 'command
+
+          elsif: (or (Char::eq? c ascii-right-parenthesis) (Char::eol? c) (eq? eos true))
+
+            ; Option 2 - we encounter a right parenthesis, eol, or eos
+            ; The end of a colon quote so we need to check for
+            ; colon block quote and if this is one then handle it
+            ; otherwise we need to wrap everything up.
+
+            define exit-colon-quote false
+            if (not (Char::eol? c))
+              ; if its a right parenthis or eos
+              set exit-colon-quote true
+              ; if its a right parenthis make sure we ajust the tree to account for it
+              if (Char::eq? c ascii-right-parenthesis)
+                paren-remove
+                ; if there is to many right parens we imeadetly know we should error
+                if (not (Null? (paren-balanced)))
+                  if (< (<term>::get (paren-balanced) 'paren-balance) 0)
+                    println "Error in code block starting on line " (<term>::get tree-current 'line) ": unbalanced parenthesis.2"
+                    exit
+            else:
+              ; Handle the EOL
+
+              define next-indent-count 0
+              define look-ahead-count 0
+              define undo-block-quote-check false
+              ; cbq-indent is 0 if it's the line that starts the colon quote.
+              ; Otherwise it is equal to the amount of indentation for the 
+              ; line that immediate succeeds the colon quote initiation.
+              if (= cbq-indent 0)
+                ; count all leading spaces
+                define valid-line false
+                while (not (valid-line))
+                  while (Char::eq? (peek-char input) ascii-space)
+                    get-char input
+                    ++ look-ahead-count
+                    ++ next-indent-count
+                  ; TODO - fix for crlf
+                  if (Char::eq? (peek-char input) ascii-newline)
+                    set valid-line false
+                    set next-indent-count 0
+                    ; eat newline so we can start counting the space for the next line
+                    get-char input                    
+                    ++ look-ahead-count
+                  else:
+                    set valid-line true
+                ; if its indented then save the indent
+                if (> next-indent-count (<term>::get tree-current 'parse-indent))
+                  set cbq-indent next-indent-count
+                  set look-ahead-count 0
+                  ; if there is something in the buffer then we need to
+                  ; add an eol to it
+                  if (not (= (String::length buffer) 0))
+                    set buffer (new-string buffer ascii-newline)
+                else:
+                  ; since we did not find indentation we undo the last few lines
+                  ; and wrap up colon-quote
+;                if (not (eq? buffer ""))
+                  ; Don't do this in a block quote..
+                  ;set undo-block-quote-check true
+                  set exit-colon-quote true
+              ; if we have been working with a colon-block-quote
+              else:
+                ; count all leading spaces up to the first colon-block-quote-indent
+                ;while (and (Char::eq? (peek-char input) ascii-space) (< next-indent-count cbq-indent))
+                ;  get-char input
+                ;  ++ next-indent-count
+                
+                define valid-line false
+                while (not (valid-line))
+                  while (Char::eq? (peek-char input) ascii-space)
+                    get-char input
+                    ++ look-ahead-count
+                    ++ next-indent-count
+                  
+                  ; TODO - fix for crlf
+                  if (Char::eq? (peek-char input) ascii-newline)
+                    ; eat newline, so we can start counting the space for the next line
+                    get-char input
+                    
+                    if (Char::eq? (peek-char input) ascii-space)
+                      ; count spaces
+                      define num-spaces 0
+                      while (Char::eq? (peek-char input) ascii-space)
+                        read-char input
+                        ++ num-spaces
+
+                      ; put back spaces
+                      define i 0
+                      while (< i num-spaces)
+                        unget-char input ascii-space
+                        ++ i
+                      
+                      if (= num-spaces cbq-indent)
+                        ; add a newline
+                        set buffer (new-string buffer ascii-newline)
+
+                    set valid-line false
+                    set next-indent-count 0
+                    ++ look-ahead-count
+                  else:
+                    set valid-line true
+                if (> next-indent-count cbq-indent)
+                  set next-indent-count cbq-indent
+
+
+                ; if its still >= the first colon-block-quote-indent then we add a new line
+                ; and continue
+                if (>= next-indent-count cbq-indent)
+                  set look-ahead-count 0
+                  if (not (= (String::length buffer) 0))
+                    set buffer (new-string buffer ascii-newline)
+                ; if its not the we reset cbq-indent and un what we did in the last few lines
+                ; and wrap up colon-quote
+                else:
+                  set cbq-indent 0
+                  ; set undo-block-quote-check true
+                  set exit-colon-quote true
+
+              ; undo the check for colon-block-quoteing
+              if (> look-ahead-count 0) ; (undo-block-quote-check)
+                while (> next-indent-count 0)
+                  unget-char input ascii-space
+                  -- next-indent-count
+
+            ; wraps up colon-quoteing
+            if (exit-colon-quote)
+              ; add buffer to tree and clear it
+              tree-add (<value>::make 'string buffer line column)
+              set buffer ""
+              
+              tree-pop ; pop the String::append              
+              state-pop ; pop the colon quote state
+              
+              tree-pop ; pop the enclosing command
+              state-pop ; pop the command state
+
+      else:
+
+        ; Option 3 - Anything else gets added to the buffer
+        ; check to see if its a backslash since String::append
+        ; uses \ for escape chars we just assume all \ are not
+        ; escape chars and conver them to \\.
+
+        if (Char::eq? c ascii-backslash)
+          define dbs (new-string c c)
+          set buffer (new-string buffer dbs)
+        else:
+          set buffer (new-string buffer c)
+
+
+    elsif: (eq? current-state 'single-quote)
+
+      if (or (Char::whitespace? c) (Char::eq? c ascii-right-parenthesis))
+        ; Push the character back so it can be handled properly next time..
+        unget-char input c
+        ; Set c to the more innocuos space so the eol stuff at the end of the loop
+        ; doesnt trip us up
+        set c ascii-space
+        state-pop
+        ; Set is-quote to one if the buffer has something in it.
+        set is-quote -1
+        if (String::eq? buffer "")
+          ; If the buffer is empty set is-quote to 2
+          set is-quote -2
+          set buffer "null"
+      else:
+        set buffer (new-string buffer c)
+
+    elsif: (eq? current-state 'double-quote)
+
+      if (Char::eq? p ascii-backslash)
+        
+        define escape-char (c)
+          require (Char? c)
+          if (Char::eq? c ascii-n) 
+            String::string ascii-newline
+          elsif: (Char::eq? c ascii-r) 
+            String::string ascii-cr
+          elsif: (Char::eq? c ascii-double-quote) 
+            String::string ascii-double-quote
+          else: c
+
+        set buffer (new-string buffer (escape-char c))
+        ; Set c to something other than \ so that p doesn't become \ and we escape the next time.
+        set c ascii-space
+
+      else:
+        if (Char::eq? c ascii-double-quote)
+          ; An ending double quote ends a double quote.
+          state-pop
+          set is-quote 1
+          if (String::eq? buffer "")
+            set is-quote 2
+            set buffer "null"
+        elsif: (Char::eq? c ascii-backslash)
+          ; eat it.
+          noop
+        else:
+          set buffer (new-string buffer c)
+
+    elsif: (eq? current-state 'comment)
+      if (Char::eol? c)
+        state-pop ; pop comment state
+        if (and (not (eq? (state-top) 'begin)) (not first-term-on-line))
+          ; this is inline comment so need to unget c and set it to a space
+          ; so the defult code for the line can wrap things up
+          unget-char input c
+          set c ascii-space
+
+    elsif: (or (eq? current-state 'begin) (eq? current-state 'command))
+
+      if (Char::eq? c ascii-semi-colon)
+        state-push 'comment
+
+      elsif: (Char::eq? c ascii-double-quote)
+        state-push 'double-quote ; FIXME - not quite right?
+
+      elsif: (Char::eq? c ascii-single-quote)
+        state-push 'single-quote
+
+      elsif: (or (Char::eq? c ascii-left-parenthesis) (Char::eq? c ascii-right-parenthesis) (Char::whitespace? c))
+
+        if (Char::eq? c ascii-left-parenthesis)
+          if (and (String::eq? buffer ":") (= is-quote 0))
+            println "Error on line " line ", column " column ": illegal colon-quote."
+            exit
+          else:
+            set buffer "("
+
+        if (Char::eq? c ascii-right-parenthesis)
+          paren-remove
+          if (not (Null? (paren-balanced)))
+            if (< (<term>::get (paren-balanced) 'paren-balance) 0)
+              println "Error in code block starting on line " (<term>::get tree-current 'line) ": unbalanced parenthesis.3"
+              exit
+
+        if (and (Char::whitespace? c) (not (Char::eol? c)) (= (String::length buffer) 0))
+          ; ignore spaces that precede a command
+          noop
+        else:
+          if (and (String::eq? buffer ":") (= is-quote 0))
+            ; defult colon-quote (:_something) or :_something or (:)
+            ; if whitespace follows a : then do not error but ...
+            if (or (Char::eq? ascii-space c) (Char::eol? c) (Char::eq? ascii-right-parenthesis c))
+              ; allthough (:) is useless it should be a valid placeholder
+              unget-char input c ; put the char back
+              if (Char::eq? c ascii-right-parenthesis)
+                ; conter act the paren-remove above because we are going to process it twice
+                paren-add
+                unget-char input ascii-space
+              else:
+                set buffer ":String::append" ; override the buffer with the defult command
+                set p ascii-d ; update p with what it should be
+              set c ascii-space ; reset c to a space
+
+          elsif: (= (String::length buffer) 0)
+            ; There is nothing in the buffer
+            if (Char::eol? c)
+              ; Nothing in the buffer and it is an EOL
+              if (and (not (eq? (state-top) 'begin)) (not first-term-on-line))
+              ; if (not (eq? (state-top) 'begin))
+                ; EOL - we need to undo this if we find an ..
+                state-pop
+                tree-pop
+            if (Char::eq? c ascii-right-parenthesis)
+              if (= (tree-sibling-count) 0)
+                <term>::set tree-current 'parse-indent parse-indent
+              state-pop
+              tree-pop
+          else:
+            ; TODO - this if statement is not necc?
+            ; if (or (eq? (state-top) 'begin) (eq? (state-top) 'command))
+            if (eq? first-term-on-line true)
+              set first-term-on-line false
+              if (> (String::length buffer) 0)
+                if (< (<term>::get tree-current 'parse-indent) parse-indent)
+
+                  ; CASE 1 - The current indentation is more than the previous
+                  ; indentation.  This indicates a code block associated with the
+                  ; previous line.
+
+                  ; println "CASE 1  - " (<term>::get tree-current 'parse-indent) " - " parse-indent
+
+                  if (not (Null? (paren-balanced)))
+                    println "Error in code block starting on line " (<term>::get tree-current 'line) ": unbalanced parenthesis.4"
+                    exit
+
+                  if (String::ellipses? buffer)
+                    ; Over indented ellipses don't make any sense!
+                    println "Error on line " line ", column " column ": illegal ellipses indentation."
+                    exit
+
+                  if (String::Label? buffer)
+                    ; Over indented labels don't make any sense!
+                    println "Error on line " line ", column " column ": illegal label indentation. (" (<term>::get 'parse-indent tree-current) ", " parse-indent ")"
+                    exit
+
+                  ; We need to "continue" the last line with a code block
+                  ; set tree-current (last (<term>::get-children tree-current))
+                  ; tree-continue
+                  tree-unpop
+
+                  ; We need to account for this by adding an extra state..
+                  state-push 'command
+
+                  ; Add a new group
+                  tree-push
+                  <term>::set tree-current 'parse-indent parse-indent
+                  state-push 'begin
+
+                  ; Add a new begin
+                  tree-set-begin
+
+                  ; Add a group for this command
+                  tree-push
+                  <term>::set tree-current 'parse-indent parse-indent
+                  state-push 'command
+
+                elsif: (> (<term>::get tree-current 'parse-indent) parse-indent)
+
+                  ; CASE 2 - The current indentation is less than the previous
+                  ; indentation.  We need to "close" some code blocks and
+                  ; begin adding to a different block.
+
+                  ; println "Case 2 - " (<term>::get tree-current 'parse-indent) " - " parse-indent
+
+                  ; Keep popping the tree until we get to an indent <= the current
+                  while (< parse-indent (<term>::get tree-current 'parse-indent))
+                    if (not (Null? (paren-balanced)))
+                      println "Error in code block starting on line " (<term>::get (paren-balanced) 'line) ": unbalanced parenthesis.5"
+                      exit
+                    tree-pop
+                    state-pop
+
+                  tree-pop
+                  state-pop
+
+                  ; The indent should now be equal
+                  if (not (= parse-indent (<term>::get tree-current 'parse-indent)))
+                    println "Error on line " line ", column " column ": illegal indentation."
+                    println "[ " parse-indent ", " (<term>::get tree-current 'parse-indent) "]"
+                    exit
+
+                  ; And we should be at a State.Begin..
+
+                  if (or (String::ellipses? buffer) (String::Label? buffer))
+                    tree-unpop
+                    state-push 'command
+                  else:
+                  ; Add a group for this command
+                    tree-push
+                    <term>::set tree-current 'parse-indent parse-indent
+                    state-push 'command
+
+                else:
+                  ; CASE 3 - Same indentation level
+
+                  ; println "CASE 3 - buffer:  '" buffer "'"
+
+                  if (or (String::ellipses? buffer) (String::Label? buffer))
+                    ; undo what was done at the last line ending..
+                    tree-unpop
+                    state-push 'command
+                  else:
+                    if (not (Null? (paren-balanced)))
+                      println "Error in code block starting on line " (<term>::get 'line tree-current) ": unbalanced parenthesis.6"
+                      exit
+                    ; Add a group for this command
+                    tree-push
+                    <term>::set tree-current 'parse-indent parse-indent
+                    state-push 'command
+
+            if (= (tree-sibling-count) 0)
+              <term>::set tree-current 'parse-indent parse-indent
+
+            if (> is-quote 0)
+              ; String
+              if (= is-quote 2)
+                set buffer ""
+              tree-add (<value>::make 'string buffer line column)
+              set is-quote 0
+
+            elsif: (< is-quote 0)
+              ; Quoted symbol
+              if (= is-quote -2)
+                set buffer ""
+              tree-add (<value>::make 'quoted-symbol buffer line column)
+              set is-quote 0
+
+            elsif: (String::Integer? buffer)
+              ; Integer
+              tree-add (<value>::make 'integer (String->Integer buffer) line column)
+
+            elsif: (String::Rational? buffer)
+              ; Rational
+              tree-add (<value>::make 'rational (String->Rational buffer) line column)
+
+            elsif: (String::Complex? buffer)
+              ; Complex
+              tree-add (<value>::make 'rational (String->Complex buffer) line column)
+
+            elsif: (String::Boolean? buffer)
+              ; Boolean
+              tree-add (<value>::make 'boolean (String->Boolean buffer) line column)
+
+            elsif: (String::colon-command? buffer)
+              ; (:something ... ) or :something
+              ; We have already added a group for the line and then a group for the
+              ; begin paren. which is right...
+
+              tree-add (<value>::make 'symbol (String->Symbol (String::rest buffer)) line column)
+              tree-push
+              <term>::set tree-current 'parse-indent parse-indent
+              tree-add (<value>::make 'symbol (String->Symbol "String::append") line column)
+              state-push 'colon-quote
+              if (Char::eol? c)
+                ; reuse eol for colon-quote
+                unget-char input c
+                set c ascii-space
+              else:
+                ; remove spaces between command and string
+                while (Char::eq? ascii-space (peek-char input))
+                  get-char input
+              set buffer ""
+
+            elsif: (String::Label? buffer)
+              ; Label
+              tree-add (<value>::make 'label (String->Label buffer) line column)
+
+            elsif: (String::Symbol? buffer)
+              ; Symbol
+              tree-add (<value>::make 'symbol (String->Symbol buffer) line column)
+
+            elsif: (String::ellipses? buffer)
+              ; Ellipses
+              if (= (<term>::get tree-current 'line) 0)
+                ; Files that begin with ellipses don't make any sense!
+                println "Error on line " line ", column " column ": illegal ellipses."
+                exit
+
+            elsif: (Char::eq? c ascii-left-parenthesis)
+              paren-add
+
+              tree-push
+              <term>::set tree-current 'parse-indent parse-indent
+              state-push 'command
+
+            else:
+              ; Anything else is an error
+              println "Error on line " line ", column " column ": invalid symbol '" buffer "'."
+              exit
+
+            if (Char::eol? c)
+              if (not (eq? (state-top) 'begin))
+                state-pop
+                tree-pop
+
+            if (Char::eq? c ascii-right-parenthesis)
+              state-pop
+              tree-pop
+
+            set buffer ""
+      else:
+        set buffer (new-string buffer c)
+
+    if (not (eos-object? input))
+      if (Char::eol? c)
+        set line (+ line 1)
+        set column 0
+        set parse-indent -1
+        set first-term-on-line true
+      else:
+        set column (+ column 1)
+
+    set p c
+
+  tree-head
