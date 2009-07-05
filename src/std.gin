@@ -1695,7 +1695,7 @@ define Null->Binary (a)
 define Foreign->String (a)
   define b false
   inline-c b " = fmt_ulong((unsigned long)" a ");"
-  inline-c "slag_analyze(mm, " a ");"
+  inline-c "gc_analyze(mm, " a ");"
   String::append "#[Foreign " b "]"
 
 ;;; STREAMS

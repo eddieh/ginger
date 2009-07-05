@@ -153,22 +153,19 @@ typedef struct {
      
 } GingerType;
 
-/// The next datastructures are used for garbage collection.  Ginger uses
-/// Slag's GC.  For more info (and licensing) see slag_mm.c.
-
 typedef struct {
   short num_bytes;
   short visited;
-} MMFastAllocHeader;
+} GCFastAllocHeader;
 
-typedef struct MMSysAllocHeader_t {
+typedef struct GCSysAllocHeader_t {
   short num_bytes;
   short visited;
   short requires_cleanup;
-  struct MMSysAllocHeader_t* next;
-} MMSysAllocHeader;
+  struct GCSysAllocHeader_t* next;
+} GCSysAllocHeader;
 
-typedef struct SlagMemoryManager_t {
+typedef struct GarbageCollector_t {
   void* fast_heap_alpha;
   void* fast_heap_beta;
 
@@ -179,7 +176,7 @@ typedef struct SlagMemoryManager_t {
   void* alpha_allocation_cursor;
   int   alpha_remaining_bytes;
 
-  void (*collection_callback)(struct SlagMemoryManager_t* data);
+  void (*collection_callback)(struct GarbageCollector_t* data);
   void* collection_data;
 
   int   system_allocations_since_last_collection;
@@ -199,29 +196,29 @@ typedef struct SlagMemoryManager_t {
 
   // Items on the long_lived_list not referenced during a collection
   // are freed at the end of the collection.
-  MMSysAllocHeader* long_lived_list;
+  GCSysAllocHeader* long_lived_list;
 
   // Allocations pending cleanup are unreferenced but need to have
   // their cleanup method called.
-  MMSysAllocHeader* pending_cleanup;
+  GCSysAllocHeader* pending_cleanup;
 
   // Items on the persistent_list do not need to be referenced 
   // during collections and are only freed at the end of the program.
-  MMSysAllocHeader* persistent_list;
+  GCSysAllocHeader* persistent_list;
 
-} SlagMemoryManager;
+} GarbageCollector;
 
 /// Section 2: Macro definitions
 ///
 
 #define GIN_GC_MB 5
-#define GIN_GC_INIT mm = slag_mm_new(1024*1024*GIN_GC_MB); slag_mm_set_collection_callback(mm, collect);
-#define GIN_ALLOCATE(v, type, size) safe_allocate = (GIN_OBJ)slag_mm_allocate(mm, size); \
+#define GIN_GC_INIT mm = gc_new(1024*1024*GIN_GC_MB); gc_set_collection_callback(mm, collect);
+#define GIN_ALLOCATE(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate(mm, size); \
 v = (type)safe_allocate;
 
-#define GIN_ALLOCATE_WITH_CLEANUP(v, type, size) safe_allocate = (GIN_OBJ)slag_mm_allocate_system(mm, size); \
+#define GIN_ALLOCATE_WITH_CLEANUP(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate_system(mm, size); \
 v = (type)safe_allocate; \
-slag_mm_mark_as_requiring_cleanup(mm, v);
+gc_mark_as_requiring_cleanup(mm, v);
 
 /// Calls are split into two macros.  First we allocate the call frame with 
 /// CALL_ALLOCATE.  Then you copy any parameters.  Then use CALL.
@@ -313,7 +310,7 @@ GingerFunctionDefinition gin_function_table[1024]; \
 GIN_OBJ next_func; \
 GIN_OBJ safe_pair; \
 GIN_OBJ safe_allocate; \
-SlagMemoryManager* mm; \
+GarbageCollector* mm; \
 int gin_argc; \
 char **gin_argv; \
 int debug_depth = 0; \
@@ -679,20 +676,20 @@ GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 #define GIN_NIM_SET_STREAM(v,stream) ((GingerObject*)v)->stream = stream;
 #define GIN_NIM_GET_STREAM(v) ((GingerObject*)v)->stream
 
-// MM_DEFAULT_FAST_PAGE_SIZE
+// GC_DEFAULT_FAST_PAGE_SIZE
 //
 // 5 MB default fast memory page size.  Two of these will be
 // allocated for a total of 10MB.  Larger sizes result in less 
 // frequent data collections with no other impact besides
 // the use of the memory itself.  Smaller allocations are certainly
 // viable when memory is tight.
-#define  MM_DEFAULT_FAST_PAGE_SIZE (5*1024*1024)
+#define  GC_DEFAULT_FAST_PAGE_SIZE (5*1024*1024)
 
 
-// MM_FAST_HEAP_THRESHOLD
+// GC_FAST_HEAP_THRESHOLD
 //
 // IMPORTANT: do not set the threshold above 32767 without increasing
-// the data size of num_bytes in MMFastAllocHeader.
+// the data size of num_bytes in GCFastAllocHeader.
 //
 // The size limit (in bytes) for an allocation to be placed
 // on the fast heap rather than directly into a system allocation.
@@ -705,28 +702,28 @@ GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 // This value should always been some fraction of the 
 // fast_heap_page_size - the heap threshold vs the page size
 // should be a fraction of (a guess here:) 1/100 or smaller.
-#if !defined(MM_FAST_HEAP_THRESHOLD)
-#define  MM_FAST_HEAP_THRESHOLD 1024
+#if !defined(GC_FAST_HEAP_THRESHOLD)
+#define  GC_FAST_HEAP_THRESHOLD 1024
 #endif
 
 //
 // Section 3: Function prototypes
 //
 
-extern SlagMemoryManager* slag_mm_new (int page_size);
-extern void slag_mm_set_collection_callback(SlagMemoryManager*mm, void(*callback)(SlagMemoryManager*));
-extern void slag_mm_shut_down(SlagMemoryManager* mm);
-extern void* slag_mm_allocate(SlagMemoryManager* mm, int size);
-extern void* slag_mm_allocate_system(SlagMemoryManager* mm, int size);
-extern void* slag_mm_allocate_persistent(SlagMemoryManager* mm, int size);
-extern void slag_mm_begin_collection(SlagMemoryManager* mm);
-extern void slag_mm_end_collection(SlagMemoryManager* mm);
-extern short slag_mm_reference(SlagMemoryManager* mm, void** ptr);
-extern unsigned long slag_mm_size(SlagMemoryManager *mm, void *m);
-extern void slag_mm_report(SlagMemoryManager *m);
-extern void slag_mm_mark_as_requiring_cleanup(SlagMemoryManager *mm, void *m);
-extern void* slag_mm_get_next_pending_cleanup(SlagMemoryManager *mm);
-extern void slag_analyze(SlagMemoryManager* mm, void* addr);
+extern GarbageCollector* gc_new (int page_size);
+extern void gc_set_collection_callback(GarbageCollector*mm, void(*callback)(GarbageCollector*));
+extern void gc_shut_down(GarbageCollector* mm);
+extern void* gc_allocate(GarbageCollector* mm, int size);
+extern void* gc_allocate_system(GarbageCollector* mm, int size);
+extern void* gc_allocate_persistent(GarbageCollector* mm, int size);
+extern void gc_begin_collection(GarbageCollector* mm);
+extern void gc_end_collection(GarbageCollector* mm);
+extern short gc_reference(GarbageCollector* mm, void** ptr);
+extern unsigned long gc_size(GarbageCollector *mm, void *m);
+extern void gc_report(GarbageCollector *m);
+extern void gc_mark_as_requiring_cleanup(GarbageCollector *mm, void *m);
+extern void* gc_get_next_pending_cleanup(GarbageCollector *mm);
+extern void gc_analyze(GarbageCollector* mm, void* addr);
 
 extern GIN_OBJ ginExec (GIN_OBJ fn, GIN_OBJ args);
 extern void GIN_display(GIN_OBJ x, GIN_OBJ out, int was_not_cdr);
@@ -746,7 +743,7 @@ extern int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp);
 extern GIN_OBJ gin_dict_contains(GIN_OBJ t, GIN_OBJ k);
 extern GIN_OBJ gin_dict_keys(GIN_OBJ, int);
 
-extern void collect (SlagMemoryManager* mm);
+extern void collect (GarbageCollector* mm);
 
 extern GIN_OBJ gin_getenv(GIN_OBJ name, GIN_OBJ default_value);
 extern GIN_OBJ gin_file_exists(GIN_OBJ filename);
@@ -757,7 +754,7 @@ extern GIN_OBJ gin_file_exists(GIN_OBJ filename);
 extern GIN_OBJ safe_allocate;
 extern GIN_OBJ next_func;
 extern GIN_OBJ safe_pair;
-extern SlagMemoryManager* mm;
+extern GarbageCollector* mm;
 extern Frame *frame;
 extern GingerClassDefinition cdef[];
 extern int cdef_count;

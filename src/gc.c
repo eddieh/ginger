@@ -26,13 +26,13 @@
 #include "ginger.h"
 #include <assert.h>
 
-#define MM_CLEAR_ALLOCATIONS 1
+#define GC_CLEAR_ALLOCATIONS 1
 
-void slag_mm_free_managed_memory(SlagMemoryManager* mm);
+void gc_free_managed_memory(GarbageCollector* mm);
 
-SlagMemoryManager* slag_mm_new (int page_size) {
-  SlagMemoryManager* mm = (SlagMemoryManager*)malloc(sizeof(SlagMemoryManager));
-  memset(mm, 0, sizeof(SlagMemoryManager));
+GarbageCollector* gc_new (int page_size) {
+  GarbageCollector* mm = (GarbageCollector*)malloc(sizeof(GarbageCollector));
+  memset(mm, 0, sizeof(GarbageCollector));
 
   mm->fast_heap_page_size = page_size;
   
@@ -48,14 +48,14 @@ SlagMemoryManager* slag_mm_new (int page_size) {
   mm->fast_heap_beta_end = mm->fast_heap_beta  + mm->fast_heap_page_size;
 
   mm->alpha_allocation_cursor = mm->fast_heap_alpha;
-  mm->alpha_remaining_bytes = (page_size - sizeof(MMFastAllocHeader)) - 4;
+  mm->alpha_remaining_bytes = (page_size - sizeof(GCFastAllocHeader)) - 4;
   mm->beta_still_unused = 1;
 
   return mm;
 }
 
-void slag_mm_shut_down (SlagMemoryManager* mm) {
-  slag_mm_free_managed_memory(mm);
+void gc_shut_down (GarbageCollector* mm) {
+  gc_free_managed_memory(mm);
 
   if (mm->fast_heap_alpha != 0) {
     free(mm->fast_heap_alpha);
@@ -68,11 +68,11 @@ void slag_mm_shut_down (SlagMemoryManager* mm) {
   }
 }
 
-void* slag_mm_allocate(SlagMemoryManager* mm, int num_bytes) {
+void* gc_allocate(GarbageCollector* mm, int num_bytes) {
   assert (num_bytes > 0);
   mm->allocations_since_last_collection++;
 
-  if (num_bytes <= MM_FAST_HEAP_THRESHOLD) {
+  if (num_bytes <= GC_FAST_HEAP_THRESHOLD) {
     // fast heap allocation
     if (num_bytes > mm->alpha_remaining_bytes) {
       if (mm->beta_still_unused) {
@@ -82,16 +82,16 @@ void* slag_mm_allocate(SlagMemoryManager* mm, int num_bytes) {
         mm->fast_heap_alpha = mm->fast_heap_beta;
         mm->fast_heap_beta = temp;
         mm->alpha_allocation_cursor = mm->fast_heap_alpha;
-        mm->alpha_remaining_bytes = mm->fast_heap_page_size - sizeof(MMFastAllocHeader);
+        mm->alpha_remaining_bytes = mm->fast_heap_page_size - sizeof(GCFastAllocHeader);
 	mm->fast_heap_alpha_end = mm->fast_heap_alpha + mm->fast_heap_page_size;
 	mm->fast_heap_beta_end = mm->fast_heap_beta  + mm->fast_heap_page_size;
       } else {
 	if (mm->collection_callback) {
 	  mm->collection_callback(mm);
-	  void* t = slag_mm_allocate(mm, num_bytes);
+	  void* t = gc_allocate(mm, num_bytes);
 	  return t;
 	} else {
-	  printf("SLAG:: The memory manager required a collection before the current allocation request!");
+	  printf("GC:: The memory manager required a collection before the current allocation request!");
 	  exit(1);
 	}
       }
@@ -101,29 +101,29 @@ void* slag_mm_allocate(SlagMemoryManager* mm, int num_bytes) {
     int num_bytes_original = num_bytes;
 
     // store the allocation size as a header before the client space
-    ((MMFastAllocHeader*) result)->num_bytes = num_bytes;
-    ((MMFastAllocHeader*) result)->visited = 0;
+    ((GCFastAllocHeader*) result)->num_bytes = num_bytes;
+    ((GCFastAllocHeader*) result)->visited = 0;
 
-    num_bytes += sizeof(MMFastAllocHeader);
+    num_bytes += sizeof(GCFastAllocHeader);
     // round out num_bytes to a multiple of 4 for data alignment purposes
     num_bytes = (num_bytes + 3) & ~3;
 
     mm->alpha_remaining_bytes   -= num_bytes;
     mm->alpha_allocation_cursor += num_bytes;
 
-    result    += sizeof(MMFastAllocHeader);
+    result    += sizeof(GCFastAllocHeader);
     return result;
   } else {
     // system allocation
     ++mm->system_allocations_since_last_collection;
-    void* result = (void*)malloc(num_bytes + sizeof(MMSysAllocHeader));
+    void* result = (void*)malloc(num_bytes + sizeof(GCSysAllocHeader));
     if ( !result ) {
       printf("Out of memory!");
       exit(1);
     }
-    memset(result, 0, num_bytes + sizeof(MMSysAllocHeader));
+    memset(result, 0, num_bytes + sizeof(GCSysAllocHeader));
 
-    MMSysAllocHeader* mem = (MMSysAllocHeader*) result;
+    GCSysAllocHeader* mem = (GCSysAllocHeader*) result;
     mem->visited = 0;
     mem->num_bytes = num_bytes;
     mem->requires_cleanup = 0;
@@ -131,12 +131,12 @@ void* slag_mm_allocate(SlagMemoryManager* mm, int num_bytes) {
     mm->long_lived_list = mem;
 
     // scoot the result pointer past the header link info
-    result += sizeof(MMSysAllocHeader);
+    result += sizeof(GCSysAllocHeader);
     return result;
   }
 }
 
-void* slag_mm_allocate_system (SlagMemoryManager* mm, int num_bytes) {
+void* gc_allocate_system (GarbageCollector* mm, int num_bytes) {
   assert (num_bytes > 0);
   // Puts something in semi-permanent system storage to begin with.
   // Note that this must still be referenced during 
@@ -145,13 +145,13 @@ void* slag_mm_allocate_system (SlagMemoryManager* mm, int num_bytes) {
   // use allocate_persistent instead.
   mm->system_allocations_since_last_collection += 1;
 
-  void* result = (void*)malloc(num_bytes + sizeof(MMSysAllocHeader));
+  void* result = (void*)malloc(num_bytes + sizeof(GCSysAllocHeader));
   if ( !result ) {
     printf("Out of memory.");
     exit(1);
   }
 
-  MMSysAllocHeader* mem = (MMSysAllocHeader*) result;
+  GCSysAllocHeader* mem = (GCSysAllocHeader*) result;
   mem->visited = 0;
   mem->num_bytes = num_bytes;
   mem->requires_cleanup = 0;
@@ -159,22 +159,22 @@ void* slag_mm_allocate_system (SlagMemoryManager* mm, int num_bytes) {
   mm->long_lived_list = mem;
 
   // scoot the result pointer past the header link info
-  result += sizeof(MMSysAllocHeader);
+  result += sizeof(GCSysAllocHeader);
   memset (result, 0, num_bytes);
   return result;
 }
 
-void* slag_mm_allocate_persistent (SlagMemoryManager* mm, int num_bytes) {
+void* gc_allocate_persistent (GarbageCollector* mm, int num_bytes) {
   assert (num_bytes > 0);
   // The memory returned from this is never traced or freed until
   // the memory manager is shut down.
-  void* result = (void*)malloc(sizeof(char)*num_bytes + sizeof(MMSysAllocHeader));
+  void* result = (void*)malloc(sizeof(char)*num_bytes + sizeof(GCSysAllocHeader));
   if (!result) {
     printf("Out of memory.");
     exit(1);
   }
 
-  MMSysAllocHeader* mem = (MMSysAllocHeader*) result;
+  GCSysAllocHeader* mem = (GCSysAllocHeader*) result;
   mem->visited = 0;
   mem->num_bytes = num_bytes;
   mem->requires_cleanup = 0;
@@ -182,34 +182,34 @@ void* slag_mm_allocate_persistent (SlagMemoryManager* mm, int num_bytes) {
   mm->persistent_list = mem;
 
   // scoot the result pointer past the header link info
-  result += sizeof(MMSysAllocHeader);
+  result += sizeof(GCSysAllocHeader);
   return result;
 }
 
-static void slag_mm_free_list (MMSysAllocHeader* list) {
-  MMSysAllocHeader* cur = list;
+static void gc_free_list (GCSysAllocHeader* list) {
+  GCSysAllocHeader* cur = list;
 
   while (cur != 0) {
-    MMSysAllocHeader* next = cur->next;
+    GCSysAllocHeader* next = cur->next;
     free(cur);
     cur = next;
   }
 }
 
-void slag_mm_free_managed_memory(SlagMemoryManager* mm) {
+void gc_free_managed_memory(GarbageCollector* mm) {
   mm->beta_still_unused = 1;
   mm->alpha_allocation_cursor = mm->fast_heap_alpha;
-  mm->alpha_remaining_bytes = (mm->fast_heap_page_size - sizeof(MMFastAllocHeader)) - 4;
+  mm->alpha_remaining_bytes = (mm->fast_heap_page_size - sizeof(GCFastAllocHeader)) - 4;
   //memset(mm->fast_heap_alpha, 0, mm->fast_heap_page_size);
 
-  slag_mm_free_list(mm->long_lived_list);
+  gc_free_list(mm->long_lived_list);
   mm->long_lived_list = 0;
-  slag_mm_free_list(mm->persistent_list);
+  gc_free_list(mm->persistent_list);
   mm->persistent_list = 0;
 }
 
 
-void slag_mm_begin_collection(SlagMemoryManager* mm)
+void gc_begin_collection(GarbageCollector* mm)
 {
   mm->system_allocations_since_last_collection = 0;
   mm->allocations_since_last_collection = 0;
@@ -232,7 +232,7 @@ void slag_mm_begin_collection(SlagMemoryManager* mm)
 //      if there's a null pointer.  No further action needs to be
 //      taken either way.
 ////////////////////////////////////////////////////////////////////
-short slag_mm_reference(SlagMemoryManager* mm, void** ptr )
+short gc_reference(GarbageCollector* mm, void** ptr )
 {
   void* addr = *ptr;
   if (addr == 0) return 0;
@@ -240,7 +240,7 @@ short slag_mm_reference(SlagMemoryManager* mm, void** ptr )
   if ((addr >= mm->fast_heap_beta) && (addr < mm->fast_heap_beta_end))
   {
     // Referencing long-lived data on the old beta heap.  
-    MMFastAllocHeader* header = (MMFastAllocHeader*)(addr - sizeof(MMFastAllocHeader));
+    GCFastAllocHeader* header = (GCFastAllocHeader*)(addr - sizeof(GCFastAllocHeader));
 
     int num_bytes = header->num_bytes;
     //    printf("R: %d\n", addr);
@@ -256,13 +256,13 @@ short slag_mm_reference(SlagMemoryManager* mm, void** ptr )
     else
     {
       // Collect the data and copy to a system allocation.
-      void* result = (void*)malloc(num_bytes + sizeof(MMSysAllocHeader));
+      void* result = (void*)malloc(num_bytes + sizeof(GCSysAllocHeader));
       if ( !result ) {
 	printf("Out of memory.");
 	assert(0);
       }
 
-      MMSysAllocHeader* mem = (MMSysAllocHeader*) result;
+      GCSysAllocHeader* mem = (GCSysAllocHeader*) result;
       mem->visited = 1;
       mem->requires_cleanup = 0;
       mem->next = mm->long_lived_list;
@@ -270,7 +270,7 @@ short slag_mm_reference(SlagMemoryManager* mm, void** ptr )
       mm->long_lived_list = mem;
 
       // scoot the result pointer past the header link info
-      result += sizeof(MMSysAllocHeader);
+      result += sizeof(GCSysAllocHeader);
       memcpy(result, addr, num_bytes);
 
       // Mark the #bytes as -1 to indicate it's been copied.
@@ -289,7 +289,7 @@ short slag_mm_reference(SlagMemoryManager* mm, void** ptr )
     // Referencing the most recent page of fast heap; no collection
     // performed, but the first one to reference this data should
     // go on the reference its internals.
-    MMFastAllocHeader* header = (MMFastAllocHeader*)(addr - sizeof(MMFastAllocHeader));
+    GCFastAllocHeader* header = (GCFastAllocHeader*)(addr - sizeof(GCFastAllocHeader));
     if (header->visited) {
       return 0;
     } else {
@@ -304,7 +304,7 @@ short slag_mm_reference(SlagMemoryManager* mm, void** ptr )
     // referenced so it won't be freed later and, if it's the first
     // time we've seen it this collection, signal that it should be
     // traced into.
-    MMSysAllocHeader* header = (MMSysAllocHeader*)(addr - sizeof(MMSysAllocHeader));
+    GCSysAllocHeader* header = (GCSysAllocHeader*)(addr - sizeof(GCSysAllocHeader));
 
     if (header->visited) {
       return 0;
@@ -317,7 +317,7 @@ short slag_mm_reference(SlagMemoryManager* mm, void** ptr )
 }
 
 // Debugging code..
-void slag_analyze(SlagMemoryManager* mm, void* addr) {
+void gc_analyze(GarbageCollector* mm, void* addr) {
   if (addr >= mm->fast_heap_alpha && addr < mm->fast_heap_alpha_end) {
     printf("analyze: is alpha\n");
     return;
@@ -326,11 +326,11 @@ void slag_analyze(SlagMemoryManager* mm, void* addr) {
     printf("analyze: is beta\n");
     return;
   }
-  MMSysAllocHeader* mem = mm->long_lived_list;
+  GCSysAllocHeader* mem = mm->long_lived_list;
   while (mem != 0) {
     if ((mem + 1) == addr) {
       int i=0;
-      int n = slag_mm_size(mm, addr);
+      int n = gc_size(mm, addr);
       printf("analyze: is long lived\n");
       printf("analyze: size is %d\n", n);
       for (i = 0; i < n; i+=4) {
@@ -349,7 +349,7 @@ void slag_analyze(SlagMemoryManager* mm, void* addr) {
   assert(0);
 }
 
-void slag_mm_end_collection(SlagMemoryManager* mm) {
+void gc_end_collection(GarbageCollector* mm) {
   mm->collections++;
   // We will count the number of system allocations below..
   mm->system_allocations = 0;
@@ -359,7 +359,7 @@ void slag_mm_end_collection(SlagMemoryManager* mm) {
   mm->fast_heap_alpha = mm->fast_heap_beta;
   mm->fast_heap_beta = temp;
   mm->alpha_allocation_cursor = mm->fast_heap_alpha;
-  mm->alpha_remaining_bytes = (mm->fast_heap_page_size - sizeof(MMFastAllocHeader)) - 4;
+  mm->alpha_remaining_bytes = (mm->fast_heap_page_size - sizeof(GCFastAllocHeader)) - 4;
 
   mm->fast_heap_alpha_end = mm->fast_heap_alpha + mm->fast_heap_page_size;
   mm->fast_heap_beta_end = mm->fast_heap_beta  + mm->fast_heap_page_size;
@@ -376,8 +376,8 @@ void slag_mm_end_collection(SlagMemoryManager* mm) {
     // Start just after the head of the list so we don't have
     // to keep checking for it as a special case whenever
     // we delete something
-    MMSysAllocHeader* prev = mm->long_lived_list;
-    MMSysAllocHeader* cur  = mm->long_lived_list->next;
+    GCSysAllocHeader* prev = mm->long_lived_list;
+    GCSysAllocHeader* cur  = mm->long_lived_list->next;
 
     while (cur) {
       if (cur->visited) {
@@ -390,7 +390,7 @@ void slag_mm_end_collection(SlagMemoryManager* mm) {
       {
         // TODO - call clean up function
         
-        GIN_OBJ object_to_del = (void*)cur + sizeof(MMSysAllocHeader);
+        GIN_OBJ object_to_del = (void*)cur + sizeof(GCSysAllocHeader);
 
         // given a ginger object get the GingerType
         GingerType *obj_type = GIN_NIM_GET_TYPE_OBJECT(object_to_del);
@@ -402,7 +402,7 @@ void slag_mm_end_collection(SlagMemoryManager* mm) {
 
         // This is untested.
         //assert(0);
-        MMSysAllocHeader* next = cur->next;
+        GCSysAllocHeader* next = cur->next;
         prev->next = next;
         cur->next = mm->pending_cleanup;
         mm->pending_cleanup = cur;
@@ -410,7 +410,7 @@ void slag_mm_end_collection(SlagMemoryManager* mm) {
       }
       else
       {
-        MMSysAllocHeader* next = cur->next;
+        GCSysAllocHeader* next = cur->next;
         prev->next = next;
         free(cur);
         cur = next;
@@ -426,7 +426,7 @@ void slag_mm_end_collection(SlagMemoryManager* mm) {
     {
       // TODO - call clean up function
       
-      //GIN_OBJ object_to_del = (void*)cur + sizeof(MMSysAllocHeader);
+      //GIN_OBJ object_to_del = (void*)cur + sizeof(GCSysAllocHeader);
 
       // given a ginger object get the GingerType
       //GingerType *obj_type = GIN_NIM_GET_TYPE_OBJECT(object_to_del);
@@ -439,29 +439,29 @@ void slag_mm_end_collection(SlagMemoryManager* mm) {
 
       // This is untested.
       assert(0);
-      MMSysAllocHeader* next = mm->long_lived_list->next;
+      GCSysAllocHeader* next = mm->long_lived_list->next;
       mm->long_lived_list->next = mm->pending_cleanup;
       mm->pending_cleanup = mm->long_lived_list;
       mm->long_lived_list = next;
     }
     else
     {
-      MMSysAllocHeader* next = mm->long_lived_list->next;
+      GCSysAllocHeader* next = mm->long_lived_list->next;
       free(mm->long_lived_list);
       mm->long_lived_list = next;
     }
   }
 }
 
-void slag_mm_mark_as_requiring_cleanup(SlagMemoryManager* mm, void* ptr) {
-  MMSysAllocHeader* header = (MMSysAllocHeader*) (ptr - sizeof(MMSysAllocHeader));
+void gc_mark_as_requiring_cleanup(GarbageCollector* mm, void* ptr) {
+  GCSysAllocHeader* header = (GCSysAllocHeader*) (ptr - sizeof(GCSysAllocHeader));
   header->requires_cleanup = 1;
 }
 
-void* slag_mm_get_next_pending_cleanup(SlagMemoryManager* mm) {
+void* gc_get_next_pending_cleanup(GarbageCollector* mm) {
   if (mm->pending_cleanup == 0) return 0;
 
-  MMSysAllocHeader* m = mm->pending_cleanup;
+  GCSysAllocHeader* m = mm->pending_cleanup;
   mm->pending_cleanup = mm->pending_cleanup->next;
   m->next = mm->long_lived_list;
   mm->long_lived_list = m;
@@ -470,63 +470,36 @@ void* slag_mm_get_next_pending_cleanup(SlagMemoryManager* mm) {
   return (m + 1);
 }
 
-void slag_mm_set_collection_callback(SlagMemoryManager*mm, void(*callback)(SlagMemoryManager*)) {
-  ((SlagMemoryManager*)mm)->collection_callback = callback;
+void gc_set_collection_callback(GarbageCollector*mm, void(*callback)(GarbageCollector*)) {
+  ((GarbageCollector*)mm)->collection_callback = callback;
 }
 
-short slag_mm_collection_required_before_allocation(SlagMemoryManager*mm, int num_bytes) {
+short gc_collection_required_before_allocation(GarbageCollector*mm, int num_bytes) {
   return !( num_bytes <= mm->alpha_remaining_bytes 
-	    || num_bytes > MM_FAST_HEAP_THRESHOLD
+	    || num_bytes > GC_FAST_HEAP_THRESHOLD
 	    || mm->beta_still_unused);
 }
 
-unsigned long slag_mm_size(SlagMemoryManager* mm, void *addr) {
+unsigned long gc_size(GarbageCollector* mm, void *addr) {
   if ( ((addr >= mm->fast_heap_beta) && (addr < mm->fast_heap_beta_end)) ||
        ((addr >= mm->fast_heap_alpha) && (addr < mm->fast_heap_alpha_end)) ) {
-    MMFastAllocHeader* n = (MMFastAllocHeader*)(addr - sizeof(MMFastAllocHeader));
+    GCFastAllocHeader* n = (GCFastAllocHeader*)(addr - sizeof(GCFastAllocHeader));
     assert(n->num_bytes != 0);
     return n->num_bytes;
   } else {
-    MMSysAllocHeader* n = (MMSysAllocHeader*)(addr - sizeof(MMSysAllocHeader));
+    GCSysAllocHeader* n = (GCSysAllocHeader*)(addr - sizeof(GCSysAllocHeader));
     assert(n->num_bytes != 0);
     return n->num_bytes;    
   }
 }
 
-
-/*
-int slag_mm_reference(void* mm, void** ptr) {
-  return ((SlagMemoryManager*)mm)->reference((char**)ptr);
-}
-
-
-
-void slag_mm_mark_as_requiring_cleanup(void* mm, void *ptr) {
-  ((SlagMemoryManager *)mm)->mark_as_requiring_cleanup(ptr);
-}
-
-void* slag_mm_get_next_pending_cleanup(void* mm) {
-  return ((SlagMemoryManager *)mm)->get_next_pending_cleanup();
-}
-
-void slag_mm_report(void *m) {
-  SlagMemoryManager *mm = (SlagMemoryManager*)m;
-  printf("GC Report\n");
-  printf("system allocations since last collection = %d\n", mm->system_allocations_since_last_collection);
-  printf("allocations since last collection = %d\n", mm->allocations_since_last_collection);
-  printf("total heap allocations = %d\n", mm->fast_heap_allocations);
-  printf("total system allocations = %d\n", mm->system_allocations);
-  printf("total collections = %d\n", mm->collections);
-}
-*/
-
 // Ginger specific functionality
 
 //#define GC_DEBUG 1
 
-void reference_frame(SlagMemoryManager* mm, Frame_Narg* frame);
+void reference_frame(GarbageCollector* mm, Frame_Narg* frame);
 
-void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
+void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   int i;
 
   // We should never reference uninitialized memory.
@@ -540,7 +513,7 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
 #ifdef GC_DEBUG
        printf("reference_var: STRING %s \n", GIN_STR_VALUE(o));
 #endif
-    slag_mm_reference(mm, (void**)&(((GingerObject*)(o))->str8_value));
+    gc_reference(mm, (void**)&(((GingerObject*)(o))->str8_value));
     return;
   }
   if (GIN_IS_VECTOR(o)) {
@@ -551,14 +524,14 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
     for (i=0; i<((GingerVector*)(o))->length; i++) {
       GIN_OBJ x = ((GingerVector*)(o))->value[i];
       GIN_OBJ y = x;
-      if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(((GingerVector*)(o))->value[i])))) {
+      if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(((GingerVector*)(o))->value[i])))) {
 	x = ((GingerVector*)(o))->value[i];
 	// printf("VECTOR (a) BEFORE = %d AFTER = %d\n", y, x);
 	reference_var(mm, x);
       }
     }
     if (((GingerVector*)(o))->length > 0) {
-      slag_mm_reference(mm, (void**)&(((GingerVector*)(o))->value));
+      gc_reference(mm, (void**)&(((GingerVector*)(o))->value));
     }
 
 #ifdef GC_DEBUG
@@ -582,7 +555,7 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
 #endif
     
     
-    if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(GIN_NIM_GET_F0(o))))) {
+    if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(GIN_NIM_GET_F0(o))))) {
       x = GIN_NIM_GET_F0(o);
       reference_var(mm, x);
     }
@@ -597,7 +570,7 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
     }
 #endif
 
-    if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(GIN_NIM_GET_F1(o))))) {
+    if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(GIN_NIM_GET_F1(o))))) {
       x = GIN_NIM_GET_F1(o);
       reference_var(mm, x);
     }
@@ -612,7 +585,7 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
     }
 #endif
 
-    if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(GIN_NIM_GET_F2(o))))) {
+    if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(GIN_NIM_GET_F2(o))))) {
       //printf("1\n");
       x = GIN_NIM_GET_F2(o);
       //printf("2\n");
@@ -630,7 +603,7 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
 #ifdef GC_DEBUG
     printf("reference_var: FUNCTION\n");
 #endif
-    if (slag_mm_reference(mm, (void**)&(((GingerObject*)(o))->previous_lexical_frame)))
+    if (gc_reference(mm, (void**)&(((GingerObject*)(o))->previous_lexical_frame)))
       reference_frame(mm, (Frame_Narg*)((GingerObject*)(o))->previous_lexical_frame);
     return;
   }
@@ -638,7 +611,7 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
 #ifdef GC_DEBUG
     printf("reference_var: BINARY\n");
 #endif
-    slag_mm_reference(mm, (void**)&(((GingerBinary*)(o))->value));
+    gc_reference(mm, (void**)&(((GingerBinary*)(o))->value));
     return;
   }
   if (GIN_IS_DICT(o)) {
@@ -646,7 +619,7 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
     printf("reference_var: DICT\n");
 #endif
     GIN_OBJ x = ((GingerDictionary*)(o))->root;
-    if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(((GingerDictionary*)(o))->root)))) {
+    if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(((GingerDictionary*)(o))->root)))) {
       x = ((GingerDictionary*)(o))->root;
       reference_var(mm, x);
     }
@@ -657,13 +630,13 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
     printf("reference_var: DICT CELL\n");
 #endif
     GIN_OBJ x = ((GingerDictionaryCell*)(o))->left;
-    if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(((GingerDictionaryCell*)(o))->left)))) {
+    if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(((GingerDictionaryCell*)(o))->left)))) {
       x = ((GingerDictionaryCell*)(o))->left;
       reference_var(mm, x);
     }
 
     x = ((GingerDictionaryCell*)(o))->right;
-    if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(((GingerDictionaryCell*)(o))->right)))) {
+    if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(((GingerDictionaryCell*)(o))->right)))) {
       x = ((GingerDictionaryCell*)(o))->right;
       reference_var(mm, x);
     }
@@ -715,15 +688,15 @@ void reference_var(SlagMemoryManager* mm, GIN_OBJ o) {
     
 }
 
-void reference_frame(SlagMemoryManager* mm, Frame_Narg* cframe) {
+void reference_frame(GarbageCollector* mm, Frame_Narg* cframe) {
   GIN_OBJ x;
   int i;
   int n;
   #ifdef GC_DEBUG
   printf("reference_frame %d\n", cframe);
   #endif
-  n = slag_mm_size(mm, cframe);
-  //printf("Slag says size=%d (%d)\n", n, cframe);
+  n = gc_size(mm, cframe);
+  //printf("GC says size=%d (%d)\n", n, cframe);
   n = n - sizeof(Frame);
   assert(n >= 0);
   assert(n % 4 == 0);
@@ -733,45 +706,45 @@ void reference_frame(SlagMemoryManager* mm, Frame_Narg* cframe) {
   
   /*  for (i=0; i<cdef_count; i++) {
     x = cdef[i].make;
-    if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(cdef[i].make)))) {
+    if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(cdef[i].make)))) {
       reference_var(mm, cdef[i].make);
     }
     x = cdef[i].unmake;
-    if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(cdef[i].unmake)))) {
+    if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(cdef[i].unmake)))) {
       reference_var(mm, cdef[i].unmake);
     }
   }
   */
   
-  if ((cframe->previous_frame) && (slag_mm_reference(mm, (void**)&(cframe->previous_frame)))) {
+  if ((cframe->previous_frame) && (gc_reference(mm, (void**)&(cframe->previous_frame)))) {
     reference_frame(mm, (Frame_Narg*)(cframe->previous_frame));
   }
   
-  if ((cframe->next_frame) && (slag_mm_reference(mm, (void**)&(cframe->next_frame)))) {
+  if ((cframe->next_frame) && (gc_reference(mm, (void**)&(cframe->next_frame)))) {
     reference_frame(mm, (Frame_Narg*)(cframe->next_frame));
   }
   
-  if ((cframe->previous_lexical_frame) && (slag_mm_reference(mm, (void**)&(cframe->previous_lexical_frame)))) {
+  if ((cframe->previous_lexical_frame) && (gc_reference(mm, (void**)&(cframe->previous_lexical_frame)))) {
     reference_frame(mm, (Frame_Narg*)(cframe->previous_lexical_frame));
   }
   x = cframe->result;
-  if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(cframe->result)))) {
+  if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(cframe->result)))) {
     reference_var(mm, cframe->result);
   }
   for (i=0; i<n; i++) {
     x = cframe->argn[i];
-    if (x && (!GIN_IS_IM(x)) && (slag_mm_reference(mm, &(cframe->argn[i])))) {
+    if (x && (!GIN_IS_IM(x)) && (gc_reference(mm, &(cframe->argn[i])))) {
       reference_var(mm, cframe->argn[i]);
     }
   }
 }
 
-void collect (SlagMemoryManager* mm) {
-  slag_mm_begin_collection(mm);
+void collect (GarbageCollector* mm) {
+  gc_begin_collection(mm);
   
   // Explore every reachable frame touching everything we can find. It all stems from the current frame.
   
-  slag_mm_reference(mm, (void**)(&frame));
+  gc_reference(mm, (void**)(&frame));
   reference_frame(mm, (Frame_Narg*)frame);
 
   // Don't need to collect these even though they are also globals because no allocation will happen before it gets put in another var.
@@ -779,14 +752,14 @@ void collect (SlagMemoryManager* mm) {
   // next_func
   // calln_temp
   
-  slag_mm_end_collection(mm);
+  gc_end_collection(mm);
 
   return; // Eddie: return so we never reach the following code.
   // TODO - what is this code supposed to do?
   
   // Now go through and call methods to cleanup garbage
   GIN_OBJ c;
-  while (c = slag_mm_get_next_pending_cleanup(mm)) {
+  while (c = gc_get_next_pending_cleanup(mm)) {
     printf("This is not implemented yet.\n");
     assert(0);
     GIN_OBJ d;

@@ -20,7 +20,7 @@
 ;
 ; Please report all bugs and problems to "bugs@ging3r.org".
 
-include "pdf3.gin"
+include "pdf.gin"
 
 define SYMBOL-FONT ""
 define DOC-FONT ""
