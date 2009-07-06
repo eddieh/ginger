@@ -32,7 +32,7 @@ define cairo-create (target)
   inline-c "GIN_NIM_SET_FOREIGN(" result ", \
     (cairo_t *)cairo_create((cairo_surface_t *)GIN_NIM_GET_FOREIGN(" target ")) \
   );"
-  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type;"
+  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type_index;"
 
 define cairo-destroy (cr) 
   inline-c "cairo_destroy(GIN_NIM_GET_FOREIGN(" cr "));"
@@ -46,7 +46,7 @@ define cairo-image-surface-create (width height)
       GIN_IM_TO_INT(" width "), \
       GIN_IM_TO_INT(" height ") \
       ));"
-  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type;"
+  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type_index;"
 
 ;define cairo-[PDF|PNG|PS|SVG]surface-create
 ;  noop
@@ -59,14 +59,14 @@ define cairo-pdf-surface-create (filename width height)
       (double)GIN_IM_TO_INT(" height ") \
       ));"
   ; TODO - make the next line a function
-  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type;"
+  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type_index;"
 
 define cairo-image-surface-create-from-png (filename)
   inline-c "GIN_NEW_NIM(" result ");"
   inline-c "GIN_NIM_SET_FOREIGN(" result ", \
     (cairo_surface_t *)cairo_image_surface_create_from_png(GIN_STR_VALUE(" filename ")));"
   ; TODO - make the next line a function
-  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type;"
+  inline-c "GIN_NIM_GET_TYPE(" result ") = ((GingerType*)(" Cairo-Surface "))->type_index;"
 
 define cairo-win32-surface-create (hdc)
   noop
