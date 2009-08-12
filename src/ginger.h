@@ -25,7 +25,8 @@
 #ifndef GINGER_H
 #define GINGER_H
 
-//#define DEBUG
+#define DEBUG
+//#define GC_DEBUG
 
 /// Section 0: Includes
 
@@ -227,8 +228,8 @@ gc_mark_as_requiring_cleanup(mm, v);
   ALLOCATE_FRAME___ ## function (frame->next_frame)
 
 #ifdef DEBUG
-#define CALLDEBUG(z) for(debug_depth_iterator=0;debug_depth_iterator<debug_depth;debug_depth_iterator++) printf(" "); printf(z); printf("\n"); debug_depth++;
-#define ENDDEBUG debug_depth--;
+#define CALLDEBUG(z) if ( gin_debug ) { if ((gin_debug_max_depth == -1) || (debug_depth <= gin_debug_max_depth)) { for (debug_depth_iterator=0;debug_depth_iterator<debug_depth;debug_depth_iterator++) printf(" "); printf(z); printf("\n"); } debug_depth++; }
+#define ENDDEBUG if ( gin_debug ) debug_depth--;
 #else
 #define CALLDEBUG(z)
 #define ENDDEBUG
@@ -313,9 +314,14 @@ GIN_OBJ safe_allocate; \
 GarbageCollector* mm; \
 int gin_argc; \
 char **gin_argv; \
+int gin_debug = 0; \
+int gin_debug_max_depth = -1; \
 int debug_depth = 0; \
 int debug_depth_iterator = 0; \
 GIN_OBJ type_table = 0;
+
+// gin_debug is a flag, it controls when the trace is printed
+// gin_debug_max_depth controls the depth of the trace, -1 means no maximum
 
 #define BEGIN_CODE Frame *frame; \
 GIN_OBJ ginExec (GIN_OBJ fn, GIN_OBJ args) { \
@@ -360,6 +366,7 @@ int main(int argc, char *argv[]) {			\
 // xxxx xxxx xxxx xxxx xxxx xxxx xzzz zz01 - Binary (Untyped Memory) (1-25 bits)
 // xxxx xxxx xxxx xxxx xxxx UUU0 1111 1111 - Integer (20 bit)
 // xxxx xxxx xxxx xxxx xxxx UU01 1111 1111 - Symbol (20 bit)
+// xxxx xxxx xxxx xxxx xxxx U101 1111 1111 - Label (20 bit)
 // xxxx xxxx xxxx xxxx 0111 1111 1111 1111 - Character (16 bit)
 // xxxx xxxx 0111 1111 1111 1111 1111 1111 - Character (8 bit)
 // xxxx 0111 1111 1111 1111 1111 1111 1111 - Boolean (1 bit)
@@ -384,6 +391,10 @@ int main(int argc, char *argv[]) {			\
 #define GIN_IM_FLAG_SYM 511 // 511
 #define GIN_IM_FLAG_SYM_O 10
 #define GIN_IM_FLAG_SYM_DO 12
+
+#define GIN_IM_FLAG_LABEL 1535
+#define GIN_IM_FLAG_LABEL_O 11
+#define GIN_IM_FLAG_LABEL_DO 12
 
 #define GIN_IM_FLAG_CHAR16 32767
 #define GIN_IM_FLAG_CHAR16_O 16
@@ -416,6 +427,7 @@ int main(int argc, char *argv[]) {			\
 #define GIN_IS_IM(x) CMP_FLAGS(GIN_IM_FLAG, GIN_IM_FLAG_O, x)
 #define GIN_IS_IM_INT(x) CMP_FLAGS(GIN_IM_FLAG_INT, GIN_IM_FLAG_INT_O, x)
 #define GIN_IS_IM_SYM(x) CMP_FLAGS(GIN_IM_FLAG_SYM, GIN_IM_FLAG_SYM_O, x)
+#define GIN_IS_IM_LABEL(x) CMP_FLAGS(GIN_IM_FLAG_LABEL, GIN_IM_FLAG_LABEL_O, x)
 #define GIN_IS_IM_BINARY(x) CMP_FLAGS(GIN_IM_FLAG_BINARY, GIN_IM_FLAG_BINARY_O, x)
 #define GIN_IS_IM_CHAR16(x) CMP_FLAGS(GIN_IM_FLAG_CHAR16, GIN_IM_FLAG_CHAR16_O, x)
 #define GIN_IS_IM_CHAR8(x) CMP_FLAGS(GIN_IM_FLAG_CHAR8, GIN_IM_FLAG_CHAR8_O, x)
@@ -425,6 +437,7 @@ int main(int argc, char *argv[]) {			\
 #define GIN_IM_TO_INT(m) (((unsigned long)(m)) >> GIN_IM_FLAG_INT_DO)
 #define GIN_IM_TO_SIGNED_INT(m) (((long)(m)) >> GIN_IM_FLAG_INT_DO)
 #define GIN_IM_TO_SYM(m) (((unsigned long)(m)) >> GIN_IM_FLAG_SYM_DO)
+#define GIN_IM_TO_LABEL(m) (((unsigned long)(m)) >> GIN_IM_FLAG_LABEL_DO)
 #define GIN_IM_TO_CHAR16(m) (((unsigned long)(m)) >> GIN_IM_FLAG_CHAR16_O)
 #define GIN_IM_TO_CHAR8(m) (((unsigned long)(m)) >> GIN_IM_FLAG_CHAR8_O)
 #define GIN_IM_TO_BOOL(m) (((unsigned long)(m)) >> GIN_IM_FLAG_BOOL_O)
@@ -436,6 +449,7 @@ int main(int argc, char *argv[]) {			\
 // Convert from a c value to an immediate value.
 #define GIN_IM_FROM_INT(i) ((GIN_OBJ)((((unsigned long)(i)) << GIN_IM_FLAG_INT_DO) | GIN_IM_FLAG_INT))
 #define GIN_IM_FROM_SYM(i) ((GIN_OBJ)((((unsigned long)(i)) << GIN_IM_FLAG_SYM_DO) | GIN_IM_FLAG_SYM))
+#define GIN_IM_FROM_LABEL(i) ((GIN_OBJ)((((unsigned long)(i)) << GIN_IM_FLAG_LABEL_DO) | GIN_IM_FLAG_LABEL))
 #define GIN_IM_FROM_CHAR16(i) ((GIN_OBJ)((((unsigned long)(i)) << GIN_IM_FLAG_CHAR16_O) | GIN_IM_FLAG_CHAR16))
 #define GIN_IM_FROM_CHAR8(i) ((GIN_OBJ)((((unsigned long)(i)) << GIN_IM_FLAG_CHAR8_O) | GIN_IM_FLAG_CHAR8))
 #define GIN_IM_FROM_BOOL(i) ((GIN_OBJ)((((unsigned long)(i)) << GIN_IM_FLAG_BOOL_O) | GIN_IM_FLAG_BOOL))
@@ -481,6 +495,7 @@ int main(int argc, char *argv[]) {			\
 #define GIN_IS_FUNCTION(x) ((!GIN_IS_IM(x))&&(((GingerObject*)x)->type_index==GIN_TYPE_FUNCTION))
 
 #define GIN_IS_SYM(x) GIN_IS_IM_SYM(x)
+#define GIN_IS_LABEL(x) GIN_IS_IM_LABEL(x)
 #define GIN_IS_CLASSID(x) GIN_IS_IM_CLASSID(x)
 #define GIN_IS_CHAR16(x) GIN_IS_IM_CHAR16(x)
 #define GIN_IS_CHAR8(x) GIN_IS_IM_CHAR8(x)
@@ -558,6 +573,7 @@ memcpy(((GingerObject*)v)->str8_value, a, ((GingerObject*)v)->str_length); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STR16; \
 ((GingerObject*)v)->str16_value = a;
 #define GIN_NEW_SYM(v,a) v=GIN_IM_FROM_SYM(a);
+#define GIN_NEW_LABEL(v,a) v=GIN_IM_FROM_LABEL(a);
 #define GIN_NEW_BOOL(v,a) v=GIN_IM_FROM_BOOL(a);
 #define GIN_NEW_OBJ(v,a) v=a;
 #define GIN_NEW_FLONUM(v,a) GIN_ALLOCATE(v, void*, sizeof(GingerFlonum));	\
@@ -583,32 +599,27 @@ GIN_NIM_SET_STREAM_MODE(v,m);
 #define GIN_NIM_GET_TYPE(v) ((GingerObject*)v)->type_index
 #define GIN_NIM_GET_TYPE_OBJECT(v) ((GingerVector*)type_table)->value[GIN_IM_TO_INT(((GingerObject*)v)->type_index)]
 
-/*
-  A string stream has [length : position : mode] encoded in str_length where:
-  length   31:17
-  position 16:2
-  mode     1:0
- */
-#define GIN_NIM_GET_STRING_STREAM_LENGTH(v) (long)(((long)((GingerObject*)v)->str_length) >> 17)
-#define GIN_NIM_SET_STRING_STREAM_LENGTH(v,l) ((GingerObject*)v)->str_length = \
-    (long)((((GingerObject*)v)->str_length) & 0x0001FFFF) | ((long)l << 17);
 
-#define GIN_NIM_GET_STRING_STREAM_POSITION(v) (long)((((long)((GingerObject*)v)->str_length) & 0x0001FFFC) >> 2)
-#define GIN_NIM_SET_STRING_STREAM_POSITION(v,p) ((GingerObject*)v)->str_length = \
-    (long)((((GingerObject*)v)->str_length) & 0xFFFE0003) | ((long)p << 2);
+#define GIN_NIM_GET_STRING_STREAM_LENGTH(v) (((GingerObject*)v)->str_length)
+#define GIN_NIM_SET_STRING_STREAM_LENGTH(v,l) (((GingerObject*)v)->str_length) = l;
+
+#define GIN_NIM_GET_STRING_STREAM_POSITION(v) ((long)(((GingerObject*)v)->f1))
+#define GIN_NIM_SET_STRING_STREAM_POSITION(v,p) (((GingerObject*)v)->f1) = (void*)p;
 
 #define GIN_NEW_STRING_STREAM(v,s,m) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STRING_STREAM; \
 GIN_NIM_SET_STRING_STREAM_LENGTH(v,strlen(s)); \
-GIN_NIM_SET_STRING_STREAM_POSITION(v,0); \
+GIN_NIM_SET_STRING_STREAM_POSITION(v,0);                        \
 GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, strlen(s)+1);	\
-GIN_NIM_SET_STREAM_MODE(v,m); \
 memcpy(((GingerObject*)v)->str8_value, s, strlen(s)+1);
 
 #define GIN_NEW_EMPTY_STRING_STREAM(v,m) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STRING_STREAM; \
-((GingerObject*)v)->str_length = 0; \
-GIN_NIM_SET_STREAM_MODE(v,m);
+GIN_NIM_SET_STRING_STREAM_LENGTH(v,0); \
+GIN_NIM_SET_STRING_STREAM_POSITION(v,0);              \
+GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, 1);	\
+((GingerObject*)v)->str8_value[0] = 0;
+
 
 // GL Images Objects
 // foreign_value =>  data
@@ -739,6 +750,7 @@ extern GIN_OBJ fmt_double(double);
 extern GIN_OBJ fmt_float(float);
 void print_bits32(unsigned long q);
 void print_bits64(unsigned long long q);
+extern GIN_OBJ gin_string_to_float(GIN_OBJ str);
 extern int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp);
 extern GIN_OBJ gin_dict_contains(GIN_OBJ t, GIN_OBJ k);
 extern GIN_OBJ gin_dict_keys(GIN_OBJ, int);

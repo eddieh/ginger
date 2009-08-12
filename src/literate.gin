@@ -66,13 +66,13 @@ define Literate::weave-pdf (name tree)
     define image? (node)
       and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'image)
 
-    define title (x)
+    define title->string (x)
       first (tail (first (tail x)))
       
-    define section (x)
+    define section->string (x)
       first (tail (first (tail x)))
      
-    define doc (x)
+    define doc->string (x)
       define string-append? (node)
         and (Symbol? node) (eq? 'String::append node)
 
@@ -141,7 +141,7 @@ define Literate::weave-pdf (name tree)
         elsif: (String? part)
           set tmp (fmt-doc part)
         elsif: (code? part)
-          set tmp (code part)
+          set tmp (code->string part)
         elsif: (math? part)
           set tmp (math part)
         elsif: (cite? part)
@@ -152,7 +152,7 @@ define Literate::weave-pdf (name tree)
         set str (String::append str tmp)
       str
      
-    define chunk (x)
+    define chunk->string (x)
       define name (first (tail node))
       if (not (eq? name '*))
         ; get the display name
@@ -190,7 +190,7 @@ define Literate::weave-pdf (name tree)
           
           define old-tail (tail node)
           set-first node (first formatted-chunk-call)
-          define z (last-cons formatted-chunk-call)
+          define z (last* formatted-chunk-call)
           set-tail z old-tail
           set-tail node (tail formatted-chunk-call)
           
@@ -234,14 +234,14 @@ define Literate::weave-pdf (name tree)
           set str (String::append str (nth components i))
       str
 
-    define code (x)
+    define code->string (x)
       define code-str (first (tail (first (tail x))))
       String::append 
       .. "<span font_desc=\"Inconsolata 12\">" 
       .. (escape code-str)
       .. "</span>"
     
-    define image (x)
+    define image->filename (x)
       second x
 
     define fmt-math (x)
@@ -284,13 +284,13 @@ define Literate::weave-pdf (name tree)
     
     each node tree
       if (title? node)
-        define title-p (PDF::make-paragraph (title node) "Bold 18")
+        define title-p (PDF::make-paragraph (title->string node) "Bold 18")
         Dict::set title-p 'alignment 'center
         PDF::add-paragraph document title-p
       
       elsif: (section? node)
         ++ section-count
-        define section-str (String::append (Fixnum->String section-count) "&#46;  " (section node))
+        define section-str (String::append (Fixnum->String section-count) "&#46;  " (section->string node))
         define section-p (PDF::make-paragraph section-str "Bold 12")
         PDF::add-paragraph document section-p
 
@@ -298,7 +298,7 @@ define Literate::weave-pdf (name tree)
         Dict::set document 'cursor-y (+ (Dict::get document 'cursor-y) 4)
       
       elsif: (doc? node)
-        define doc-str (doc node)
+        define doc-str (doc->string node)
         define doc-p (PDF::make-paragraph doc-str)
         Dict::set doc-p 'indent 14
         PDF::add-paragraph document doc-p
@@ -307,12 +307,12 @@ define Literate::weave-pdf (name tree)
         Dict::set document 'cursor-y (+ (Dict::get document 'cursor-y) 12)
 
       elsif: (Lit::chunk? node)
-        define chunk-str (chunk node)
+        define chunk-str (chunk->string node)
         define chunk-p (PDF::make-paragraph chunk-str)
         PDF::add-paragraph document chunk-p
       
       elsif: (code? node)
-        define code-str (code node)
+        define code-str (code->string node)
         define code-p (PDF::make-paragraph code-str)
         PDF::add-paragraph document code-p
 
@@ -320,7 +320,7 @@ define Literate::weave-pdf (name tree)
         Dict::set document 'cursor-y (+ (Dict::get document 'cursor-y) 12)
       
       elsif: (image? node)
-        define image-filename (image node)
+        define image-filename (image->filename node)
         PDF::add-image document image-filename
 
       else:

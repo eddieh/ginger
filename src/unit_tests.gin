@@ -542,7 +542,7 @@ define test-pango-list-fonts ()
   define layout (Pango::cairo-create-layout cr)
   define context (Pango::layout-get-context layout)
   Pango::context-list-families context
-test-pango-list-fonts
+;test-pango-list-fonts
 
 define test-font-from-string ()
   println "Test make document"
@@ -575,3 +575,17 @@ define test-color-document ()
   PDF::close document
 ;test-color-document
 
+define test-output-string ()
+  println "Test output string"
+  define output (open-output-string)
+  print output "Hey"
+  print output " " "way " "got a pain!"
+  println (get-output-string output)
+;test-output-string
+
+define test-labels ()
+  println "Test Labels"
+  define label (String->Label-Sym "monkey:")
+  assertEquals "monkey:" (Label->String label)
+  assertTrue (Label? label)
+test-labels

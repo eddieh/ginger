@@ -234,11 +234,13 @@ void gc_begin_collection(GarbageCollector* mm)
 ////////////////////////////////////////////////////////////////////
 short gc_reference(GarbageCollector* mm, void** ptr )
 {
+  //printf(":debug GC gc_reference\n");
   void* addr = *ptr;
   if (addr == 0) return 0;
-
+  
   if ((addr >= mm->fast_heap_beta) && (addr < mm->fast_heap_beta_end))
   {
+    //printf(":debug GC gc_reference 1\n");
     // Referencing long-lived data on the old beta heap.  
     GCFastAllocHeader* header = (GCFastAllocHeader*)(addr - sizeof(GCFastAllocHeader));
 
@@ -248,6 +250,7 @@ short gc_reference(GarbageCollector* mm, void** ptr )
 
     if (num_bytes == -1)
     {
+      //printf(":debug GC gc_reference 1.1\n");
       // We already collected this data. **ptr contains the new
       // address that *ptr should be reset to.
       *ptr = *((void**)addr);
@@ -255,11 +258,12 @@ short gc_reference(GarbageCollector* mm, void** ptr )
     }
     else
     {
+      //printf(":debug GC gc_reference 1.2\n");
       // Collect the data and copy to a system allocation.
       void* result = (void*)malloc(num_bytes + sizeof(GCSysAllocHeader));
       if ( !result ) {
-	printf("Out of memory.");
-	assert(0);
+        printf("Out of memory.");
+        assert(0);
       }
 
       GCSysAllocHeader* mem = (GCSysAllocHeader*) result;
@@ -281,23 +285,31 @@ short gc_reference(GarbageCollector* mm, void** ptr )
 
       // update calling address
       *ptr = result; 
-
+      
+      //printf(":debug GC gc_reference 1.2 return\n");
       return 1;
     }
   }
   else if (addr >= mm->fast_heap_alpha && addr < mm->fast_heap_alpha_end) {
+    //printf(":debug GC gc_reference 2\n");
     // Referencing the most recent page of fast heap; no collection
     // performed, but the first one to reference this data should
     // go on the reference its internals.
     GCFastAllocHeader* header = (GCFastAllocHeader*)(addr - sizeof(GCFastAllocHeader));
     if (header->visited) {
+      //printf(":debug GC gc_reference 2.1 return\n");
       return 0;
     } else {
+      //printf(":debug GC gc_reference 2.2 return\n");
       mm->fast_heap_allocations++;
       header->visited = 1;
       return 1;
     }
   } else {
+    //printf(":debug GC gc_reference 3 %x\n", addr);
+    //print_bits32(addr);
+
+    //gc_analyze(mm, addr);
     // Address isn't on Alpha or Beta fast heap pages; it must be
     // allocated in system memory.  There's no question of collection 
     // (the data remains where it is), but we need to mark it as 
@@ -305,14 +317,18 @@ short gc_reference(GarbageCollector* mm, void** ptr )
     // time we've seen it this collection, signal that it should be
     // traced into.
     GCSysAllocHeader* header = (GCSysAllocHeader*)(addr - sizeof(GCSysAllocHeader));
-
+    
+    //printf(":debug GC !!!\n");
     if (header->visited) {
+      //printf(":debug GC gc_reference 3.1 return\n");
       return 0;
     } else {
+      //printf(":debug GC gc_reference 3.2 return\n");
       header->visited = 1;
       return 1;
     }
   }
+  //printf(":debug GC Some kind of ERROR\n");
   assert(0);
 }
 
@@ -665,6 +681,7 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
 #ifdef GC_DEBUG
     printf("reference_var: STRING STREAM\n");
 #endif
+    gc_reference(mm, (void**)&(((GingerObject*)(o))->str8_value));
     return;
   }
   return;

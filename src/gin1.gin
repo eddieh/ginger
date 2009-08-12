@@ -997,7 +997,7 @@ define function-expansion (v kind)
       ; lookup lexical path to value
       define info (lexical-path (<term>-get-value v) function)
       if (not info)
-        println "** Error - Unbound variable: " (<term>-get-value v) " on line " (<term>-get-line v) "."
+        println "** Error - Unbound variable.1: " (<term>-get-value v) " on line " (<term>-get-line v) "."
         exit
       define bound-variable (first info)
       println output-delayed-c a " = " bound-variable ";"
@@ -1029,7 +1029,7 @@ define function-expansion (v kind)
     ;   e.g. define name value
     define info (lexical-path (<term>-get-value lhs) function)
     if (not info)
-      println "** Error - Unbound variable: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
+      println "** Error - Unbound variable.2: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
       exit
     println output-delayed-c "// SET " (<term>-get-value lhs)
     define bound-variable (first info)
@@ -1041,7 +1041,7 @@ define function-expansion (v kind)
       ; RHS is a variable
       define info2 (lexical-path (<term>-get-value rhs) function)
       if (not info2)
-        println "** Error - Unbound variable: " (<term>-get-value rhs) " on line " (<term>-get-line rhs) "."
+        println "** Error - Unbound variable.3: " (<term>-get-value rhs) " on line " (<term>-get-line rhs) "."
         exit
       define bound-variable-2 (first info2)
       println output-delayed-c "GIN_NEW_OBJ(" bound-variable "," bound-variable-2 ")"
@@ -1073,14 +1073,14 @@ define function-expansion (v kind)
     ; Get the next value (the cdr) of a list
     define info (lexical-path (<term>-get-value lhs) function)
     if (not info)
-      println "** Error - Unbound variable: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
+      println "** Error - Unbound variable.4: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
       exit
     define bound-variable (first info)
     if (eq? (<term>-get-type rhs) 'symbol)
       ; RHS is a variable
       define info2 (lexical-path (<term>-get-value rhs) function)
       if (not info2)
-        println "** Error - Unbound variable: " (<term>-get-value rhs) " on line " (<term>-get-line rhs) "."
+        println "** Error - Unbound variable.5: " (<term>-get-value rhs) " on line " (<term>-get-line rhs) "."
         exit
       define bound-variable-2 (first info2)
       println output-delayed-c "GIN_NEW_OBJ(" bound-variable ",GIN_NIM_GET_F2(" bound-variable-2 "))"
@@ -1093,7 +1093,7 @@ define function-expansion (v kind)
         ; Function definition
         define info (lexical-path (<term>-get-definition-name v) function)
         if (not info)
-          println "** Error - Unbound variable: " (<term>-get-definition-name v) " on line " (<term>-get-line v) "."
+          println "** Error - Unbound variable.6: " (<term>-get-definition-name v) " on line " (<term>-get-line v) "."
           exit
         define bound-variable (first info)
         println output-c "GIN_NEW_FN(" bound-variable ", &(gin_function_table[fdef___" (name->c-name (<term>-get-definition-name v)) "]), frame)"
@@ -1232,7 +1232,7 @@ define function-expansion (v kind)
 
           define info (lexical-path (<term>-get-value (second terms)) function)
           if (not info)
-            println "** Error - Unbound variable: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
+            println "** Error - Unbound variable.7: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
             exit
           define bound-variable (first info)
           println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))+1);"
@@ -1241,7 +1241,7 @@ define function-expansion (v kind)
 
           define info (lexical-path (<term>-get-value (second terms)) function)
           if (not info)
-            println "** Error - Unbound variable: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
+            println "** Error - Unbound variable.8: " (<term>-get-value lhs) " on line " (<term>-get-line lhs) "."
             exit
           define bound-variable (first info)
           println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))-1);"
@@ -1270,22 +1270,22 @@ define function-expansion (v kind)
         elsif: (string=? (<term>-get-value (first terms)) "register-class")
           define info (lexical-path (<term>-get-value (second terms)) function)
           if (not info)
-            println "** Error - Unbound variable: " (<term>-get-value (second terms)) " on line " (<term>-get-line (second terms)) "."
+            println "** Error - Unbound variable.9: " (<term>-get-value (second terms)) " on line " (<term>-get-line (second terms)) "."
             exit
           define bound-variable (first info)
           define base-class-info (lexical-path (<term>-get-value (third terms)) function)
           if (not base-class-info)
-            println "** Error - Unbound variable: " (<term>-get-value (third terms)) " on line " (<term>-get-line (third terms)) "."
+            println "** Error - Unbound variable.10: " (<term>-get-value (third terms)) " on line " (<term>-get-line (third terms)) "."
             exit
           define bound-base-class (first info)
           define make-fn-info (lexical-path (<term>-get-value (fourth terms)) function)
           if (not make-fn-info)
-            println "** Error - Unbound variable: " (<term>-get-value (fourth terms)) " on line " (<term>-get-line (fourth terms)) "."
+            println "** Error - Unbound variable.11: " (<term>-get-value (fourth terms)) " on line " (<term>-get-line (fourth terms)) "."
             exit
           define bound-make-fn (first info)
           define unmake-fn-info (lexical-path (<term>-get-value (fifth terms)) function)
           if (not unmake-fn-info)
-            println "** Error - Unbound variable: " (<term>-get-value (fifth terms)) " on line " (<term>-get-line (fifth terms)) "."
+            println "** Error - Unbound variable.12: " (<term>-get-value (fifth terms)) " on line " (<term>-get-line (fifth terms)) "."
             exit
           define bound-unmake-fn (first info)
           ++ class-number
@@ -1305,7 +1305,7 @@ define function-expansion (v kind)
               else:
                 define info (lexical-path (<term>-get-value i) function)
                 if (not info)
-                  println "** Error - Unbound variable: " (<term>-get-value i) " on line " (<term>-get-line i) "."
+                  println "** Error - Unbound variable.3: " (<term>-get-value i) " on line " (<term>-get-line i) "."
                   exit
                 define bound-variable (first info)
                 print output-delayed-c bound-variable
@@ -1329,7 +1329,7 @@ define function-expansion (v kind)
           ; var1 location ..
           define info (lexical-path (<term>-get-value (first terms)) function)
           if (not info)
-            println "** Error - Unbound variable: " (<term>-get-value (first terms)) " on line " (<term>-get-line (first terms)) "."
+            println "** Error - Unbound variable.13: " (<term>-get-value (first terms)) " on line " (<term>-get-line (first terms)) "."
             exit
 
           define function-def (third info)
@@ -1516,7 +1516,7 @@ define function-expansion (v kind)
                 ; lookup lexical path to value
                 define info (lexical-path (<term>-get-value ii) function)
                 if (not info)
-                  println "** Error - Unbound variable: " (<term>-get-value ii) " on line " (<term>-get-line ii) "."
+                  println "** Error - Unbound variable.14: " (<term>-get-value ii) " on line " (<term>-get-line ii) "."
                   exit
                 define bound-variable (first info)
                 print output-call bound-variable

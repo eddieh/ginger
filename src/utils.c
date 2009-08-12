@@ -180,3 +180,11 @@ GIN_OBJ fmt_float(float d) {
   GIN_STR_LENGTH(r) = strlen(s); 
   return r;
 }
+
+GIN_OBJ gin_string_to_float(GIN_OBJ str) {
+  GIN_OBJ r;
+  double f = atof(GIN_STR_VALUE(str));
+  GIN_NEW_FLONUM(r, f);
+  return r;
+}
+  

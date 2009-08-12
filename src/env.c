@@ -28,7 +28,6 @@
 GIN_OBJ gin_getenv(GIN_OBJ name, GIN_OBJ default_value) 
 {
   GIN_OBJ r;
-  printf("gin_getenv\n");
   char *s = getenv(GIN_STR_VALUE(name));
   if (s != NULL) {
     GIN_NEW_STR8(r, s);

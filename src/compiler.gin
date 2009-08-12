@@ -1,0 +1,965 @@
+; Double quote escape
+define dq-escape (a)
+  if (String::eq? a "")
+    a
+  else:
+    define b (String::first a)
+    if (Char::eq? b ascii-double-quote)
+      new-string (new-string ascii-backslash b) (dq-escape (String::rest a))
+    else:
+      new-string b (dq-escape (String::rest a))
+
+define flatten-functions (v)
+  if (and (list? v) (or (<term>::function-definition? v) (<term>::method-definition? v)))
+    set flat-functions (append flat-functions (list v))
+  if (list? v)
+    each i v
+      flatten-functions i
+
+; TODO - local variable scoping is per function - need to consider code block scopes..
+; Given a function or the tree head look for local variables
+; If it's a function also look for arguments
+; Appends variables/arguments to the global local-variables in the form of:
+; (v type name index val function)
+define discover-local-variables (v kind)
+  define index 0
+  define function v
+
+  define add-local-variable (v type name index val fn)
+    set local-variables (append local-variables (list (list v type name index val fn)))
+  
+  ; Search for local variables in a function body
+  define search (v)
+    ; if (<term>::register-class-symbol? v)
+    ;  removed - if you need this go back and look at an old revision
+    if (or (<term>::definition? v) (<term>::each-loop? v))
+      define f v
+      define var-name (<term>::get-definition-name f)
+
+      if (or (<term>::function-definition? f) (<term>::method-definition? f))
+        if (eq? var-name false)
+          println "DEAD"
+          print-term f
+          exit
+        add-local-variable function 'local var-name index 'function f
+
+      else:
+        if (eq? var-name false)
+          println "DEAD"
+          print-term f        
+          exit
+        add-local-variable function 'local var-name index 'value f
+      ++ index
+
+    if (not (<term>::definition? v))
+      if (list? v)
+        each i v
+          search i
+
+  if (<term>::function-definition? v)
+    search (fourth v) ; the body of the function
+  elsif: (<term>::method-definition? v)
+    search (fifth v) ; the body of the method
+  else:
+    search v
+  set index 0
+  
+  ; Look for arguments
+  if (eq? kind 'function)
+    each i (<term>::get-definition-arguments v)
+      if (list? i)
+        if (eq? (first i) false)
+          println "DEAD ARGUMENT 1"
+          print-term i
+          exit
+        add-local-variable function 'argument (first i) index 'value v
+        ++ index
+      elsif: (Label? i)
+        ; labels don't get counted as arguments.
+        noop
+      elsif: (Symbol? i)
+        if (eq? i false)
+          println "DEAD ARGUMENT 2"
+          print-term i
+          exit
+        add-local-variable function 'argument i index 'value v
+        ++ index
+      elsif: (Boolean? i)
+        ; the function has no arguments
+        noop
+      else:
+        ; assertion - this should never happen.
+        println "No valid classification."
+        exit
+
+; Takes a Ginger identifier and produces a representation that can be
+; used with C. In particular Ginger uses (by convention) a hyphen to
+; seperate words in identifiers which is incompatible with C. Ginger
+; identifiers may also contain other characters that can not be used
+; with C. All incompatible characters are converted to their numeric
+; ASCII value proceded by a underscore.
+define name->c-name (v)
+  define t (open-output-string)
+  define p (v)
+    define c (String::first v)
+    define ci (Char->Integer c)
+    if (and (>= ci 65) (<= ci 90))
+      print t c
+    elsif: (and (>= ci 97) (<= ci 122))
+      print t c
+    elsif: (>= ci 100)
+      print t "_" ci
+    elsif: (>= ci 10)
+      print t "_0" ci
+    else:
+      print t "_00" ci
+    if (> (String::length v) 1)
+      p (String::rest v)
+  if (String? v)
+    p v
+    close-output-stream t
+    get-output-string t
+  elsif: (Symbol? v)
+    name->c-name (Symbol->String v)
+  else:
+    close-output-stream t
+    "undefined"
+
+define function-prototype-expansion (v kind)
+  define terms (<term>::get-children v)
+  println output-h "typedef struct {"
+  println output-h "Frame* next_frame;"
+  println output-h "Frame* previous_frame;"
+  println output-h "Frame* previous_lexical_frame;"
+  println output-h "GIN_OBJ return_address;"
+  println output-h "GIN_OBJ result;"
+  define c-name "MAIN"
+  if (eq? kind 'function)
+    ;println (<term>::get-definition-name v)
+    ;println (name->c-name (<term>::get-definition-name v))
+    set c-name (name->c-name (<term>::get-definition-name v))
+  define argument-count 0
+  define local-count 0
+  define tmp-count 0
+  define j 0
+  each i local-variables
+    if (eq? v (first i))
+      if (eq? (second i) 'local)
+        ++ local-count
+      elsif: (eq? (second i) 'argument)
+        ++ argument-count
+  each i tmp-variables
+    if (eq? v (first i))
+      set tmp-count (second i)
+  while (< j argument-count)
+    println output-h "GIN_OBJ arg" j ";"
+    ++ j
+  set j 0
+  while (< j local-count)
+    println output-h "GIN_OBJ loc" j ";"
+    ++ j
+  set j 0
+  while (< j tmp-count)
+    println output-h "GIN_OBJ tmp" j ";"
+    ++ j
+  println output-h "} Frame___" c-name ";"
+  println output-h ""
+  println output-h "#define ALLOCATE_FRAME___" c-name "(t000)  GIN_ALLOCATE(t000, Frame*, sizeof(Frame___" c-name "));"
+  println output-h "#define DEALLOCATE_FRAME___" c-name "(t000)"
+  println output-h ""
+
+define function-definition-expansion (v kind)
+  define terms null
+  define name ""
+
+  define c-name "MAIN"
+  if (eq? kind 'function)
+    set terms (<term>::get-children v)
+    set name (<term>::get-definition-name v)
+    set c-name (name->c-name name)
+
+  println output-c "#define fdef___" c-name " " func-def-exp-number
+  println output-c "gin_function_table[" func-def-exp-number "].frame_size = sizeof(Frame___" c-name ");"
+
+  if (eq? kind 'function)
+    println output-c "gin_function_table[" func-def-exp-number "].code = &&code_" c-name ";"
+  else:
+    println output-c "gin_function_table[" func-def-exp-number "].code = &&main_entry;"
+
+  println output-c "gin_function_table[" func-def-exp-number "].name = \"" name "\";"
+  ++ func-def-exp-number
+
+define <term> register-class-symbol? (v)
+  and (Symbol? v) (eq? v 'register-class)
+
+define <list>-remove (lst e)
+  if (Null? lst) lst
+  elsif: (eq? (first lst) e)
+    ; TODO - is this correct?
+    <list>-remove (tail lst) e
+  else:
+    ; TODO - is this correct?
+    pair (first lst) (<list>-remove (tail lst) e)
+
+define lexical-path (term function)
+  ; priority, local variables, arguments
+  define function-name ""
+  define info false
+  define fn false
+  define lexical-path-i (term function)
+    define r false
+    each i local-variables
+      if (eq? (first i) function)
+        define tmp (third i)
+        
+        ; hack - take care fo the case when we might compare
+        ; different types
+        if (and (String? tmp) (not (String? term)))
+          set tmp (String->Symbol tmp)
+        
+        if (eq? tmp term)
+          ; TODO - check if it is a local variable or an argument.
+          if (or (<term>::function-definition? function) (<term>::method-definition? function))
+            set function-name (name->c-name (<term>::get-definition-name function))
+            ; TODO - if it is a function keep searching until we come to the root,
+            ; then return the best match so far.
+          else:
+            set function-name "MAIN"
+            set fn tree-head
+          if (eq? (second i) 'local)
+            set r "loc"
+          else:
+            set r "arg"
+          set r (String::append r (Fixnum->String (fourth i)))
+          set info (fifth i)
+          set fn (sixth i)
+    if (eq? r false)
+      if (eq? function tree-head)
+        false
+      else:
+        define t false
+        if (eq? (<term>::get-parent-function function) false)
+          set t (lexical-path-i term tree-head)
+        else:
+          set t (lexical-path-i term (<term>::get-parent-function function))
+        if (eq? t false)
+          false
+        else:
+          if (String::eq? (String::substring t 0 3) "pre")
+            String::append "previous_lexical_frame->" t
+          else:
+            String::append "previous_lexical_frame))->" t
+    else:
+      r
+  define z (lexical-path-i term function)
+  if (not z)
+    false
+  else:
+    if (String::eq? (String::substring z 0 3) "pre")
+      list (String::append "((Frame___" function-name " *)(frame->" z) info fn
+    else:
+      list (String::append "((Frame___" function-name " *)(frame))->" z) info fn
+
+define call-number 0
+define func-def-number 1
+define class-number 500
+define function-expansion (v kind)
+  define terms (<term>::get-children v)
+  define function v
+  define function-name "MAIN"
+  define output-delayed-c (open-output-string)
+  
+  if (eq? kind 'function)
+    set function-name (name->c-name (<term>::get-definition-name function))
+    println output-c "BEGIN_FUNCTION(" function-name ")"
+  define tmp-number 0
+  define tmp-number-max 0
+
+  define next-tmp ()
+    ++ tmp-number
+    if (> tmp-number tmp-number-max)
+      set tmp-number-max tmp-number
+
+  define previous-tmp ()
+    -- tmp-number
+
+  define flatten-term (a v)
+    ; Value appears in expression
+    ;   e.g. some-fn value
+    ; a => variable 
+    ; v => value
+    
+    ; Ugly hack
+    ; Arguments are to functions are not pairs...
+    if (not (Cons? v))
+      set v (pair v null)
+    
+    if (<term>::quoted-symbol? (first v))
+      println output-delayed-c a " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (second (first v))) ");"
+    elsif: (Label? (first v))
+      println output-delayed-c a " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (first v)) ");"
+    elsif: (Symbol? (first v))
+      ; lookup lexical path to value
+      define info (lexical-path (first v) function)
+      if (not info)
+        println "** Error - Unbound variable.1: " (first v) " on line " (<term>::get v 'line) "."
+        exit
+      define bound-variable (first info)
+      println output-delayed-c a " = " bound-variable ";"
+    elsif: (Integer? (first v))
+      ; RHS is a value
+      println output-delayed-c a " = GIN_IM_FROM_INT(" (first v) ");"
+    elsif: (String? (first v))
+      println output-delayed-c "GIN_NEW_STR8(" a ",\"" (dq-escape (first v)) "\");"
+    elsif: (or (Flonum? (first v)) (String::Rational? (first v)))
+      println output-delayed-c "GIN_NEW_FLONUM(" a ", (double)" (first v) ");"
+    elsif: (Boolean? (first v))
+      ; RHS is a value
+      print output-delayed-c a " = GIN_IM_FROM_BOOL("
+      if (first v)
+        print output-delayed-c "1"
+      else:
+        print output-delayed-c "0"
+      println output-delayed-c ");"
+    else:
+      println output-delayed-c "// UNKNOWN flatten-term"
+      print output-delayed-c "UNKNOWN-" v "-" (Symbol->String (type-of v))
+
+  define flatten-set (lhs rhs)
+    ; Variable definition and sets
+    ;   e.g. define name value
+    ;   e.g. set name value
+    ; lhs => variable
+    ; rhs => value
+    define info (lexical-path (first lhs) function)
+    if (not info)
+      println "** Error - Unbound variable.2: " (first lhs) " on line " (<term>::get lhs 'line) "."
+      exit
+    println output-delayed-c "// SET " (first lhs)
+    define bound-variable (first info)
+
+    if (<term>::quoted-symbol? (first rhs))
+      println output-delayed-c bound-variable " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (second (first rhs))) ");"
+    elsif: (Cons? (first rhs))
+      ; RHS is an expression
+      flatten (first rhs)
+      println output-delayed-c "GIN_NEW_OBJ(" bound-variable ",((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")"
+    elsif: (Symbol? (first rhs))
+      ; RHS is a variable
+
+      define info2 (lexical-path (first rhs) function)
+      if (not info2)
+        println "** Error - Unbound variable.3: " (first rhs) " on line " (<term>::get rhs 'line) "."
+        exit
+      define bound-variable-2 (first info2)
+
+      println output-delayed-c "GIN_NEW_OBJ(" bound-variable "," bound-variable-2 ")"
+    elsif: (Integer? (first rhs))
+      ; RHS is a value
+      println output-delayed-c "GIN_NEW_FIXNUM(" bound-variable "," (first rhs) ")"
+    elsif: (Flonum? (first rhs))
+      ; RHS is a value
+      println output-delayed-c "GIN_NEW_FLONUM(" bound-variable ", (double)" (first rhs) ")"
+    elsif: (String? (first rhs))
+      ; RHS is a value
+      println output-delayed-c "GIN_NEW_STR8(" bound-variable ",\"" (dq-escape (first rhs)) "\")"
+    elsif: (Boolean? (first rhs))
+      ; RHS is a value
+      print output-delayed-c "GIN_NEW_BOOL(" bound-variable ","
+      if (first rhs)
+        print output-delayed-c "1"
+      else:
+        print output-delayed-c "0"
+      println output-delayed-c ")"
+    elsif: (Label? rhs)
+      println output-delayed-c bound-variable " = GIN_IM_FROM_SYM(qsdef___" (name->c-name rhs) ");"
+    else:
+      println output-delayed-c "// UNKNOWN flatten-set"
+      print output-delayed-c "UNKNOWN-" rhs "-" (Symbol->String (type-of rhs))
+
+  define flatten (v)
+
+    if (or (Group? v) (list? v))
+
+      define terms (<term>::get-children v)
+
+      if (or (<term>::function-definition? v) (<term>::method-definition? v))
+        ; Function definition
+        define info (lexical-path (<term>::get-definition-name v) function)
+
+        if (not info)
+          println "** Error - Unbound variable.6: " (<term>::get-definition-name v) " on line " (<term>::get v 'line) "."
+          exit
+        define bound-variable (first info)
+        println output-c "GIN_NEW_FN(" bound-variable ", &(gin_function_table[fdef___" (name->c-name (<term>::get-definition-name v)) "]), frame)"
+        ; TODO - OPTIMIZATION - we only care about capturing the value (next line) if it's the last item in this code block.
+        println output-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = " bound-variable ";;;"
+        ++ func-def-number
+      
+      elsif: (<term>::definition? v)
+        flatten-set (tail v) (tail (tail v))
+      
+      elsif: (<term>::get v 'begin)
+        println output-delayed-c "// BEGIN (tmp" tmp-number ")"
+        next-tmp
+
+        each i v
+          flatten i
+        previous-tmp
+
+        ; We need to capture the last value..
+        if (= tmp-number 0)
+          println output-delayed-c "frame->result = ((Frame___" function-name " *)(frame))->tmp0;;"
+        else:
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = ((Frame___" function-name " *)(frame))->tmp" tmp-number ";;"
+      
+      elsif: (Cons? (first v))
+
+        next-tmp
+        each i v
+          flatten i
+        previous-tmp
+
+      elsif: (Symbol? (first v))
+        if (eq? (first v) 'require)
+          noop
+
+        elsif: (eq? (first v) 'ensure)
+          noop
+
+        elsif: (eq? (first v) 'noop)
+          noop
+
+        elsif: (eq? (first v) 'repeat)
+          ; an expression that controls the number of times the body is executed
+          ; it should evaluate to an integer
+          flatten (second v) ;(cadr terms)
+          
+          next-tmp
+          ; TODO - for bigger numbers this should use a bignum.
+
+          println output-delayed-c "for (((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) "=GIN_IM_FROM_INT(0); GIN_IM_TO_INT(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")<(GIN_IM_TO_INT(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) ")); ((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_IM_FROM_INT(GIN_IM_TO_INT(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ") + 1)) {"
+          next-tmp
+          
+          ; The body of the repeat block.
+          flatten (third v)
+          
+          previous-tmp
+          previous-tmp
+          println output-delayed-c "}"
+
+        elsif: (eq? (first v) 'while)
+          ; conditional expression, should evaluate to a boolean
+          flatten (second v) ;(cadr terms)
+
+          println output-delayed-c "while (GIN_IS_TRUE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+          next-tmp
+          
+          ; the body of the while block
+          flatten (third v)
+          
+          previous-tmp
+          
+          
+          flatten (second v)
+          println output-delayed-c "}"
+
+          ; TODO - set the right return value..
+
+        elsif: (eq? (first v) 'each)
+          ; TODO - fix var scope
+          ; TODO - change tmp0 to a better name (its really each-of-list).
+          next-tmp
+          define tmp0 (String::append "((Frame___" function-name " *)(frame))->tmp" (Fixnum->String (- tmp-number 1)))
+          
+          ; the list
+          flatten (third v)
+
+          ; the variable
+          define info (lexical-path (second v) function)
+          ; TODO - Error if not found
+          define bound-variable (first info)
+          println output-delayed-c "if (!GIN_IS_NULL(" tmp0 ")) {" bound-variable " = GIN_NIM_GET_F0(" tmp0 "); }"
+          println output-delayed-c "while (!GIN_IS_NULL(" tmp0 ")) {"
+          next-tmp
+
+          ; each body
+          flatten (fourth v)
+
+          previous-tmp
+          println output-delayed-c tmp0 " = GIN_NIM_GET_F2(" tmp0 ");"
+          println output-delayed-c "if (!GIN_IS_NULL(" tmp0 "))" bound-variable " = GIN_NIM_GET_F0(" tmp0 ");"
+          println output-delayed-c "}"
+          previous-tmp
+
+        elsif: (eq? (first v) 'if)
+          ; if conditional
+          flatten (second v)
+          
+          println output-delayed-c "if (!GIN_IS_FALSE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+          
+          ; if body
+          flatten (third v)
+
+          define else-count 1
+          println output-delayed-c "} else {"
+
+          define test (t)
+            if (Null? t) (noop)
+            elsif: (Null? (first t)) (noop)
+            elsif: (and (Label? (first t)) (String::eq? (Label->String (first t)) "elsif:"))
+              
+              ; elsif conditional
+              flatten (second t)
+              println output-delayed-c "if (!GIN_IS_FALSE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+              
+              ; esif body
+              flatten (third t)
+
+              println output-delayed-c "} else {"
+              ++ else-count
+              
+              ; remaining elsif & else blocks
+              if (>= (length t) 4)
+                test (fourth* t)
+              
+            elsif: (and (Label? (first t)) (String::eq? (Label->String (first t)) "else:"))
+              
+              ; else body
+              flatten (second t)
+              
+              ; remaining elsif & else blocks
+              if (>= (length t) 3)
+                test (third* t)
+
+          ; flatten elsif & else blocks
+          if (>= (length v) 4)
+            test (fourth* v)
+
+          while (> else-count 0)
+            print output-delayed-c "}"
+            -- else-count
+          println output-delayed-c ""
+
+        elsif: (eq? (first v) 'or)
+          ; TODO - when macros work, this could be replaced with a macro
+
+          define else-count 0
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_TRUE;"
+          next-tmp
+
+          each i (tail v)
+            flatten i
+            ++ else-count
+            println output-delayed-c "if (GIN_IS_FALSE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) " = GIN_FALSE;"
+
+          while (> else-count 0)
+            print output-delayed-c "}"
+            -- else-count
+          println output-delayed-c ""
+
+          previous-tmp
+
+        elsif: (eq? (first v) 'set)
+          flatten-set (second* v) (third* v)
+
+        elsif: (eq? (first v) '++)
+
+          define info (lexical-path (second v) function)
+          if (not info)
+            println "** Error - Unbound variable.7: " (second v) " on line " (<term>::get v 'line) "."
+            exit
+          define bound-variable (first info)
+          println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))+1);"
+
+        elsif: (eq? (first v) '--)
+
+          define info (lexical-path (second v) function)
+          if (not info)
+            println "** Error - Unbound variable.8: " (second v) " on line " (<term>::get v 'line) "."
+            exit
+          define bound-variable (first info)
+          println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))-1);"
+
+        elsif: (eq? (first v) 'and)
+          ; TODO - when macros work, this could be replaced with a macro
+
+          define else-count 0
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_FALSE;"
+          next-tmp
+
+          each i (tail v)
+            flatten i
+            ++ else-count
+            println output-delayed-c "if (GIN_IS_TRUE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
+            
+          println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) " = GIN_TRUE;"
+
+          while (> else-count 0)
+            print output-delayed-c "}"
+            -- else-count
+          println output-delayed-c ""
+
+          previous-tmp
+
+        elsif: (eq? (first v) 'register-class)
+          define info (lexical-path (<term>::get-value (second terms)) function)
+          if (not info)
+            println "** Error - Unbound variable.9: " (<term>::get-value (second terms)) " on line " (<term>::get (second terms) 'line) "."
+            exit
+          define bound-variable (first info)
+          define base-class-info (lexical-path (<term>::get-value (third terms)) function)
+          if (not base-class-info)
+            println "** Error - Unbound variable.9: " (<term>::get-value (third terms)) " on line " (<term>::get (second terms) 'line) "."
+            exit
+          define bound-base-class (first info)
+          define make-fn-info (lexical-path (<term>::get-value (fourth terms)) function)
+          if (not make-fn-info)
+            println "** Error - Unbound variable.10: " (<term>::get-value (fourth terms)) " on line " (<term>::get (second terms) 'line) "."
+            exit
+          define bound-make-fn (first info)
+          define unmake-fn-info (lexical-path (<term>::get-value (fifth terms)) function)
+          if (not unmake-fn-info)
+            println "** Error - Unbound variable.11: " (<term>::get-value (fifth terms)) " on line " (<term>::get (second terms) 'line) "."
+            exit
+          define bound-unmake-fn (first info)
+          ++ class-number
+
+          println output-delayed-c "GIN_NEW_CLASS(" bound-variable ",cdef___" (name->c-name (<term>::get-value (second terms))) "," bound-base-class "," bound-make-fn "," bound-unmake-fn ");"
+
+
+        elsif: (eq? (first v) 'inline-c-header)
+          println output-h (second v)
+
+        elsif: (eq? (first v) 'inline-c)
+          each i (tail v)
+            if (Symbol? i)
+              if (eq? i 'result)
+                print output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
+              else:
+                define info (lexical-path i function)
+                if (not info)
+                  println "** Error - Unbound variable.12: " i " on line " (<term>::get v 'line) "."
+                  exit
+                define bound-variable (first info)
+                print output-delayed-c bound-variable
+            elsif: (String? i)
+              print output-delayed-c i
+            else:
+              println "TODO: inline-c doesn't create temporaries..  preflatten calls used.."
+              exit
+          println output-delayed-c ""
+
+        else:
+          ; Function call
+          define tmp-call-number (- tmp-number 1)
+
+          ; CALL params:
+          ; the lexical context of the function - TODO.. closures won't use the current frame
+          ; function name
+          ; unique seed number - so we can go back to the caller
+          ; result location
+          ; var0 location
+          ; var1 location ..
+          define info (lexical-path (first v) function)
+
+          if (not info)
+            println "** Error - Unbound variable.13: " (first v) " on line " (<term>::get v 'line) "."
+            exit
+          
+          define function-def (third info)
+          define immutable (<term>::immutable-definition? function-def)
+
+          ; TODO - this line is here since mutables don't work as they should.  so we assume immutable
+          ; comment this line out to test the new code..
+          set immutable true
+
+          if (and (not (eq? (second info) 'function)) (= (length v) 1) immutable)
+            ; it's an immutable value..  we can really do better than this.. TODO: better optimization
+            ; A value returns itself.  In this case we know it's a value and not a function because it's immutable.
+            flatten-term (String::append "((Frame___" function-name " *)(frame))->tmp" (Fixnum->String (- tmp-number 1))) (first v)
+          elsif: (and (eq? (second info) 'function) immutable)
+            ; it's an immutable function..
+            define output-call (open-output-string)
+            println output-call "CALL_ALLOCATE(" (name->c-name (first v)) ");"
+
+            ; The list of parameters as passed to the function
+
+            define original-parameters (tail v)
+
+            ; The new list of parameters without names attached
+            define new-parameters (list)
+
+            ; The list of required parameters as extracted from the function signature
+            define required-parameters (list)
+
+            ; The list of optional parameters as extracted from the function signature
+            define optional-parameters (list)
+
+            define anon-first true
+
+            ; Create the required parameters list
+            define has-residual false
+            
+            each a (<term>::get-definition-arguments function-def)
+              if (Residual? a)
+                ; We set the residual keyword.  The next symbol won't be added to either list.
+                set has-residual true
+              elsif: (and (Symbol? a) (not has-residual))
+                ; The parameter is a symbol and we have not seen a residual keyword.
+                ; So..  We add it as a required parameter.
+                set required-parameters (append required-parameters (list a))
+              elsif: (and (list? a) (not has-residual))
+                ; The parameter is a list and we have not seen a residual keyword.
+                ; So.. We add the first term as an optional parameter.
+                set optional-parameters (append optional-parameters (list a))
+              elsif: (Residual? a)
+                ; We set the residual keyword.  The next symbol won't be added to either list.
+                set has-residual true
+
+           ;  define find-named-parameter (plst a)
+;               if (Null? plst) false
+;               elsif: (and (eq? (<term>::get (first plst) 'type) 'label) (String::eq? (<term>::get-value (first plst)) (String::append a ":")))
+;                 ; TODO: fails if xxx: is the last term in the list.
+;                 pair (first plst) (second plst)
+;               else:
+;                 find-named-parameter (tail plst) a
+
+            define remove-named-parameter (plst a)
+              if (Null? plst)
+                plst
+              elsif: (and (eq? (<term>::get (first plst) 'type) 'label) (String::eq? (<term>::get-value (first plst)) a))
+                ; TODO - what does this do? fix it.
+                remove-named-parameter (tail (tail plst)) a
+              else:
+                pair (first plst) (remove-named-parameter (tail plst) a)
+
+            ; Fill the required parameters in the new-parameters list.
+            each a required-parameters
+              define named-argument (find-named-parameter original-parameters a)
+              
+              if named-argument
+                ; 1. See if this argument is named in the call.
+                ; if it is, then insert an unnamed call now.
+                ; Then remove it from the old parameters.
+                ; add new-parameters named-argument
+                set new-parameters (append new-parameters (list (tail named-argument)))
+                ; remove original-parameters named-argument
+                set original-parameters (remove-named-parameter original-parameters (<term>::get-value (first named-argument)))
+                set anon-first false
+              
+              if (and (> (length original-parameters) 0) (not (Label? (first original-parameters))))
+                ; 2. See if there is an unnamed parameter.  It must be this one..
+                ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
+                if (eq? anon-first false)
+                  println "Named arguments must follow unnamed arguments!"
+                  exit
+                set new-parameters (append new-parameters (list (first original-parameters)))
+                set original-parameters (tail original-parameters)
+              else:
+                ; This was a required arg but we didn't find a named term or an anon term that matched.
+                println "Required argument, " a ", missing from call on line " (<term>::get v 'line) "." 
+                exit
+            
+            if (> (length required-parameters) (length new-parameters))
+              ; TODO - better output state function, line and which parameters were missing.
+              println "Some required parameters missing"
+              exit
+
+            each a optional-parameters
+              define named-argument (find-named-parameter original-parameters (second a))
+              if named-argument
+                set new-parameters (append new-parameters (list (tail named-argument)))
+                set original-parameters (remove-named-parameter original-parameters (first named-argument))
+                set anon-first false
+              elsif: (and
+              .. (> (length original-parameters) 0)
+              .. (not (Label? (first original-parameters))))
+                ; 2. See if there is an unnamed parameter.  It must be this one..
+                ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
+                if (eq? anon-first false)
+                  println "Named arguments must follow unnamed arguments!"
+                  exit
+                set new-parameters (append new-parameters (list (first original-parameters)))
+                set original-parameters (tail original-parameters)
+              else:
+                ; This was an optional argument that was not given..
+                ; original parameters doesn't change. but we add it to new parameters
+                ; TODO - BUG - In the next section when we look up the lexical path of the "default value"
+                ; we look it up using the calling function's lexical scope.  We should look it up using the called
+                ; function's lexical scope.  The difference in behavior would be noticeable when using closures but
+                ; also other common situations.
+                ;
+                ; define z 3
+                ; define print-z ((a z))
+                ;   println a
+                ; define foo ()
+                ;   define z 4
+                ;   print-z
+                ; foo
+                ;
+                ; should print 3! but it prints 4.
+
+                set new-parameters (append new-parameters (list (second a)))
+
+            ; The next term must be the residual or nothing..
+            if has-residual
+              ; handle the residual..  The remaining arguments are turned into a list.
+              define d (<term>::make false 'residual 0 0 0 original-parameters)
+              if (= (length new-parameters) 0)
+                set new-parameters (list d)
+              else:
+                set new-parameters (append new-parameters (list d))
+            elsif: (= (length original-parameters) 0)
+              ; Nothing in the original parameters so do nothing..
+              noop
+            else:
+              println "Too many arguments in function call, " (first v) ", on line " (<term>::get v 'line) "."
+              exit
+              
+            define delayed-tmp-number 0
+            define delayed-previous-tmp ()
+              ++ delayed-tmp-number
+            define i 0
+
+            each ii new-parameters
+              print output-call "((Frame_Narg *)(frame->next_frame))->argn[" i "] = "
+              ++ i
+              
+              if (<term>::quoted-symbol? ii)
+                print output-call "GIN_IM_FROM_SYM(qsdef___" (name->c-name (second ii)) ")"
+              elsif: (and (list? ii) (eq? (<term>::get ii 'type) 'residual))
+                ; TODO - flatten tmps into a list
+                define list-args (open-output-string)
+                next-tmp
+                next-tmp
+                println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) " = GIN_NULL;"
+                define ri (reverse (<term>::get-value ii))
+                each xx ri
+                  next-tmp
+                  if (<term>::quoted-symbol? xx)
+                    print output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
+                    print output-delayed-c " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (second xx)) ");"
+                    println output-delayed-c ""
+                  else:
+                    flatten xx
+                  print output-delayed-c "GIN_NEW_PAIR( ((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2)
+                  println output-delayed-c ", " "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ", ((Frame___" function-name " *)(frame))->tmp" (- tmp-number 3) ");"
+                  println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 3) "=" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) ";"
+                  previous-tmp
+                print output-call "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2)
+                previous-tmp
+                delayed-previous-tmp
+              elsif: (Cons? ii)
+                next-tmp
+                print output-call "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
+                flatten ii
+                delayed-previous-tmp
+              elsif: (String? ii)
+                next-tmp
+                print output-call "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
+                flatten-term (String::append "((Frame___" function-name " *)(frame))->tmp" (Fixnum->String (- tmp-number 1))) ii
+                delayed-previous-tmp
+              elsif: (Flonum? ii)
+                next-tmp
+                print output-call "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
+                flatten-term (String::append "((Frame___" function-name " *)(frame))->tmp" (Fixnum->String (- tmp-number 1))) ii
+                delayed-previous-tmp
+              elsif: (Symbol? ii)
+                ; lookup lexical path to value
+                define info1 (lexical-path ii function)
+                if (not info1)
+                  println "** Error - Unbound variable.14: " ii " on line " (<term>::get v 'line) "."
+                  exit
+                define bound-variable (first info1)
+                print output-call bound-variable
+              elsif: (Integer? ii)
+                print output-call "GIN_IM_FROM_INT(" ii ")"
+              elsif: (Boolean? ii)
+                print output-call "GIN_IM_FROM_BOOL("
+                if ii
+                  print output-call "1"
+                else:
+                  print output-call "0"
+                print output-call ")"
+              elsif: (Label? ii)
+                print output-call "GIN_IM_FROM_SYM(qsdef___" (name->c-name ii) ")"
+              else:
+                println output-delayed-c "// UNKNOWN argument flatten"
+                print output-call "UNKNOWN-"  ii "-" (Symbol->String (type-of ii))
+              println output-call ";"
+            ++ call-number
+            println output-call "CALL(GIN_NIM_GET_PREVIOUS_LEXICAL_FRAME(" (first info) ")," (name->c-name (first v)) "," call-number ",((Frame___" function-name " *)(frame))->tmp" tmp-call-number ");"
+
+            ; unwind the temporary variables..
+            repeat delayed-tmp-number
+              previous-tmp
+
+            ; print the call.
+            println output-delayed-c (get-output-string output-call)
+          else:
+            ; third case - the value is immutable so we can't be sure if it's a function call or not.
+            ; TODO - optimization - if the value is never set or used an argument we can assume it is immutable and then it falls into case 1 or 2 (most likely).
+            ; In this case we flatten any arguments and pass along with labels to CALLNDYNAMIC
+            ; CALLNDYNAMIC must at RUNTIME figure out the arguments and if it is a VALUE or an OBJECT.
+            ; TODO - optional arguments must be embedded in the called code - NOT part of the pre call.
+            noop
+      else:
+        ; Not a symbol- simply return the value.
+        ; TODO - not quite this simple.. consider infix.. 0 + 5
+        ;flatten-term (String::append "((Frame___" function-name " *)(frame))->tmp" (Fixnum->String (- tmp-number 1))) (first terms)
+        flatten-term (String::append "((Frame___" function-name " *)(frame))->tmp" (Fixnum->String (- tmp-number 1))) v
+    else:
+      ; Not a group so we are flattening an individual term..
+      flatten-term (String::append "((Frame___" function-name " *)(frame))->tmp" (Fixnum->String (- tmp-number 1))) v
+   ; Thie ensures NEW_FN appears before other code
+
+  if (eq? kind 'function)
+    flatten (<term>::get-definition-body function)
+    println output-c (get-output-string output-delayed-c)
+    ; println output-c "frame->result = ((Frame___" function-name " *)(frame))->tmp" tmp-number ";"
+    println output-c "END_FUNCTION()"
+    set tmp-variables (append tmp-variables (list (list v tmp-number-max)))
+  else:
+    flatten v
+    println output-c (get-output-string output-delayed-c)
+    ; println output-c "frame->result = ((Frame___" function-name " *)(frame))->tmp" tmp-number ";"
+    ; After the function has been flattened we can now report the required number of tmp vars
+    set tmp-variables (append tmp-variables (list (list tree-head tmp-number-max)))
+
+; define glob-push (s)
+;   set glob-stack (append glob-stack (list s))
+
+; define glob-pop ()
+;   set glob-stack (first glob-stack)
+
+; define glob-top ()
+;   last glob-stack
+
+; define glob-parent ()
+;   cadr (reverse glob-stack)
+
+; define glob-current ()
+;   first (reverse glob-stack)
+
+define string-n (v n)
+  if (= n 0)
+    String::first v
+  else:
+    string-n (String::rest v) (- n 1)
+
+define quoted-symbols (list)
+
+define discover-quoted-symbols (v)
+  if (and (list? v) (<term>::quoted-symbol? v))
+    ; Add each symbol once
+    if (not (contains? quoted-symbols (second v)))
+      set quoted-symbols (append quoted-symbols (list (second v)))
+  elsif: (Label? v)
+    if (not (contains? quoted-symbols v))
+      set quoted-symbols (append quoted-symbols (list v))
+  if (list? v)
+    each i v
+      discover-quoted-symbols i

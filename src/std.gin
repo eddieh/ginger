@@ -1252,6 +1252,7 @@ define set-properties (p a)
 define set-tail (p a)
   inline-c "GIN_NIM_SET_F2(" p "," a ");"
 
+; These functions return the value of the element at the position in the list.
 define second (a)
   first (tail a)
 
@@ -1276,17 +1277,51 @@ define eigth (a)
 define ninth (a)
   first (tail (tail (tail (tail (tail (tail (tail (tail a))))))))
 
+; These functions (with the post fix *) return the cell at the position in the list.
+define second* (a)
+  tail a
+
+define third* (a)
+  tail (tail a)
+
+define fourth* (a)
+  tail (tail (tail a))
+
+define fifth* (a)
+  tail (tail (tail (tail a)))
+
+define sixth* (a)
+  tail (tail (tail (tail (tail a))))
+
+define seventh* (a)
+  tail (tail (tail (tail (tail (tail a)))))
+
+define eigth* (a)
+  tail (tail (tail (tail (tail (tail (tail a))))))
+
+define ninth* (a)
+  tail (tail (tail (tail (tail (tail (tail (tail a)))))))
+
 define nth (a i)
   if (= i 1)
     first a
   else:
     nth (tail a) (- i 1)
 
-define nth-pair (a i)
+define nth* (a i)
   if (= i 1)
     a
   else:
-    nth-pair (tail a) (- i 1)
+    nth* (tail a) (- i 1)
+
+define last (a)
+  nth a (length a)
+
+define last* (c)
+  if (Null? (tail c))
+    c
+  else:
+    last* (tail c)
 
 define length (a)
   if (Null? a)
@@ -1294,19 +1329,13 @@ define length (a)
   else:
     + 1 (length (tail a))
 
-define last-cons (c)
-  if (Null? (tail c))
-    c
-  else:
-    last-cons (tail c)
-
 define append (a b)
   ; TODO - currently destructive. fix it.
   ; TODO - should be residual?
   if (Null? a)
     b
   else:
-    define t (last-cons a)
+    define t (last* a)
     set-tail t b
     a
 
@@ -1343,6 +1372,7 @@ define List::duplicate (lst)
   if (Null? lst) null
   else:
     pair (first lst) (List::duplicate (tail lst))
+
 
 ;;; CHARACTERS
 ;;;
@@ -1856,6 +1886,9 @@ define Stream? (a)
 define String-Stream? (a)
   inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_STRING_STREAM(" a "));"
 
+define Generic-Stream? (a)
+  or (Stream? a) (String-Stream? a)
+
 define Stream->String (a)
   define b false
   inline-c b " = fmt_ulong((unsigned long)" a ");"
@@ -1870,11 +1903,15 @@ define open-input-string (str)
   ; Takes a string and returns an input port
   ; delivers characters from the string.
   inline-c "GIN_NEW_STRING_STREAM(" result ", GIN_STR_VALUE(" str "), GIN_INPUT_STREAM_MODE);"
+  ;set-string-stream-position 0
+  ;set-string-stream-mode 0
 
 define open-output-string ()
   ; Returns an output port that will accumulate
   ; characters for retrieval by get-output-string.
   inline-c "GIN_NEW_EMPTY_STRING_STREAM(" result ", GIN_OUTPUT_STREAM_MODE);"
+  ;set-string-stream-position 0
+  ;set-string-stream-mode 0
 
 define get-output-string (out-stream)
   ; Given an output port created by open-output-string,
@@ -1885,6 +1922,24 @@ define get-output-string (out-stream)
 define string-output-stream? (stream)
   inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_OUTPUT_STREAM(" stream ")&&GIN_IS_STRING_STREAM(" stream "));"
 
+define write-string-stream (out in)
+  define out-length 0
+  define in-length 0
+  define total-length 0
+  define tmp false
+  inline-c out-length "= GIN_IM_FROM_INT(GIN_NIM_GET_STRING_STREAM_LENGTH(" out "));"
+  inline-c in-length "= GIN_IM_FROM_INT(GIN_STR_LENGTH(" in "));"
+  set total-length (+ out-length in-length)
+  inline-c "GIN_NEW_STR8(" tmp ",GIN_STR_VALUE(" out "));"
+  inline-c "GIN_ALLOCATE(GIN_STR_VALUE(" out "),char*,sizeof(char)*((int)GIN_IM_TO_INT(" total-length ")+1));"
+  inline-c "strncpy(&(GIN_STR_VALUE(" out ")[0]),GIN_STR_VALUE(" tmp "),GIN_STR_LENGTH(" tmp "));"
+  inline-c "strncpy(&(GIN_STR_VALUE(" out ")[GIN_NIM_GET_STRING_STREAM_POSITION(" out ")]), \
+    GIN_STR_VALUE(" in "), \
+    GIN_STR_LENGTH(" in "));"
+  inline-c "GIN_NIM_SET_STRING_STREAM_LENGTH(" out ",GIN_IM_TO_INT(" total-length "));"
+  inline-c "GIN_NIM_SET_STRING_STREAM_POSITION(" out ",GIN_IM_TO_INT(" total-length "));"
+  inline-c "GIN_STR_VALUE(" out ")[(int)GIN_IM_TO_INT(" total-length ")] = 0;"
+
 ; Environment
 define getenv (name (default ""))
   inline-c result "= gin_getenv(" name ", " default ");"
@@ -1892,6 +1947,17 @@ define getenv (name (default ""))
 define file-exists? (filename)
   inline-c result "= gin_file_exists(" filename ");"
 
+define execute (command)
+  inline-c result "= GIN_IM_FROM_INT(system(GIN_STR_VALUE(" command ")));"
+
+; Debug
+; Takes a boolean to turn the trace debug on or off and
+; takes an intereger to control the maximum trace depth
+; use -1 for no maximum.
+define gin-debug ((a true) (max-depth -1))
+  inline-c "gin_debug = GIN_IM_TO_BOOL(" a ");"
+  inline-c "gin_debug_max_depth = GIN_IM_TO_INT(" max-depth ");"
+  inline-c "debug_depth = 0;"
 
 ; todo - make this an intrinsic and optimize it for each.
 define range (i j)
@@ -1907,7 +1973,7 @@ define print-term (residual: z)
   define output false
   define term false
 
-  if (and (eq? (length z) 2) (Stream? (first z)))
+  if (and (eq? (length z) 2) (Generic-Stream? (first z)))
     set output (first z)
     set term (second z)
   elsif: (eq? (length z) 1)
@@ -1921,8 +1987,7 @@ define print-term (residual: z)
       inline-c "fprintf(stdout,\"%s\", GIN_STR_VALUE(" term "));"
     else:
       if (String-Stream? output)
-        println "print-term String-Stream not implemented."
-        exit
+        write-string-stream output term
       else:
         inline-c "fprintf(GIN_NIM_GET_STREAM(" output "),\"%s\", GIN_STR_VALUE(" term "));"
 
@@ -1957,7 +2022,7 @@ define print-term (residual: z)
   else: (print-primitive (Foreign->String term))
 
 define print (residual: terms)
-  if (and (> (length terms) 0) (Stream? (first terms)))
+  if (and (> (length terms) 0) (Generic-Stream? (first terms)))
     each i (tail terms)
       print-term (first terms) i
   else:
@@ -1965,7 +2030,7 @@ define print (residual: terms)
       print-term i
 
 define println (residual: terms)
-  if (and (> (length terms) 0) (Stream? (first terms)))
+  if (and (> (length terms) 0) (Generic-Stream? (first terms)))
     each i (tail terms)
       print-term (first terms) i
     print-term (first terms) ascii-newline
@@ -1979,7 +2044,7 @@ define write-term (residual: z)
   define output false
   define term false
 
-  if (and (eq? (length z) 2) (Stream? (first z)))
+  if (and (eq? (length z) 2) (Generic-Stream? (first z)))
     set output (first z)
     set term (second z)
   elsif: (eq? (length z) 1)
@@ -1993,8 +2058,8 @@ define write-term (residual: z)
       inline-c "fprintf(stdout,\"%s\", GIN_STR_VALUE(" term "));"
     else:
       if (String-Stream? output)
-        println "write-term String-Stream not implemented."
-        exit
+        write-string-stream output term
+        
       else:
         inline-c "fprintf(GIN_NIM_GET_STREAM(" output "),\"%s\", GIN_STR_VALUE(" term "));"
 
@@ -2031,7 +2096,7 @@ define write-term (residual: z)
   else: (write-primitive (Foreign->String term))
 
 define write (residual: terms)
-  if (and (> (length terms) 0) (Stream? (first terms)))
+  if (and (> (length terms) 0) (Generic-Stream? (first terms)))
     each i (tail terms)
       write-term (first terms) i
   else:
@@ -2039,7 +2104,7 @@ define write (residual: terms)
       write-term i
 
 define writeln (residual: terms)
-  if (and (> (length terms) 0) (Stream? (first terms)))
+  if (and (> (length terms) 0) (Generic-Stream? (first terms)))
     each i (tail terms)
       write-term (first terms) i
     write-term (first terms) ascii-newline
@@ -2101,8 +2166,10 @@ define <term> set-children (obj children)
   set-tail obj children
 
 define <term> get (obj key)
-  if (Null? (properties obj)) false
-  elsif: (eq? (properties obj) false) false
+  if (Null? (properties obj)) 
+    false
+  elsif: (eq? (properties obj) false) 
+    false
   else:
     Dict::get (properties obj) key
 
@@ -2111,10 +2178,21 @@ define <term> set (obj key value)
 
 ; TODO: REWRITE THESE A BIT
 
+; Given a list return true if the list represents a function definition.
+; A function defintion has the form:
+;   define name (arg-list) 
+;     (body)
+; So to determine if the list is a function we need to know if its
+; first element is the symbol 'define or 'define! followed by a
+; name, argument list, and a body. In other words it needs to
+; be a list of 4 elements with the first element 'define or 'define!.
+; We check if the first element and then check if there are 3 additional 
+; elements for a total of 4 elements.
 define <term> function-definition? (self)
+  define number-of-terms-after-define 3
   if (<term>::definition? self)
     define terms (<term>::get-children self)
-    if (= (length terms) 4)
+    if (= (length terms) number-of-terms-after-define)
       true
     else:
       false
@@ -2122,9 +2200,10 @@ define <term> function-definition? (self)
     false
 
 define <term> method-definition? (self)
+  define number-of-terms-after-define 4
   if (<term>::definition? self)
     define terms (<term>::get-children self)
-    if (= (length terms) 5)
+    if (= (length terms) number-of-terms-after-define)
       true
     else:
       false
@@ -2132,73 +2211,77 @@ define <term> method-definition? (self)
     false
 
 define <term> get-definition-name (self)
-  define terms (<term>::get-children self)
+  ; TODO - it is bad practice to return two different types (String
+  ; and Symbol in this case)
   if (<term>::method-definition? self)
-    String::append (<term>::get-value (second terms)) "::" (<term>::get-value (third terms))
+    String::append (Symbol->String (second self)) "::" (Symbol->String (third self))
   else:
-    <term>::get-value (second terms)
+    second self
 
 define <term> get-definition-body (self)
-  define terms (<term>::get-children self)
   if (<term>::method-definition? self)
-    fifth terms
+    fifth self
   else:
-    fourth terms
+    fourth self
 
 define <term> get-definition-arguments (self)
-  define terms (<term>::get-children self)
   if (<term>::method-definition? self)
-    fourth terms
+    fourth self
   elsif: (<term>::function-definition? self)
-    third terms
+    third self
   else:
     false
+
+define <term> parent (o)
+  set o (<term>::get o 'head)
+  if (or (Null? o) (eq? o false)) false
+  else:
+    set o (<term>::get o 'parent)
+    if (or (Null? o) (eq? o false)) false
+    else:
+      set o (<term>::get o 'head)
+      if (or (Null? o) (eq? o false))  false
+      else:
+        o
 
 define <term> get-parent-function (f)
   define get-f (v)
-    if (eq? v false)
+    if (or (Null? v) (eq? v false))
       false
+    elsif: (or (<term>::function-definition? v) (<term>::method-definition? v))
+      v
     else:
-      if (<term>::function-definition? v)
-        v
-      elsif: (<term>::method-definition? v)
-        v
-      else:
-        get-f (<term>::get v 'parent)
-  get-f (<term>::get f 'parent)
+      get-f (<term>::parent v)
+  get-f (<term>::parent f)
 
 define <term> definition-symbol? (v)
-  if (and (eq? (<term>::get v 'type) 'symbol) (or (String::eq? (<term>::get-value v) "define") (String::eq? (<term>::get-value v) "define!")))
-    true
-  else:
-    false
+  and (Symbol? v) (or (eq? v 'define) (eq? v 'define!))
 
 define <term> each-loop? (v)
-  if (and (eq? (<term>::get v 'type) 'symbol) (String::eq? (<term>::get-value v) "each"))
-    true
-  else:
-    false
+  and (list? v) (Symbol? (first v)) (eq? (first v) 'each)
 
 define <term> definition? (f)
-  if (not (eq? (<term>::get f 'type) 'group))
-    false
-  else:
-    define terms (<term>::get-children f)
-    if (>= (length terms) 2)
-      if (<term>::definition-symbol? (first terms))
-        true
-      else:
-        false
-    else:
-      false
+  and (Cons? f) (<term>::definition-symbol? (first f))
 
 define <term> immutable-definition? (f)
-  define terms (<term>::get-children f)
-  define v (first terms)
-  if (and (eq? (<term>::get v 'type) 'symbol) (String::eq? (<term>::get-value v) "define!"))
-    true
-  else:
+  and (Symbol? (first f)) (eq? (first f) 'define!)
+
+define <term> quoted-symbol? (v)
+  and (Cons? v) (Symbol? (first v)) (eq? (first v) 'quote)
+
+; TODO - not sure if this documentation is correct
+; Find parameters that are named as in (sender: obj)???
+define find-named-parameter (plst a)
+  if (Symbol? a)
+    set a (Symbol->String a)
+
+  if (Null? plst) 
     false
+  elsif: (and (String? (first plst)) (String::eq? (first plst) (String::append a ":")))
+    ; TODO: fails if xxx: is the last term in the list.
+    pair (first plst) (second plst)
+  else:
+    find-named-parameter (tail plst) a
 
 ; TODO - for this to work, we need to embed at least the function signatures in C.
 define fix-parameters (function-def residual: r)
@@ -2233,14 +2316,6 @@ define fix-parameters (function-def residual: r)
     elsif: (and (eq? (<term>::get a 'type) 'label) (String::eq? (<term>::get-value a) "residual:"))
       ; We set the residual keyword.  The next symbol won't be added to either list.
       set has-residual true
-
-  define find-named-parameter (plst a)
-    if (Null? plst) false
-    elsif: (and (eq? (<term>::get (first plst) 'type) 'label) (String::eq? (<term>::get-value (first plst)) (String::append a ":")))
-      ; TODO: fails if xxx: is the last term in the list.
-      pair (first plst) (second plst)
-    else:
-      find-named-parameter (tail plst) a
 
 ;   define remove-named-parameter (plst a)
 ;     if (Null? plst)
@@ -2334,12 +2409,6 @@ define fix-parameters (function-def residual: r)
 
 define ascii-mult ascii-asterik
 define ascii-equals ascii-equal
-
-define head (a)
-  first a
-
-define last (a)
-  nth a (length a)
 
 define last-char false
 define get-char (input)
@@ -2578,15 +2647,23 @@ define String scientific? (v)
 
 define String Rational? (v)
   require (String? v)
-  if (String::Ratio? v) true
-  elsif: (String::scientific? v) true
-  else: false
+  ; TODO - when DBC works remove the first conditional
+  if (not (String? v))
+    false
+  else:
+    if (String::Ratio? v) true
+    elsif: (String::scientific? v) true
+    else: false
 
 define String->Rational (v)
   require (String? v)
-  if (String::Ratio? v) (String->Ratio v)
-  elsif: (String::scientific? v) (String->Scientific v)
-  else: false
+  ; TODO - when DBC works remove the first conditional
+  if (not (String? v))
+    false
+  else:
+    if (String::Ratio? v) (String->Ratio v)
+    elsif: (String::scientific? v) (String->Scientific v)
+    else: false
 
 define String->Complex (v)
   require (String? v)
@@ -2619,6 +2696,9 @@ define String Complex? (v)
   require (String? v)
   if (not (String->Complex v)) false
   else: true
+
+define String->Flonum (v)
+  inline-c result "= gin_string_to_float(" v ");"
 
 ; TODO: This should return a symbol - not a string!!
 define String->Symbol (v)
@@ -2661,6 +2741,18 @@ define String Symbol? (v)
   if (not (String->Symbol v)) false
   else: true
 
+define Label->String (v)
+  Symbol->String v
+
+define String->Label-Sym (v)
+  define tmp (String->Symbol v)
+  inline-c result "= GIN_IM_FROM_LABEL(GIN_IM_TO_SYM(" tmp "));"
+
+define Label? (v)
+  define check-label-flag (v)
+    inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_LABEL(" v "));"
+  and (Symbol? v) (check-label-flag v)
+
 define String->Label (v)
   if (< (String::length v) 2) false
   else:
@@ -2670,8 +2762,21 @@ define String->Label (v)
 
 define String Label? (v)
   require (String? v)
-  if (not (String->Label v)) false
-  else: true
+  ; TODO - when DBC works remove the first conditional
+  if (not (String? v))
+    false
+  else:
+    if (not (String->Label v)) false
+    else: true
+
+define Residual? (v)
+  and (Label? v) (String::eq? (Label->String v) "residual:")
+
+define String::Residual? (v)
+  if (not (String? v))
+    false
+  else:
+    and (String::Label? v) (String::eq? v "residual:")
 
 define String colon-command? (v)
   require (String? v)
@@ -2679,7 +2784,7 @@ define String colon-command? (v)
   else: false
 
 define include-filename (terms)
-  first (tail terms)
+  first (tail (first terms))
 
 define open-include-file (filename)
   define found-include-file false
@@ -2704,7 +2809,8 @@ define expand-includes (tree)
   ; TODO - make sure include in quoted list does not expand
 
   define include? (node)
-    and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'include)
+    if (and (Cons? node) (Cons? (first node)) (Symbol? (first (first node))))
+      eq? (first (first node)) 'include
 
   define expand-include (node)
     ; TODO - Test if '(include "hello") get's expanded
@@ -2712,27 +2818,31 @@ define expand-includes (tree)
     define input (open-include-file (include-filename  node))
     define tmp (read input)
     expand-includes tmp
-    set-first node (first tmp) ; replace (include "file.gin) with expand tree
+
+    define old-tail (tail node)
+    set-first node (first tmp) ; replace (include "file.gin") with expand tree
+    define z (last* tmp)
+    set-tail z old-tail
     set-tail node (tail tmp)
+    
     close-input-stream input
 
   if (Null? tree) 
     false
   elsif: (include? tree) 
     expand-include tree
-  else: 
-    ; TODO - make this iterative
-    if (list? (first tree)) (expand-includes (first tree))
-    expand-includes (tail tree)
+  ;   ; TODO - make this iterative
+  if (list? (first tree)) (expand-includes (first tree))
+  if (list? (tail tree)) (expand-includes (tail tree))
 
 define <group>::make (line column)
   <term>::make null 'group 0 line column false
 
+define Group? (a)
+  and (Cons? a) (not (Null? (properties a))) (eq? (<term>::get a 'type) 'group)
+
 define <begin>::make (line column)
   <term>::make null 'begin 0 line column false
-
-define tree-add-X (v)
-  noop
 
 define <value>::make (value-type value line column)
   <term>::make null value-type -1 line column value
@@ -2756,7 +2866,7 @@ define read (input (tree-head null))
       println "Error: Can't have empty state stack"
       exit
     else:
-      set-tail (nth-pair state-stack (- (length state-stack) 1)) null  
+      set-tail (nth* state-stack (- (length state-stack) 1)) null  
 
   define begin-group? (t)
     if (eq? (<term>::get t 'begin) true)
@@ -2810,6 +2920,7 @@ define read (input (tree-head null))
     <term>::set tree-current-cell 'head tree-current
 
   define tree-push ()
+    ;println ":debug TREE-PUSH"
     define g0 false
     if (tree-current-cell-free)
       set g0 tree-current-cell
@@ -2839,7 +2950,7 @@ define read (input (tree-head null))
 
   define tree-unpop ()
     set tree-current (last tree-current)
-    set tree-current-cell (last-cons tree-current)
+    set tree-current-cell (last* tree-current)
 
   define tree-set-begin ()
     <term>::set tree-current 'begin true
@@ -3231,6 +3342,7 @@ define read (input (tree-head null))
 
                   ; Add a new group
                   tree-push
+                  ;println ":debug ADDING " buffer " as GROUP"
                   <term>::set tree-current 'parse-indent parse-indent
                   state-push 'begin
 
@@ -3307,11 +3419,40 @@ define read (input (tree-head null))
               set is-quote 0
 
             elsif: (< is-quote 0)
+              ;println ":debug READ QS " buffer
+              ; TODO - Add a surrounding (quote ###) in a similar
+              ; fashion to adding a colon command.
+
               ; Quoted symbol
               if (= is-quote -2)
                 set buffer ""
-              tree-add (<value>::make 'quoted-symbol buffer line column)
+              
+              ; Add a new group for the command
+              tree-push                                           
+              <term>::set tree-current 'parse-indent parse-indent 
+              
+              tree-add (<value>::make 'quoted-symbol (String->Symbol "quote") line column)
+              tree-add (<value>::make 'quoted-symbol (String->Symbol buffer) line column)
+              
+              tree-pop
+
               set is-quote 0
+
+              ;tree-add (<value>::make 'symbol (String->Symbol (String::rest buffer)) line column)
+              ;tree-push
+              ;<term>::set tree-current 'parse-indent parse-indent
+              ;tree-add (<value>::make 'quoted-symbol (String->Symbol "quote") line column)
+              ; 
+              ;state-push 'single-quote
+              ;if (Char::eol? c)
+              ;  ; reuse eol for colon-quote
+              ;  unget-char input c
+              ;  set c ascii-space
+              ;else:
+              ;  ; remove spaces between command and string
+              ;  while (Char::eq? ascii-space (peek-char input))
+              ;    get-char input
+              ;set buffer ""
 
             elsif: (String::Integer? buffer)
               ; Integer
@@ -3319,7 +3460,7 @@ define read (input (tree-head null))
 
             elsif: (String::Rational? buffer)
               ; Rational
-              tree-add (<value>::make 'rational (String->Rational buffer) line column)
+              tree-add (<value>::make 'rational (String->Flonum buffer) line column)
 
             elsif: (String::Complex? buffer)
               ; Complex
@@ -3351,7 +3492,7 @@ define read (input (tree-head null))
 
             elsif: (String::Label? buffer)
               ; Label
-              tree-add (<value>::make 'label (String->Label buffer) line column)
+              tree-add (<value>::make 'label (String->Label-Sym buffer) line column)
 
             elsif: (String::Symbol? buffer)
               ; Symbol

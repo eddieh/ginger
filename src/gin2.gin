@@ -20,6 +20,8 @@
 ;
 ; Please report all bugs and problems to "bugs@ging3r.org".
 
+include "compiler.gin"
+
 define ginger-version "20090518"
 define banner (String::append "This is Ginger, version " ginger-version)
 
@@ -34,11 +36,15 @@ define print-debug-tree-with-includes false
 define print-debug-tree-after-chunk-expand false
 
 define compile false ; aka tangle
-define literate false ; aka weave
+define objC false
+define fltk false
+define opengl false
+define cairo false
+define pango false
 
+define literate false ; aka weave
 define allowed-compile-target (list 'c 'asm)
 define compile-target (first allowed-compile-target)
-
 define allowed-literate-target (list 'pdf 'tex 'html)
 define literate-target (first allowed-literate-target)
 
@@ -88,6 +94,14 @@ define process-arguments (args)
         
       process-arguments (tail args)
 
+    elsif: (String::eq? (first args) "--cairo")
+      set cairo true
+      process-arguments (tail args)
+   
+    elsif: (String::eq? (first args) "--pango")
+      set pango true
+      process-arguments (tail args)
+
     elsif: (String::eq? (first args) "--print-debug-tree")
       set print-debug-tree true
       process-arguments (tail args)
@@ -113,8 +127,10 @@ if (not input-file-name)
 println "The Literate Gingerbread Man: Opening file.."
 
 define tree-head (<group>::make 0 0)
+<term>::set tree-head 'begin true
 
 println "Inserting auto includes.."
+;define std-include (append (<value>::make 'symbol 'include 0 0) (<value>::make 'string "stder.gin" 0 0))
 define std-include (append (<value>::make 'symbol 'include 0 0) (<value>::make 'string "std.gin" 0 0))
 set-first tree-head std-include
 set-tail tree-head (<group>::make 0 0)
@@ -128,8 +144,8 @@ close-input-stream input
 if print-debug-tree
   println tree-head
 
-;println "Expand includes.."
-;expand-includes tree-head
+println "Expand includes.."
+expand-includes tree-head
 
 if print-debug-tree-with-includes
   println tree-head
@@ -196,9 +212,9 @@ if compile
           exit
 
         set macro-def (List::duplicate macro-def)
-        define old-tail (tail node) ; (tail (last-cons node))
+        define old-tail (tail node) ; (tail (last* node))
         set-first node (first  macro-def)
-        define z (last-cons macro-def)
+        define z (last* macro-def)
         set-tail z old-tail
         set-tail node (tail macro-def)
         
@@ -217,11 +233,15 @@ if compile
         expand-chunk-calls (tail tree)
 
     println "Expanding chunks.."
-    expand-chunk-calls (Dict::get chunks "*")
+    if (Dict::get chunks "*")
+      expand-chunk-calls (Dict::get chunks "*")
 
     ; return the new tree
-    Dict::get chunks "*"
-
+    if (Dict::get chunks "*")
+      Dict::get chunks "*"
+    else:
+      tree
+  
   set tree-head (expand-chunks tree-head)
 
   if print-debug-tree-after-chunk-expand
@@ -247,3 +267,145 @@ if compile
 
   println "Writing " output-c-file-name
   println output-c "#include \"" output-h-file-name "\""
+
+  define flat-functions (list)
+  define local-variables (list)
+  define tmp-variables (list)
+  define glob 0
+  define glob-stack (list 0)
+  define func-def-exp-number 0  ; function definition expansion number
+
+  println "Flatten functions.."
+  flatten-functions tree-head
+
+  println "Discover local variables.."
+  each i flat-functions
+    discover-local-variables i 'function
+
+  discover-local-variables tree-head 'main
+   
+  ; Discover quoted symbols
+  discover-quoted-symbols tree-head
+   
+  println "Writing quoted symbols.."
+  println output-c "char* qsdef[] = {"
+  define qdef-index 0
+  each i quoted-symbols
+    if (= (String::length i) 1)
+      define n (Char->Integer (String::get-Char i 0))
+      println output-c "#define qsdef___" (name->c-name i) " " (Fixnum->String n)
+    else:
+      println output-c "\"" i "\","
+      println output-c "#define qsdef___" (name->c-name i) " " (Fixnum->String (+ qdef-index 2048))
+      ++ qdef-index
+  println output-c "};"
+  println output-c "int qsdef_count = " qdef-index ";"
+   
+  ; Discover classes
+  define cdef-count 0
+  println "Writing class definitions.."
+  each i local-variables
+    if (eq? (fifth i) 'class)
+      println output-c "#define cdef___" (name->c-name (third i)) " " (Fixnum->String cdef-count)
+      ++ cdef-count
+  println output-c "GingerClassDefinition cdef[" (Fixnum->String cdef-count) "];"
+  println output-c "int cdef_count = " (Fixnum->String cdef-count) ";"
+   
+  println output-c "GLOBALS"
+  println output-c "BEGIN_CODE"
+   
+  println "Writing function definitions"
+  function-definition-expansion tree-head 'main
+  each i flat-functions
+    function-definition-expansion i 'function
+   
+  println output-c "MID_CODE"
+   
+  println "Expand flattened functions"
+  each i flat-functions
+    function-expansion i 'function
+   
+  println "Main..."
+  println output-c "main_entry:"
+  function-expansion tree-head 'main
+   
+  println output-c "END_CODE"
+   
+  println "Expand prototypes"
+  function-prototype-expansion tree-head 'main
+  each i flat-functions
+    function-prototype-expansion i 'function
+  
+  ; Close the output-c file.
+  close-output-stream output-c
+  close-output-stream output-h
+   
+  ; Gather information about the environment
+  define GIN-C (getenv "GIN_C" "")
+  define GIN-CFLAGS (getenv "GIN_CFLAGS" "")
+  define GIN-LDFLAGS (getenv "GIN_LDFLAGS" "")
+  define GIN-INCLUDE-PATH (getenv "GIN_INCLUDE_PATH" "")
+  define GIN-IMPORT-PATH (getenv "GIN_IMPORT_PATH" "")
+   
+  ; TODO - this should be a compiler flag
+  ; show all warnings
+  set GIN-CFLAGS (String::append GIN-CFLAGS " -Wall ")
+  ;set GIN-LDFLAGS (String::append GIN-LDFLAGS " ")
+   
+  ; TODO - this should be a compiler flag
+  ; add debugging symbols
+  set GIN-CFLAGS (String::append GIN-CFLAGS " -g ")
+  ;set GIN-LDFLAGS (String::append GIN-LDFLAGS " ")
+   
+  set GIN-CFLAGS (String::append GIN-CFLAGS " -Ilib ")
+  set GIN-LDFLAGS (String::append GIN-LDFLAGS " -Llib -lginger -lgmp ")
+   
+  ; Add mode specific flags.
+  if (cairo)
+    println "Using Cairo."
+    set GIN-CFLAGS (String::append GIN-CFLAGS " $(pkg-config --cflags cairo) ")
+    set GIN-LDFLAGS (String::append GIN-LDFLAGS " $(pkg-config --libs cairo) ")
+   
+  if (pango)
+    println "Using Pango."
+    set GIN-CFLAGS (String::append GIN-CFLAGS " $(pkg-config --cflags pangocairo) ")
+    set GIN-LDFLAGS (String::append GIN-LDFLAGS " $(pkg-config --libs pangocairo) ")
+   
+  if (and fltk (not opengl))
+    println "Using Fltk."
+    set GIN-CFLAGS (String::append GIN-CFLAGS " `fltk2-config --cxxflags` ")
+    set GIN-LDFLAGS (String::append GIN-LDFLAGS " `fltk2-config --ldflags` ")
+   
+  if (and fltk opengl)
+    println "Using Fltk with OpenGL."
+    set GIN-CFLAGS (String::append GIN-CFLAGS " `fltk2-config --cxxflags` ")
+    set GIN-LDFLAGS (String::append GIN-LDFLAGS " `fltk2-config --ldflags --use-gl` -lfltk2_glut -framework GLUT ")
+   
+  if (objC)
+    println "Using ObjC (and Cocoa)."
+    set GIN-LDFLAGS (String::append GIN-LDFLAGS " -framework Cocoa ")
+   
+  ; Compile the program.
+  if (eq? compile true)
+    println (String::append "Compiling with " GIN-C)
+    println GIN-CFLAGS
+    println GIN-LDFLAGS
+    if (and fltk (not opengl))
+      execute (String::append GIN-C " " GIN-CFLAGS " -c fltk-support.cxx")
+      execute (String::append GIN-C " " GIN-CFLAGS " -c " output-c-file-name)
+      execute (String::append GIN-C " " GIN-CFLAGS " -o " base-file-name " fltk-support.o " base-file-name ".o " GIN-LDFLAGS)
+    elsif: (and fltk opengl)
+      execute (String::append GIN-C " " GIN-CFLAGS " -c fltk-support.cxx")
+      execute (String::append GIN-C " " GIN-CFLAGS " -c gin-glwindow.cxx")
+      execute (String::append GIN-C " " GIN-CFLAGS " -c " output-c-file-name)
+      execute (String::append GIN-C " -o " base-file-name " fltk-support.o gin-glwindow.o " base-file-name ".o " GIN-LDFLAGS)
+    elsif: pango
+      execute (String::append GIN-C " " GIN-CFLAGS " -c pango-support.c")
+      execute (String::append GIN-C " " GIN-CFLAGS " -c " output-c-file-name)
+      execute (String::append GIN-C " " GIN-CFLAGS " -o " base-file-name " pango-support.o " base-file-name ".o " GIN-LDFLAGS)
+    else:
+      execute (String::append GIN-C " " GIN-CFLAGS " " output-c-file-name " -o " base-file-name " " GIN-LDFLAGS)
+      println (String::append GIN-C " " GIN-CFLAGS " " output-c-file-name " -o " base-file-name " " GIN-LDFLAGS)
+    println "Executable: " base-file-name
+   
+  println "Done."
