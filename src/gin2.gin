@@ -64,10 +64,10 @@ define process-arguments (args)
       exit
     elsif: (String::eq? (first args) "--compile")
       set compile true
-      process-arguments (tail args)
+      process-arguments (second* args)
     elsif: (String::eq? (first args) "--literate")
       set literate true
-      process-arguments (tail args)
+      process-arguments (second* args)
     elsif: (String::eq? (String::substring (first args) 0 8) "--target")
 
       define target null
@@ -91,34 +91,32 @@ define process-arguments (args)
           println "target " target " is not supported"
           exit
         set literate-target target
-        
-      process-arguments (tail args)
+
+      process-arguments (second* args)
 
     elsif: (String::eq? (first args) "--cairo")
       set cairo true
-      process-arguments (tail args)
-   
+      process-arguments (second* args)
     elsif: (String::eq? (first args) "--pango")
       set pango true
-      process-arguments (tail args)
-
+      process-arguments (second* args)
     elsif: (String::eq? (first args) "--print-debug-tree")
       set print-debug-tree true
-      process-arguments (tail args)
+      process-arguments (second* args)
     elsif: (String::eq? (first args) "--print-debug-tree-with-includes")
       set print-debug-tree-with-includes true
-      process-arguments (tail args)
+      process-arguments (second* args)
     elsif: (String::eq? (first args) "--print-debug-tree-after-chunk-expand")
       set print-debug-tree-after-chunk-expand true
-      process-arguments (tail args)
+      process-arguments (second* args)
     elsif: (String::eq? (first args) "-o")
-      set output-c-file-name (first (tail args))
-      process-arguments (tail (tail args))
+      set output-c-file-name (second args)
+      process-arguments (third* args)
     else:
       set input-file-name (first args)
-      process-arguments (tail args)
+      process-arguments (second* args)
 
-process-arguments (tail (command-line))
+process-arguments (second* (command-line))
 
 if (not input-file-name)
   println "Error: no input file"
@@ -127,18 +125,17 @@ if (not input-file-name)
 println "The Literate Gingerbread Man: Opening file.."
 
 define tree-head (<group>::make 0 0)
-<term>::set tree-head 'begin true
+trait! tree-head 'begin true
 
 println "Inserting auto includes.."
-;define std-include (append (<value>::make 'symbol 'include 0 0) (<value>::make 'string "stder.gin" 0 0))
 define std-include (append (<value>::make 'symbol 'include 0 0) (<value>::make 'string "std.gin" 0 0))
-set-first tree-head std-include
-set-tail tree-head (<group>::make 0 0)
+first! tree-head std-include
+second*! tree-head (<group>::make 0 0)
 
 ; Read input file
 println "Reading " input-file-name
 define input (open-input-file input-file-name)
-read input (tail tree-head)
+read input (second* tree-head)
 close-input-stream input
 
 if print-debug-tree
@@ -152,8 +149,6 @@ if print-debug-tree-with-includes
 
 if literate
   println "Literate (weave) => " literate-target
-  ;println tree-head
-  
   include "literate.gin"
   Literate::weave-pdf (base-name input-file-name) tree-head
 
@@ -162,11 +157,11 @@ if compile
     define chunks (Dict::make)
 
     define chunk-name (node)
-      object->string (first (tail node))
+      object->string (first (second* node))
 
     define chunk? (node)
       ; TODO - Don't use <term> functions
-      and (eq? (<term>::get node 'type) 'symbol) (eq? (<term>::get-value node) 'chunk)
+      and (eq? (trait node 'type) 'symbol) (eq? (first node) 'chunk)
     
     define discover-chunks (tree)
       ; find chunks and add them to chunk dict based on names
@@ -174,15 +169,14 @@ if compile
         null
       elsif: (chunk? tree)
         println "Discovered " (chunk-name tree)
-        define chunk-def (first (tail (tail tree)))
+        define chunk-def (first (second* (second* tree)))
         ;println "  def => " chunk-def
         Dict::set chunks (chunk-name tree) chunk-def
       else:
         ; TODO - make this iterative
         if (list? (first tree))
           discover-chunks (first tree)
-        discover-chunks (tail tree)
-        
+        discover-chunks (second* tree)
         
     println "Discovering chunks.."
     discover-chunks tree
@@ -197,9 +191,9 @@ if compile
       define macro-key (node)
         String::append 
         .. "(String::append " 
-        .. (object->string (first (tail (first node)))) 
+        .. (object->string (first (second* (first node)))) 
         .. " )"        
-        ;String::append "(String::append " (object->string (first (tail node))) " )"
+        ;String::append "(String::append " (object->string (first (second* node))) " )"
       
       define expand-chunk-call (node)
         println "Expanding chunk: " (macro-key node)
@@ -212,11 +206,11 @@ if compile
           exit
 
         set macro-def (List::duplicate macro-def)
-        define old-tail (tail node) ; (tail (last* node))
-        set-first node (first  macro-def)
+        define old-second* (second* node) ; (second* (last* node))
+        first! node (first  macro-def)
         define z (last* macro-def)
-        set-tail z old-tail
-        set-tail node (tail macro-def)
+        second*! z old-second*
+        second*! node (second* macro-def)
         
         expand-chunk-calls node ; macro-def
         
@@ -230,7 +224,7 @@ if compile
         ;else:
         if (list? (first tree)) 
           expand-chunk-calls (first tree)
-        expand-chunk-calls (tail tree)
+        expand-chunk-calls (second* tree)
 
     println "Expanding chunks.."
     if (Dict::get chunks "*")
@@ -292,7 +286,7 @@ if compile
   define qdef-index 0
   each i quoted-symbols
     if (= (String::length i) 1)
-      define n (Char->Integer (String::get-Char i 0))
+      define n (Char->Integer (String::nth i 0))
       println output-c "#define qsdef___" (name->c-name i) " " (Fixnum->String n)
     else:
       println output-c "\"" i "\","

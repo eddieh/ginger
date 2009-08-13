@@ -239,7 +239,7 @@ define object->string (term)
       set output (String::append output (object->string i) " ")
     set output (String::append output ")")
   elsif: (Cons? term)
-    set output (String::append output "(" (object->string (first term)) " . . " (object->string (tail term)) ")")
+    set output (String::append output "(" (object->string (first term)) " . . " (object->string (second* term)) ")")
   elsif: (String? term) (set output (String::append output term))
   elsif: (Binary? term) (set output (String::append (Binary->String term)))
   elsif: (Function? term) (set output (String::append (Function->String term)))
@@ -332,7 +332,7 @@ define object->pretty-string (term)
       .. "(" 
       .. (object->pretty-string-internal (first term)) 
       .. " . . " 
-      .. (object->pretty-string-internal (tail term))
+      .. (object->pretty-string-internal (second* term))
       .. ")")
     elsif: (String? term) (set output (String::append output term))
     elsif: (Binary? term) (set output (String::append (Binary->String term)))
@@ -804,7 +804,7 @@ define Binary->String (a)
     while (> i 0)
       define b false
       inline-c b " = GIN_IM_FROM_CHAR8(((((unsigned long)(GIN_IM_TO_BINARY(" a "))) << (32 - GIN_IM_TO_INT(" i "))) >> 31) + 48);"
-      String::set-Char r (- len i) b
+      String::nth! r (- len i) b
       -- i
   else:
     ; TODO:
@@ -1214,8 +1214,8 @@ define empty? (a)
 
 define list? (a)
   if (Cons? a)
-    if (Null? (tail a)) true
-    else: (list? (tail a))
+    if (Null? (second* a)) true
+    else: (list? (second* a))
   else:
     false
 
@@ -1236,98 +1236,93 @@ define first (a)
 define properties (a)
   inline-c result "= GIN_NIM_GET_F1(" a ");"
 
-define tail (a)
+define second* (a)
   if (Cons? a)
     inline-c result "= GIN_NIM_GET_F2(" a ");"
   else:
-    println "Bad argument to tail"
+    println "Bad argument to second*"
     exit
 
-define set-first (p a)
+define first! (p a)
   inline-c "GIN_NIM_SET_F0(" p "," a ");"
 
 define set-properties (p a)
   inline-c "GIN_NIM_SET_F1(" p "," a ");"
 
-define set-tail (p a)
+define second*! (p a)
   inline-c "GIN_NIM_SET_F2(" p "," a ");"
 
 ; These functions return the value of the element at the position in the list.
+define nth (a i)
+  repeat (- i 1)
+    set a (second* a)
+  first a
+
 define second (a)
-  first (tail a)
+  nth a 2
 
 define third (a)
-  first (tail (tail a))
+  nth a 3
 
 define fourth (a)
-  first (tail (tail (tail a)))
+  nth a 4
 
 define fifth (a)
-  first (tail (tail (tail (tail a))))
+  nth a 5
 
 define sixth (a)
-  first (tail (tail (tail (tail (tail a)))))
+  nth a 6
 
 define seventh (a)
-  first (tail (tail (tail (tail (tail (tail a))))))
+  nth a 7
 
 define eigth (a)
-  first (tail (tail (tail (tail (tail (tail (tail a)))))))
+  nth a 8
 
 define ninth (a)
-  first (tail (tail (tail (tail (tail (tail (tail (tail a))))))))
+  nth a 9
 
 ; These functions (with the post fix *) return the cell at the position in the list.
-define second* (a)
-  tail a
+define nth* (a i)
+  repeat (- i 1)
+    set a (second* a)
+  a
 
 define third* (a)
-  tail (tail a)
+  nth* a 3
 
 define fourth* (a)
-  tail (tail (tail a))
+  nth* a 4
 
 define fifth* (a)
-  tail (tail (tail (tail a)))
+  nth* a 5
 
 define sixth* (a)
-  tail (tail (tail (tail (tail a))))
+  nth* a 6
 
 define seventh* (a)
-  tail (tail (tail (tail (tail (tail a)))))
+  nth* a 7
 
 define eigth* (a)
-  tail (tail (tail (tail (tail (tail (tail a))))))
+  nth* a 8
 
 define ninth* (a)
-  tail (tail (tail (tail (tail (tail (tail (tail a)))))))
-
-define nth (a i)
-  if (= i 1)
-    first a
-  else:
-    nth (tail a) (- i 1)
-
-define nth* (a i)
-  if (= i 1)
-    a
-  else:
-    nth* (tail a) (- i 1)
+  nth* a 9
 
 define last (a)
   nth a (length a)
 
 define last* (c)
-  if (Null? (tail c))
+  if (Null? (second* c))
     c
   else:
-    last* (tail c)
+    last* (second* c)
 
 define length (a)
   if (Null? a)
     0
   else:
-    + 1 (length (tail a))
+    + 1 (length (second* a))
 
 define append (a b)
   ; TODO - currently destructive. fix it.
@@ -1336,7 +1331,7 @@ define append (a b)
     b
   else:
     define t (last* a)
-    set-tail t b
+    second*! t b
     a
 
 define reverse (a)
@@ -1344,7 +1339,7 @@ define reverse (a)
   if (Null? a)
     a
   else:
-    append (reverse (tail a)) (list (first a))
+    append (reverse (second* a)) (list (first a))
 
 define list (residual: r)
   r
@@ -1352,7 +1347,7 @@ define list (residual: r)
 define contains? (lst a)
   if (Null? lst) false
   elsif: (eq? (first lst) a) true
-  else: (contains? (tail lst) a)
+  else: (contains? (second* lst) a)
 
 define split-list (lst v)
   define a (list)
@@ -1371,7 +1366,7 @@ define split-list (lst v)
 define List::duplicate (lst)
   if (Null? lst) null
   else:
-    pair (first lst) (List::duplicate (tail lst))
+    pair (first lst) (List::duplicate (second* lst))
 
 
 ;;; CHARACTERS
@@ -1494,17 +1489,16 @@ define String->Binary (a)
 define String length (a)
   inline-c result "= GIN_IM_FROM_INT(GIN_STR_LENGTH(" a "));"
 
-define String get-Char (a k)
+define String nth (a k)
   inline-c result "= GIN_IM_FROM_CHAR8(GIN_STR_VALUE(" a ")[GIN_IM_TO_INT(" k ")]);"
 
 define String first (a)
-  String::get-Char a 0
+  String::nth a 0
 
 define String last (a)
-  String::get-Char a (- (String::length a) 1)
+  String::nth a (- (String::length a) 1)
 
-define String set-Char (a k c)
-
+define String nth! (a k c)
   inline-c "GIN_STR_VALUE(" a ")[GIN_IM_TO_INT(" k ")] = GIN_IM_TO_CHAR8(" c ");"
 
 define String eq? (a b)
@@ -1578,7 +1572,7 @@ define String split (str ch)
 ; Path functions
 define base-name (str)
   define comp (String::split str ascii-period)
-  define base-file-name (String::join (reverse (tail (reverse comp))) ".")
+  define base-file-name (String::join (reverse (second* (reverse comp))) ".")
   base-file-name
 
 
@@ -1679,7 +1673,7 @@ define Dict get (self key)
   define r 0
   inline-c r "= gin_dict_contains(" self ", " key ");"
   if (Cons? r)
-    tail r
+    second* r
   else:
     false
 
@@ -2002,7 +1996,7 @@ define print-term (residual: z)
     print-primitive "("
     print-term (first term)
     print-primitive " . . "
-    print-term (tail term)
+    print-term (second* term)
     print-primitive ")"
   elsif: (String? term) 
     print-primitive term
@@ -2023,7 +2017,7 @@ define print-term (residual: z)
 
 define print (residual: terms)
   if (and (> (length terms) 0) (Generic-Stream? (first terms)))
-    each i (tail terms)
+    each i (second* terms)
       print-term (first terms) i
   else:
     each i terms
@@ -2031,7 +2025,7 @@ define print (residual: terms)
 
 define println (residual: terms)
   if (and (> (length terms) 0) (Generic-Stream? (first terms)))
-    each i (tail terms)
+    each i (second* terms)
       print-term (first terms) i
     print-term (first terms) ascii-newline
   else:
@@ -2074,7 +2068,7 @@ define write-term (residual: z)
     write-primitive "("
     write-term (first term)
     write-primitive " . . "
-    write-term (tail term)
+    write-term (second* term)
     write-primitive ")"
   elsif: (String? term) 
     write-primitive "\""
@@ -2097,7 +2091,7 @@ define write-term (residual: z)
 
 define write (residual: terms)
   if (and (> (length terms) 0) (Generic-Stream? (first terms)))
-    each i (tail terms)
+    each i (second* terms)
       write-term (first terms) i
   else:
     each i terms
@@ -2105,7 +2099,7 @@ define write (residual: terms)
 
 define writeln (residual: terms)
   if (and (> (length terms) 0) (Generic-Stream? (first terms)))
-    each i (tail terms)
+    each i (second* terms)
       write-term (first terms) i
     write-term (first terms) ascii-newline
   else:
@@ -2115,14 +2109,14 @@ define writeln (residual: terms)
 
 define print-properties (cell)
   println "{"
-  println "  parent => " (<term>::get cell 'parent)
-  println "  head => " (<term>::get cell 'head)
-  println "  type => " (<term>::get cell 'type)
-  println "  paren-balance => " (<term>::get cell 'paren-balance)
-  println "  parse-indent => " (<term>::get cell 'parse-indent)
-  println "  line => " (<term>::get cell 'line)
-  println "  column => " (<term>::get cell 'column)
-  println "  begin => " (<term>::get cell 'begin)
+  println "  parent => " (trait cell 'parent)
+  println "  head => " (trait cell 'head)
+  println "  type => " (trait cell 'type)
+  println "  paren-balance => " (trait cell 'paren-balance)
+  println "  parse-indent => " (trait cell 'parse-indent)
+  println "  line => " (trait cell 'line)
+  println "  column => " (trait cell 'column)
+  println "  begin => " (trait cell 'begin)
   println "}"
 
 define print-dictionary (dict)
@@ -2153,19 +2147,7 @@ define exit ()
 define <term> make (parent type parse-indent line column value)
   cons value (Dict::make 'parent parent 'head null 'type type 'paren-balance 0 'parse-indent parse-indent 'line line 'column column 'begin false) null
 
-define <term> get-value (obj)
-  first obj
-
-define <term> get-children (obj)
-  tail obj
-
-define <term> set-value (obj value)
-  set-first obj value
-
-define <term> set-children (obj children)
-  set-tail obj children
-
-define <term> get (obj key)
+define trait (obj key)
   if (Null? (properties obj)) 
     false
   elsif: (eq? (properties obj) false) 
@@ -2173,7 +2155,7 @@ define <term> get (obj key)
   else:
     Dict::get (properties obj) key
 
-define <term> set (obj key value)
+define trait! (obj key value)
   Dict::set (properties obj) key value
 
 ; TODO: REWRITE THESE A BIT
@@ -2191,7 +2173,7 @@ define <term> set (obj key value)
 define <term> function-definition? (self)
   define number-of-terms-after-define 3
   if (<term>::definition? self)
-    define terms (<term>::get-children self)
+    define terms (second* self)
     if (= (length terms) number-of-terms-after-define)
       true
     else:
@@ -2202,7 +2184,7 @@ define <term> function-definition? (self)
 define <term> method-definition? (self)
   define number-of-terms-after-define 4
   if (<term>::definition? self)
-    define terms (<term>::get-children self)
+    define terms (second* self)
     if (= (length terms) number-of-terms-after-define)
       true
     else:
@@ -2233,13 +2215,13 @@ define <term> get-definition-arguments (self)
     false
 
 define <term> parent (o)
-  set o (<term>::get o 'head)
+  set o (trait o 'head)
   if (or (Null? o) (eq? o false)) false
   else:
-    set o (<term>::get o 'parent)
+    set o (trait o 'parent)
     if (or (Null? o) (eq? o false)) false
     else:
-      set o (<term>::get o 'head)
+      set o (trait o 'head)
       if (or (Null? o) (eq? o false))  false
       else:
         o
@@ -2281,12 +2263,12 @@ define find-named-parameter (plst a)
     ; TODO: fails if xxx: is the last term in the list.
     pair (first plst) (second plst)
   else:
-    find-named-parameter (tail plst) a
+    find-named-parameter (second* plst) a
 
 ; TODO - for this to work, we need to embed at least the function signatures in C.
 define fix-parameters (function-def residual: r)
 
-  define original-parameters (tail r)
+  define original-parameters (second* r)
   define function (first r)
 
   ; The new list of parameters without names attached
@@ -2303,17 +2285,17 @@ define fix-parameters (function-def residual: r)
   ; Create the required parameters list
   define has-residual false
 
-  each a (<term>::get-children (<term>::get-definition-arguments function-def))
-    if (and (eq? (<term>::get a 'type) 'symbol) (not has-residual))
+  each a (second* (<term>::get-definition-arguments function-def))
+    if (and (eq? (trait a 'type) 'symbol) (not has-residual))
       ; The parameter is a symbol and we have not seen a residual keyword.
       ; So..  We add it as a required parameter.
       set required-parameters (append required-parameters (list a))
-    elsif: (and (eq? (<term>::get a 'type) 'group) (not has-residual))
+    elsif: (and (eq? (trait a 'type) 'group) (not has-residual))
       ; The parameter is a group and we have not seen a residual keyword.
       ; So.. We add the first term as an optional parameter.
-      define t (first (<term>::get-children a))
+      define t (first (second* a))
       set optional-parameters (append optional-parameters (list a))
-    elsif: (and (eq? (<term>::get a 'type) 'label) (String::eq? (<term>::get-value a) "residual:"))
+    elsif: (and (eq? (trait a 'type) 'label) (String::eq? (first a) "residual:"))
       ; We set the residual keyword.  The next symbol won't be added to either list.
       set has-residual true
 
@@ -2321,9 +2303,9 @@ define fix-parameters (function-def residual: r)
 ;     if (Null? plst)
 ;       plst
 ;     elsif: (and (eq? (<term>::get (first plst) 'type) 'label) (String::eq? (<term>::get-value (first plst)) a))
-;       remove-named-parameter (tail (tail plst)) a
+;       remove-named-parameter (second* (second* plst)) a
 ;     else:
-;       pair (first plst) (remove-named-parameter (tail plst) a)
+;       pair (first plst) (remove-named-parameter (second* plst) a)
 
 ;   ; Fill the required parameters in the new-parameters list.
 ;   each a required-parameters
@@ -2334,18 +2316,18 @@ define fix-parameters (function-def residual: r)
 ;       ; if it is, then insert an unnamed call now.
 ;       ; Then remove it from the old parameters.
 ;       ; add new-parameters named-argument
-;       set new-parameters (append new-parameters (list (tail named-argument)))
+;       set new-parameters (append new-parameters (list (second* named-argument)))
 ;       ; remove original-parameters named-argument
 ;       set original-parameters (remove-named-parameter original-parameters (<term>::get-value (first named-argument)))
 ;       set anon-first false
-;     elsif: (and (> (length original-parameters) 0) (not (eq? (<term>::get (first original-parameters) 'type) 'label))) 
+;     elsif: (and (> (length original-parameters) 0) (not (eq? (trait (first original-parameters) 'type) 'label))) 
 ;       ; 2. See if there is an unnamed parameter.  It must be this one..
 ;       ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
 ;       if (eq? anon-first false)
 ;         println "Named arguments must follow unnamed arguments!"
 ;         exit
 ;       set new-parameters (append new-parameters (list (first original-parameters)))
-;       set original-parameters (tail original-parameters)
+;       set original-parameters (second* original-parameters)
 ;     else:
 ;       ; This was a required arg but we didn't find a named term or an anon term that matched.
 ;       println "No matching term found (req)"
@@ -2358,19 +2340,19 @@ define fix-parameters (function-def residual: r)
 
 ;   ; TODO - Make this a LOT simpler - pass a zero for each parameter.  Let the function fill out the parameter IF it's zero.
 ;   each a optional-parameters
-;     define named-argument (find-named-parameter original-parameters (<term>::get-value (first (<term>::get-children a))))
+;     define named-argument (find-named-parameter original-parameters (<term>::get-value (first (second* a))))
 ;     if named-argument
-;       set new-parameters (append new-parameters (list (tail named-argument)))
+;       set new-parameters (append new-parameters (list (second* named-argument)))
 ;       set original-parameters (remove-named-parameter original-parameters (<term>::get-value (first named-argument)))
 ;       set anon-first false
-;     elsif: (and (> (length original-parameters) 0) (not (eq? (<term>::get (first original-parameters) 'type) 'label))) 
+;     elsif: (and (> (length original-parameters) 0) (not (eq? (trait (first original-parameters) 'type) 'label))) 
 ;       ; 2. See if there is an unnamed parameter.  It must be this one..
 ;       ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
 ;       if (eq? anon-first false)
 ;         println "Named arguments must follow unnamed arguments!"
 ;         exit
 ;       set new-parameters (append new-parameters (list (first original-parameters)))
-;       set original-parameters (tail original-parameters)
+;       set original-parameters (second* original-parameters)
 ;     else:
 ;       ; This was an optional argument that was not given..
 ;       ; original parameters doesn't change. but we add it to new parameters
@@ -2389,7 +2371,7 @@ define fix-parameters (function-def residual: r)
 ;       ;
 ;       ; should print 3! but it prints 4.
 
-;       set new-parameters (append new-parameters (list (second (<term>::get-children a))))
+;       set new-parameters (append new-parameters (list (second (second* a))))
 
 ;   ; The next term must be the residual or nothing..
 ;   if has-residual
@@ -2555,7 +2537,7 @@ define String->Integer (v)
   require (String? v)
   define v0 (String::split v ascii-underscore)
   define v1 (first v0)
-  define v2 (tail v0)
+  define v2 (second* v0)
   if (String::eq? v1 "") false ; _ without anything prefixing it is invalid.
   elsif: (and (Null? v2) (String::numeric? v1)) 
     if (Char::eq? (String::first v1) ascii-minus)
@@ -2563,7 +2545,7 @@ define String->Integer (v)
     else:
       String->digits v1 ; no base but okay
   elsif: (Null? v2) false ; no base but not numeric
-  elsif: (and (Null? (tail v2)) (String::numeric? (first v2))  )
+  elsif: (and (Null? (second* v2)) (String::numeric? (first v2))  )
     if (and (Char::eq? (String::first v1) ascii-minus) (String::digits? (String::rest v1) (String->digits (first v2))))
       * -1 (String->digits (String::rest v1) (String->digits (first v2))) ;if -ve number
     elsif: (String::digits? v1 (String->digits (first v2)))
@@ -2579,11 +2561,11 @@ define String->Ratio (v)
   require (String? v)
   define v0 (String::split v ascii-slash)
   define v1 (first v0)
-  define v2 (tail v0)
+  define v2 (second* v0)
   if (String::eq? v1 "") false ; / without anything prefixing it is invalid.
   elsif: (and (Null? v2) (String::Integer? v1)) (String->Integer v1) ; no denomenator but okay
   elsif: (Null? v2) false ; no denomenator but not numeric
-  elsif: (and (Null? (tail v2)) (String::Integer? (first v2)) (String::Integer? v1)) ; numerator and denomenator
+  elsif: (and (Null? (second* v2)) (String::Integer? (first v2)) (String::Integer? v1)) ; numerator and denomenator
     / (String->Integer v1) (String->Integer (first v2))
   else: false
 
@@ -2602,37 +2584,37 @@ define String->Scientific (v)
   define base "10"
   define sign 1
   set va (String::split v ascii-e)
-  if (not (Null? (tail va))) ; there IS an exponent
-    if (not (Null? (tail (tail va))))
+  if (not (Null? (second* va))) ; there IS an exponent
+    if (not (Null? (second* (second* va))))
       ; but there is more than one "e" which is illegal..
       set exponent false
     else:
-      set exponent (first (tail va))
+      set exponent (first (second* va))
   set va (String::split (first va) ascii-underscore)
-  if (not (Null? (tail va))) ; there IS a base
+  if (not (Null? (second* va))) ; there IS a base
     ; but there is more than one "_" which is illegal..
-    if (not (Null? (tail (tail va))))
+    if (not (Null? (second* (second* va))))
       set base false
     else:
-        set base (first (tail va))
+        set base (first (second* va))
   set va (String::split (first va) ascii-period)
-  if (not (Null? (tail va))) ; there IS a decimal
-    if (not (Null? (tail (tail va))))
+  if (not (Null? (second* va))) ; there IS a decimal
+    if (not (Null? (second* (second* va))))
       ; but there is more than one "." which is illegal..
       set n2 false
     else:
-      set n2 (first (tail va))
+      set n2 (first (second* va))
   set n1 (first va)
   set va (String::split n1 ascii-minus)
-  if (not (Null? (tail va))) ; there IS a minus
-    if (not (Null? (tail (tail va))))
+  if (not (Null? (second* va))) ; there IS a minus
+    if (not (Null? (second* (second* va))))
       ; but there is more than one "." which is illegal..
       set n1 false
     else:
       if (not (= (String::length (first va)) 0))
         set n1 false
       else:
-        set n1 (first (tail va))
+        set n1 (first (second* va))
         set sign -1
   if (and (not (not n1)) (not (not n2)) (not (not base)) (not (not exponent)) (String::numeric? exponent) (String::numeric? base) (String::digits? n1 (String->digits base)) (String::digits? n2 (String->digits base)))
     ; add before decimal to after decimal
@@ -2671,11 +2653,11 @@ define String->Complex (v)
     false
   else:
     define va (String::split v ascii-plus)
-    if (Null? (tail va)) false ; + was not found
+    if (Null? (second* va)) false ; + was not found
     else:
       define real-part (first va)
       define vb (String::split (second va) ascii-i)
-      if (Null? (tail vb)) false ; i was not found
+      if (Null? (second* vb)) false ; i was not found
       else:
         define imaginary-part (first vb)
         define rp
@@ -2784,7 +2766,7 @@ define String colon-command? (v)
   else: false
 
 define include-filename (terms)
-  first (tail (first terms))
+  first (second* (first terms))
 
 define open-include-file (filename)
   define found-include-file false
@@ -2799,7 +2781,7 @@ define open-include-file (filename)
       if (file-exists? path)
         set found-include-file true
         set include-file-path path
-      set inc-paths (tail inc-paths)
+      set inc-paths (second* inc-paths)
   if (not found-include-file)
     println "No file found for include: " filename
     exit
@@ -2819,11 +2801,11 @@ define expand-includes (tree)
     define tmp (read input)
     expand-includes tmp
 
-    define old-tail (tail node)
-    set-first node (first tmp) ; replace (include "file.gin") with expand tree
+    define old-second* (second* node)
+    first! node (first tmp) ; replace (include "file.gin") with expand tree
     define z (last* tmp)
-    set-tail z old-tail
-    set-tail node (tail tmp)
+    second*! z old-second*
+    second*! node (second* tmp)
     
     close-input-stream input
 
@@ -2833,13 +2815,13 @@ define expand-includes (tree)
     expand-include tree
   ;   ; TODO - make this iterative
   if (list? (first tree)) (expand-includes (first tree))
-  if (list? (tail tree)) (expand-includes (tail tree))
+  if (list? (second* tree)) (expand-includes (second* tree))
 
 define <group>::make (line column)
   <term>::make null 'group 0 line column false
 
 define Group? (a)
-  and (Cons? a) (not (Null? (properties a))) (eq? (<term>::get a 'type) 'group)
+  and (Cons? a) (not (Null? (properties a))) (eq? (trait a 'type) 'group)
 
 define <begin>::make (line column)
   <term>::make null 'begin 0 line column false
@@ -2866,10 +2848,10 @@ define read (input (tree-head null))
       println "Error: Can't have empty state stack"
       exit
     else:
-      set-tail (nth* state-stack (- (length state-stack) 1)) null  
+      second*! (nth* state-stack (- (length state-stack) 1)) null  
 
   define begin-group? (t)
-    if (eq? (<term>::get t 'begin) true)
+    if (eq? (trait t 'begin) true)
       true
     else: false
 
@@ -2877,28 +2859,28 @@ define read (input (tree-head null))
     define paren-balanced2 (t)
       require (not (eq? t false))
       if (begin-group? t)
-        if (= (<term>::get t 'paren-balance) 0) (list)
+        if (= (trait t 'paren-balance) 0) (list)
         else: t
       else:
-        paren-balanced2 (<term>::get (<term>::get t 'parent) 'head)
+        paren-balanced2 (trait (trait t 'parent) 'head)
     paren-balanced2 tree-current
 
   define paren-add ()
     define add-paren2 (t)
       require (not (eq? t false))
       if (begin-group? t)
-        <term>::set t 'paren-balance (+ (<term>::get t 'paren-balance) 1)
+        trait! t 'paren-balance (+ (trait t 'paren-balance) 1)
       else:
-        add-paren2 (<term>::get (<term>::get t 'parent) 'head)
+        add-paren2 (trait (trait t 'parent) 'head)
     add-paren2 tree-current
 
   define paren-remove ()
     define remove-paren2 (t)
       require (not (eq? t false))
       if (begin-group? t)
-        <term>::set t 'paren-balance (- (<term>::get t 'paren-balance) 1)
+        trait! t 'paren-balance (- (trait t 'paren-balance) 1)
       else:
-        remove-paren2 (<term>::get (<term>::get t 'parent) 'head)
+        remove-paren2 (trait (trait t 'parent) 'head)
     remove-paren2 tree-current
  
   if (Null? tree-head) (set tree-head (<group>::make 0 0))
@@ -2911,38 +2893,38 @@ define read (input (tree-head null))
     if (tree-current-cell-free)
       set tree-current-cell-free false
       ; Use the value
-      set-first tree-current-cell (first v)
+      first! tree-current-cell (first v)
       ; Merge dictionaries... TODO: do more attributes?
-      <term>::set tree-current-cell 'type (<term>::get v 'type)
+      trait! tree-current-cell 'type (trait v 'type)
     else:
-      set-tail tree-current-cell v
+      second*! tree-current-cell v
       set tree-current-cell v
-    <term>::set tree-current-cell 'head tree-current
+    trait! tree-current-cell 'head tree-current
 
   define tree-push ()
     ;println ":debug TREE-PUSH"
     define g0 false
     if (tree-current-cell-free)
       set g0 tree-current-cell
-      <term>::set g0 'parent (<term>::get tree-current-cell 'parent)
+      trait! g0 'parent (trait tree-current-cell 'parent)
     else:
       set g0 (<group>::make line column)
-      <term>::set g0 'parent tree-current-cell
+      trait! g0 'parent tree-current-cell
     define g1 (<group>::make line column)
-    <term>::set g0 'head g0
-    <term>::set g1 'head g1
-    set-first g0 g1
+    trait! g0 'head g0
+    trait! g1 'head g1
+    first! g0 g1
     tree-add g0
-    <term>::set g1 'parent g0
+    trait! g1 'parent g0
 
     set tree-current g1
     set tree-current-cell g1
     set tree-current-cell-free true
 
   define tree-pop ()
-    if (not (eq? (<term>::get tree-current 'parent) null))
-      set tree-current-cell (<term>::get tree-current 'parent)
-      set tree-current (<term>::get tree-current-cell 'head)
+    if (not (eq? (trait tree-current 'parent) null))
+      set tree-current-cell (trait tree-current 'parent)
+      set tree-current (trait tree-current-cell 'head)
       set tree-current-cell-free false
     else:
       println "Could not find parent."
@@ -2953,7 +2935,7 @@ define read (input (tree-head null))
     set tree-current-cell (last* tree-current)
 
   define tree-set-begin ()
-    <term>::set tree-current 'begin true
+    trait! tree-current 'begin true
 
   define tree-sibling-count ()
     - (length tree-current) 1
@@ -2983,7 +2965,7 @@ define read (input (tree-head null))
       ; if its eos we need to check for paren balence because its usualy done by
       ; indentation checking but there will be no more lines to check the last line
       if (not (Null? (paren-balanced)))
-        println "Error in code block starting on line " (<term>::get tree-current 'line) ": unbalanced parenthesis.1"
+        println "Error in code block starting on line " (trait tree-current 'line) ": unbalanced parenthesis.1"
         exit
     else:
       set c (get-char input) ; get the next character
@@ -3030,7 +3012,7 @@ define read (input (tree-head null))
 
             ; Add a new group for the command
             tree-push
-            <term>::set tree-current 'parse-indent parse-indent
+            trait! tree-current 'parse-indent parse-indent
 
             ; And then add commands..
             state-push 'command
@@ -3051,8 +3033,8 @@ define read (input (tree-head null))
                 paren-remove
                 ; if there is to many right parens we imeadetly know we should error
                 if (not (Null? (paren-balanced)))
-                  if (< (<term>::get (paren-balanced) 'paren-balance) 0)
-                    println "Error in code block starting on line " (<term>::get tree-current 'line) ": unbalanced parenthesis.2"
+                  if (< (trait (paren-balanced) 'paren-balance) 0)
+                    println "Error in code block starting on line " (trait tree-current 'line) ": unbalanced parenthesis.2"
                     exit
             else:
               ; Handle the EOL
@@ -3081,7 +3063,7 @@ define read (input (tree-head null))
                   else:
                     set valid-line true
                 ; if its indented then save the indent
-                if (> next-indent-count (<term>::get tree-current 'parse-indent))
+                if (> next-indent-count (trait tree-current 'parse-indent))
                   set cbq-indent next-indent-count
                   set look-ahead-count 0
                   ; if there is something in the buffer then we need to
@@ -3267,8 +3249,8 @@ define read (input (tree-head null))
         if (Char::eq? c ascii-right-parenthesis)
           paren-remove
           if (not (Null? (paren-balanced)))
-            if (< (<term>::get (paren-balanced) 'paren-balance) 0)
-              println "Error in code block starting on line " (<term>::get tree-current 'line) ": unbalanced parenthesis.3"
+            if (< (trait (paren-balanced) 'paren-balance) 0)
+              println "Error in code block starting on line " (trait tree-current 'line) ": unbalanced parenthesis.3"
               exit
 
         if (and (Char::whitespace? c) (not (Char::eol? c)) (= (String::length buffer) 0))
@@ -3301,7 +3283,7 @@ define read (input (tree-head null))
                 tree-pop
             if (Char::eq? c ascii-right-parenthesis)
               if (= (tree-sibling-count) 0)
-                <term>::set tree-current 'parse-indent parse-indent
+                trait! tree-current 'parse-indent parse-indent
               state-pop
               tree-pop
           else:
@@ -3310,16 +3292,16 @@ define read (input (tree-head null))
             if (eq? first-term-on-line true)
               set first-term-on-line false
               if (> (String::length buffer) 0)
-                if (< (<term>::get tree-current 'parse-indent) parse-indent)
+                if (< (trait tree-current 'parse-indent) parse-indent)
 
                   ; CASE 1 - The current indentation is more than the previous
                   ; indentation.  This indicates a code block associated with the
                   ; previous line.
 
-                  ; println "CASE 1  - " (<term>::get tree-current 'parse-indent) " - " parse-indent
+                  ; println "CASE 1  - " (trait tree-current 'parse-indent) " - " parse-indent
 
                   if (not (Null? (paren-balanced)))
-                    println "Error in code block starting on line " (<term>::get tree-current 'line) ": unbalanced parenthesis.4"
+                    println "Error in code block starting on line " (trait tree-current 'line) ": unbalanced parenthesis.4"
                     exit
 
                   if (String::ellipses? buffer)
@@ -3329,11 +3311,11 @@ define read (input (tree-head null))
 
                   if (String::Label? buffer)
                     ; Over indented labels don't make any sense!
-                    println "Error on line " line ", column " column ": illegal label indentation. (" (<term>::get 'parse-indent tree-current) ", " parse-indent ")"
+                    println "Error on line " line ", column " column ": illegal label indentation. (" (trait 'parse-indent tree-current) ", " parse-indent ")"
                     exit
 
                   ; We need to "continue" the last line with a code block
-                  ; set tree-current (last (<term>::get-children tree-current))
+                  ; set tree-current (last (second* tree-current))
                   ; tree-continue
                   tree-unpop
 
@@ -3343,7 +3325,7 @@ define read (input (tree-head null))
                   ; Add a new group
                   tree-push
                   ;println ":debug ADDING " buffer " as GROUP"
-                  <term>::set tree-current 'parse-indent parse-indent
+                  trait! tree-current 'parse-indent parse-indent
                   state-push 'begin
 
                   ; Add a new begin
@@ -3351,21 +3333,21 @@ define read (input (tree-head null))
 
                   ; Add a group for this command
                   tree-push
-                  <term>::set tree-current 'parse-indent parse-indent
+                  trait! tree-current 'parse-indent parse-indent
                   state-push 'command
 
-                elsif: (> (<term>::get tree-current 'parse-indent) parse-indent)
+                elsif: (> (trait tree-current 'parse-indent) parse-indent)
 
                   ; CASE 2 - The current indentation is less than the previous
                   ; indentation.  We need to "close" some code blocks and
                   ; begin adding to a different block.
 
-                  ; println "Case 2 - " (<term>::get tree-current 'parse-indent) " - " parse-indent
+                  ; println "Case 2 - " (trait tree-current 'parse-indent) " - " parse-indent
 
                   ; Keep popping the tree until we get to an indent <= the current
-                  while (< parse-indent (<term>::get tree-current 'parse-indent))
+                  while (< parse-indent (trait tree-current 'parse-indent))
                     if (not (Null? (paren-balanced)))
-                      println "Error in code block starting on line " (<term>::get (paren-balanced) 'line) ": unbalanced parenthesis.5"
+                      println "Error in code block starting on line " (trait (paren-balanced) 'line) ": unbalanced parenthesis.5"
                       exit
                     tree-pop
                     state-pop
@@ -3374,9 +3356,9 @@ define read (input (tree-head null))
                   state-pop
 
                   ; The indent should now be equal
-                  if (not (= parse-indent (<term>::get tree-current 'parse-indent)))
+                  if (not (= parse-indent (trait tree-current 'parse-indent)))
                     println "Error on line " line ", column " column ": illegal indentation."
-                    println "[ " parse-indent ", " (<term>::get tree-current 'parse-indent) "]"
+                    println "[ " parse-indent ", " (trait tree-current 'parse-indent) "]"
                     exit
 
                   ; And we should be at a State.Begin..
@@ -3387,7 +3369,7 @@ define read (input (tree-head null))
                   else:
                   ; Add a group for this command
                     tree-push
-                    <term>::set tree-current 'parse-indent parse-indent
+                    trait! tree-current 'parse-indent parse-indent
                     state-push 'command
 
                 else:
@@ -3401,15 +3383,15 @@ define read (input (tree-head null))
                     state-push 'command
                   else:
                     if (not (Null? (paren-balanced)))
-                      println "Error in code block starting on line " (<term>::get 'line tree-current) ": unbalanced parenthesis.6"
+                      println "Error in code block starting on line " (trait 'line tree-current) ": unbalanced parenthesis.6"
                       exit
                     ; Add a group for this command
                     tree-push
-                    <term>::set tree-current 'parse-indent parse-indent
+                    trait! tree-current 'parse-indent parse-indent
                     state-push 'command
 
             if (= (tree-sibling-count) 0)
-              <term>::set tree-current 'parse-indent parse-indent
+              trait! tree-current 'parse-indent parse-indent
 
             if (> is-quote 0)
               ; String
@@ -3429,7 +3411,7 @@ define read (input (tree-head null))
               
               ; Add a new group for the command
               tree-push                                           
-              <term>::set tree-current 'parse-indent parse-indent 
+              trait! tree-current 'parse-indent parse-indent 
               
               tree-add (<value>::make 'quoted-symbol (String->Symbol "quote") line column)
               tree-add (<value>::make 'quoted-symbol (String->Symbol buffer) line column)
@@ -3440,7 +3422,7 @@ define read (input (tree-head null))
 
               ;tree-add (<value>::make 'symbol (String->Symbol (String::rest buffer)) line column)
               ;tree-push
-              ;<term>::set tree-current 'parse-indent parse-indent
+              ;trait! tree-current 'parse-indent parse-indent
               ;tree-add (<value>::make 'quoted-symbol (String->Symbol "quote") line column)
               ; 
               ;state-push 'single-quote
@@ -3477,7 +3459,7 @@ define read (input (tree-head null))
 
               tree-add (<value>::make 'symbol (String->Symbol (String::rest buffer)) line column)
               tree-push
-              <term>::set tree-current 'parse-indent parse-indent
+              trait! tree-current 'parse-indent parse-indent
               tree-add (<value>::make 'symbol (String->Symbol "String::append") line column)
               state-push 'colon-quote
               if (Char::eol? c)
@@ -3500,7 +3482,7 @@ define read (input (tree-head null))
 
             elsif: (String::ellipses? buffer)
               ; Ellipses
-              if (= (<term>::get tree-current 'line) 0)
+              if (= (trait tree-current 'line) 0)
                 ; Files that begin with ellipses don't make any sense!
                 println "Error on line " line ", column " column ": illegal ellipses."
                 exit
@@ -3509,7 +3491,7 @@ define read (input (tree-head null))
               paren-add
 
               tree-push
-              <term>::set tree-current 'parse-indent parse-indent
+              trait! tree-current 'parse-indent parse-indent
               state-push 'command
 
             else:

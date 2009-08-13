@@ -302,7 +302,7 @@ define function-expansion (v kind)
       ; lookup lexical path to value
       define info (lexical-path (first v) function)
       if (not info)
-        println "** Error - Unbound variable.1: " (first v) " on line " (<term>::get v 'line) "."
+        println "** Error - Unbound variable.1: " (first v) " on line " (trait v 'line) "."
         exit
       define bound-variable (first info)
       println output-delayed-c a " = " bound-variable ";"
@@ -333,7 +333,7 @@ define function-expansion (v kind)
     ; rhs => value
     define info (lexical-path (first lhs) function)
     if (not info)
-      println "** Error - Unbound variable.2: " (first lhs) " on line " (<term>::get lhs 'line) "."
+      println "** Error - Unbound variable.2: " (first lhs) " on line " (trait lhs 'line) "."
       exit
     println output-delayed-c "// SET " (first lhs)
     define bound-variable (first info)
@@ -349,7 +349,7 @@ define function-expansion (v kind)
 
       define info2 (lexical-path (first rhs) function)
       if (not info2)
-        println "** Error - Unbound variable.3: " (first rhs) " on line " (<term>::get rhs 'line) "."
+        println "** Error - Unbound variable.3: " (first rhs) " on line " (trait rhs 'line) "."
         exit
       define bound-variable-2 (first info2)
 
@@ -388,7 +388,7 @@ define function-expansion (v kind)
         define info (lexical-path (<term>::get-definition-name v) function)
 
         if (not info)
-          println "** Error - Unbound variable.6: " (<term>::get-definition-name v) " on line " (<term>::get v 'line) "."
+          println "** Error - Unbound variable.6: " (<term>::get-definition-name v) " on line " (trait v 'line) "."
           exit
         define bound-variable (first info)
         println output-c "GIN_NEW_FN(" bound-variable ", &(gin_function_table[fdef___" (name->c-name (<term>::get-definition-name v)) "]), frame)"
@@ -399,7 +399,7 @@ define function-expansion (v kind)
       elsif: (<term>::definition? v)
         flatten-set (tail v) (tail (tail v))
       
-      elsif: (<term>::get v 'begin)
+      elsif: (trait v 'begin)
         println output-delayed-c "// BEGIN (tmp" tmp-number ")"
         next-tmp
 
@@ -569,7 +569,7 @@ define function-expansion (v kind)
 
           define info (lexical-path (second v) function)
           if (not info)
-            println "** Error - Unbound variable.7: " (second v) " on line " (<term>::get v 'line) "."
+            println "** Error - Unbound variable.7: " (second v) " on line " (trait v 'line) "."
             exit
           define bound-variable (first info)
           println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))+1);"
@@ -578,7 +578,7 @@ define function-expansion (v kind)
 
           define info (lexical-path (second v) function)
           if (not info)
-            println "** Error - Unbound variable.8: " (second v) " on line " (<term>::get v 'line) "."
+            println "** Error - Unbound variable.8: " (second v) " on line " (trait v 'line) "."
             exit
           define bound-variable (first info)
           println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))-1);"
@@ -605,29 +605,29 @@ define function-expansion (v kind)
           previous-tmp
 
         elsif: (eq? (first v) 'register-class)
-          define info (lexical-path (<term>::get-value (second terms)) function)
+          define info (lexical-path (first (second terms)) function)
           if (not info)
-            println "** Error - Unbound variable.9: " (<term>::get-value (second terms)) " on line " (<term>::get (second terms) 'line) "."
+            println "** Error - Unbound variable.9: " (first (second terms)) " on line " (trait (second terms) 'line) "."
             exit
           define bound-variable (first info)
-          define base-class-info (lexical-path (<term>::get-value (third terms)) function)
+          define base-class-info (lexical-path (first (third terms)) function)
           if (not base-class-info)
-            println "** Error - Unbound variable.9: " (<term>::get-value (third terms)) " on line " (<term>::get (second terms) 'line) "."
+            println "** Error - Unbound variable.9: " (first (third terms)) " on line " (trait (second terms) 'line) "."
             exit
           define bound-base-class (first info)
-          define make-fn-info (lexical-path (<term>::get-value (fourth terms)) function)
+          define make-fn-info (lexical-path (first (fourth terms)) function)
           if (not make-fn-info)
-            println "** Error - Unbound variable.10: " (<term>::get-value (fourth terms)) " on line " (<term>::get (second terms) 'line) "."
+            println "** Error - Unbound variable.10: " (first (fourth terms)) " on line " (trait (second terms) 'line) "."
             exit
           define bound-make-fn (first info)
-          define unmake-fn-info (lexical-path (<term>::get-value (fifth terms)) function)
+          define unmake-fn-info (lexical-path (first (fifth terms)) function)
           if (not unmake-fn-info)
-            println "** Error - Unbound variable.11: " (<term>::get-value (fifth terms)) " on line " (<term>::get (second terms) 'line) "."
+            println "** Error - Unbound variable.11: " (first (fifth terms)) " on line " (trait (second terms) 'line) "."
             exit
           define bound-unmake-fn (first info)
           ++ class-number
 
-          println output-delayed-c "GIN_NEW_CLASS(" bound-variable ",cdef___" (name->c-name (<term>::get-value (second terms))) "," bound-base-class "," bound-make-fn "," bound-unmake-fn ");"
+          println output-delayed-c "GIN_NEW_CLASS(" bound-variable ",cdef___" (name->c-name (first (second terms))) "," bound-base-class "," bound-make-fn "," bound-unmake-fn ");"
 
 
         elsif: (eq? (first v) 'inline-c-header)
@@ -641,7 +641,7 @@ define function-expansion (v kind)
               else:
                 define info (lexical-path i function)
                 if (not info)
-                  println "** Error - Unbound variable.12: " i " on line " (<term>::get v 'line) "."
+                  println "** Error - Unbound variable.12: " i " on line " (trait v 'line) "."
                   exit
                 define bound-variable (first info)
                 print output-delayed-c bound-variable
@@ -666,7 +666,7 @@ define function-expansion (v kind)
           define info (lexical-path (first v) function)
 
           if (not info)
-            println "** Error - Unbound variable.13: " (first v) " on line " (<term>::get v 'line) "."
+            println "** Error - Unbound variable.13: " (first v) " on line " (trait v 'line) "."
             exit
           
           define function-def (third info)
@@ -721,7 +721,7 @@ define function-expansion (v kind)
 
            ;  define find-named-parameter (plst a)
 ;               if (Null? plst) false
-;               elsif: (and (eq? (<term>::get (first plst) 'type) 'label) (String::eq? (<term>::get-value (first plst)) (String::append a ":")))
+;               elsif: (and (eq? (trait (first plst) 'type) 'label) (String::eq? (first (first plst)) (String::append a ":")))
 ;                 ; TODO: fails if xxx: is the last term in the list.
 ;                 pair (first plst) (second plst)
 ;               else:
@@ -730,7 +730,7 @@ define function-expansion (v kind)
             define remove-named-parameter (plst a)
               if (Null? plst)
                 plst
-              elsif: (and (eq? (<term>::get (first plst) 'type) 'label) (String::eq? (<term>::get-value (first plst)) a))
+              elsif: (and (eq? (trait (first plst) 'type) 'label) (String::eq? (first (first plst)) a))
                 ; TODO - what does this do? fix it.
                 remove-named-parameter (tail (tail plst)) a
               else:
@@ -747,7 +747,7 @@ define function-expansion (v kind)
                 ; add new-parameters named-argument
                 set new-parameters (append new-parameters (list (tail named-argument)))
                 ; remove original-parameters named-argument
-                set original-parameters (remove-named-parameter original-parameters (<term>::get-value (first named-argument)))
+                set original-parameters (remove-named-parameter original-parameters (first (first named-argument)))
                 set anon-first false
               
               if (and (> (length original-parameters) 0) (not (Label? (first original-parameters))))
@@ -760,7 +760,7 @@ define function-expansion (v kind)
                 set original-parameters (tail original-parameters)
               else:
                 ; This was a required arg but we didn't find a named term or an anon term that matched.
-                println "Required argument, " a ", missing from call on line " (<term>::get v 'line) "." 
+                println "Required argument, " a ", missing from call on line " (trait v 'line) "." 
                 exit
             
             if (> (length required-parameters) (length new-parameters))
@@ -816,7 +816,7 @@ define function-expansion (v kind)
               ; Nothing in the original parameters so do nothing..
               noop
             else:
-              println "Too many arguments in function call, " (first v) ", on line " (<term>::get v 'line) "."
+              println "Too many arguments in function call, " (first v) ", on line " (trait v 'line) "."
               exit
               
             define delayed-tmp-number 0
@@ -830,13 +830,13 @@ define function-expansion (v kind)
               
               if (<term>::quoted-symbol? ii)
                 print output-call "GIN_IM_FROM_SYM(qsdef___" (name->c-name (second ii)) ")"
-              elsif: (and (list? ii) (eq? (<term>::get ii 'type) 'residual))
+              elsif: (and (list? ii) (eq? (trait ii 'type) 'residual))
                 ; TODO - flatten tmps into a list
                 define list-args (open-output-string)
                 next-tmp
                 next-tmp
                 println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 2) " = GIN_NULL;"
-                define ri (reverse (<term>::get-value ii))
+                define ri (reverse (first ii))
                 each xx ri
                   next-tmp
                   if (<term>::quoted-symbol? xx)
@@ -871,7 +871,7 @@ define function-expansion (v kind)
                 ; lookup lexical path to value
                 define info1 (lexical-path ii function)
                 if (not info1)
-                  println "** Error - Unbound variable.14: " ii " on line " (<term>::get v 'line) "."
+                  println "** Error - Unbound variable.14: " ii " on line " (trait v 'line) "."
                   exit
                 define bound-variable (first info1)
                 print output-call bound-variable
