@@ -126,7 +126,7 @@ define name->c-name (v)
     "undefined"
 
 define function-prototype-expansion (v kind)
-  define terms (<term>::get-children v)
+  define terms (second* v)
   println output-h "typedef struct {"
   println output-h "Frame* next_frame;"
   println output-h "Frame* previous_frame;"
@@ -174,7 +174,7 @@ define function-definition-expansion (v kind)
 
   define c-name "MAIN"
   if (eq? kind 'function)
-    set terms (<term>::get-children v)
+    set terms (second* v)
     set name (<term>::get-definition-name v)
     set c-name (name->c-name name)
 
@@ -196,10 +196,10 @@ define <list>-remove (lst e)
   if (Null? lst) lst
   elsif: (eq? (first lst) e)
     ; TODO - is this correct?
-    <list>-remove (tail lst) e
+    <list>-remove (second* lst) e
   else:
     ; TODO - is this correct?
-    pair (first lst) (<list>-remove (tail lst) e)
+    pair (first lst) (<list>-remove (second* lst) e)
 
 define lexical-path (term function)
   ; priority, local variables, arguments
@@ -264,7 +264,7 @@ define call-number 0
 define func-def-number 1
 define class-number 500
 define function-expansion (v kind)
-  define terms (<term>::get-children v)
+  define terms (second* v)
   define function v
   define function-name "MAIN"
   define output-delayed-c (open-output-string)
@@ -381,7 +381,7 @@ define function-expansion (v kind)
 
     if (or (Group? v) (list? v))
 
-      define terms (<term>::get-children v)
+      define terms (second* v)
 
       if (or (<term>::function-definition? v) (<term>::method-definition? v))
         ; Function definition
@@ -397,7 +397,7 @@ define function-expansion (v kind)
         ++ func-def-number
       
       elsif: (<term>::definition? v)
-        flatten-set (tail v) (tail (tail v))
+        flatten-set (second* v) (second* (second* v))
       
       elsif: (trait v 'begin)
         println output-delayed-c "// BEGIN (tmp" tmp-number ")"
@@ -548,7 +548,7 @@ define function-expansion (v kind)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_TRUE;"
           next-tmp
 
-          each i (tail v)
+          each i (second* v)
             flatten i
             ++ else-count
             println output-delayed-c "if (GIN_IS_FALSE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
@@ -590,7 +590,7 @@ define function-expansion (v kind)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_FALSE;"
           next-tmp
 
-          each i (tail v)
+          each i (second* v)
             flatten i
             ++ else-count
             println output-delayed-c "if (GIN_IS_TRUE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
@@ -634,7 +634,7 @@ define function-expansion (v kind)
           println output-h (second v)
 
         elsif: (eq? (first v) 'inline-c)
-          each i (tail v)
+          each i (second* v)
             if (Symbol? i)
               if (eq? i 'result)
                 print output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
@@ -687,7 +687,7 @@ define function-expansion (v kind)
 
             ; The list of parameters as passed to the function
 
-            define original-parameters (tail v)
+            define original-parameters (second* v)
 
             ; The new list of parameters without names attached
             define new-parameters (list)
@@ -725,16 +725,16 @@ define function-expansion (v kind)
 ;                 ; TODO: fails if xxx: is the last term in the list.
 ;                 pair (first plst) (second plst)
 ;               else:
-;                 find-named-parameter (tail plst) a
+;                 find-named-parameter (second* plst) a
 
             define remove-named-parameter (plst a)
               if (Null? plst)
                 plst
               elsif: (and (eq? (trait (first plst) 'type) 'label) (String::eq? (first (first plst)) a))
                 ; TODO - what does this do? fix it.
-                remove-named-parameter (tail (tail plst)) a
+                remove-named-parameter (second* (second* plst)) a
               else:
-                pair (first plst) (remove-named-parameter (tail plst) a)
+                pair (first plst) (remove-named-parameter (second* plst) a)
 
             ; Fill the required parameters in the new-parameters list.
             each a required-parameters
@@ -745,7 +745,7 @@ define function-expansion (v kind)
                 ; if it is, then insert an unnamed call now.
                 ; Then remove it from the old parameters.
                 ; add new-parameters named-argument
-                set new-parameters (append new-parameters (list (tail named-argument)))
+                set new-parameters (append new-parameters (list (second* named-argument)))
                 ; remove original-parameters named-argument
                 set original-parameters (remove-named-parameter original-parameters (first (first named-argument)))
                 set anon-first false
@@ -757,7 +757,7 @@ define function-expansion (v kind)
                   println "Named arguments must follow unnamed arguments!"
                   exit
                 set new-parameters (append new-parameters (list (first original-parameters)))
-                set original-parameters (tail original-parameters)
+                set original-parameters (second* original-parameters)
               else:
                 ; This was a required arg but we didn't find a named term or an anon term that matched.
                 println "Required argument, " a ", missing from call on line " (trait v 'line) "." 
@@ -771,7 +771,7 @@ define function-expansion (v kind)
             each a optional-parameters
               define named-argument (find-named-parameter original-parameters (second a))
               if named-argument
-                set new-parameters (append new-parameters (list (tail named-argument)))
+                set new-parameters (append new-parameters (list (second* named-argument)))
                 set original-parameters (remove-named-parameter original-parameters (first named-argument))
                 set anon-first false
               elsif: (and
@@ -783,7 +783,7 @@ define function-expansion (v kind)
                   println "Named arguments must follow unnamed arguments!"
                   exit
                 set new-parameters (append new-parameters (list (first original-parameters)))
-                set original-parameters (tail original-parameters)
+                set original-parameters (second* original-parameters)
               else:
                 ; This was an optional argument that was not given..
                 ; original parameters doesn't change. but we add it to new parameters

@@ -7,29 +7,21 @@ Specifically, you will need gcc, make, uname and ar.  On Mac OS X
 these are available once Xcode is installed.  On Windows you must 
 install either cygwin or msys.
 
-2. Install prerequisite libraries:  Cairo, Pango, and GMP
--------------------------------------------------
+2. Install prerequisite libraries
+---------------------------------
 
 Install the libs and headers for each library as appropriate for 
-your OS and development platform.
-
-You must compile GMP as a 32 bit library.  This is accomplished with:
+your OS and development platform.  Ginger has been tested with
+Cairo 1.8.8 and Pango 1.25.3.  Some older versions of these
+libraries are known not to work.  If you need to compile these
+from source, do something like this:
 
 export ABI=32
-./configure
+./configure --prefix=/usr
+make
+make install
 
-3. Install the Gambit scheme compiler
--------------------------------------
-
-Get the latest version (4.2.x at this time) for your system.
-
-The Ginger->C compiler is currently not self hosting.  The older 
-Ginger->Scheme compiler is self hosting but needs Gambit to interpret
-the resulting scheme file.
-
-http://dynamo.iro.umontreal.ca/~gambit/wiki/index.php/Distributions
-
-4. Build and install Ginger
+3. Build and install Ginger
 ---------------------------
 
 Ginger uses a very minimal configure script you should execute by
@@ -48,7 +40,7 @@ if necessary) by typing:
 
 $ make install
 
-5. The Post-Install
+4. The Post-Install
 -------------------
 
 Ginger supports several environmental variables you can use to tweak
