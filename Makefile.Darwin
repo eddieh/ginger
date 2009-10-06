@@ -5,7 +5,8 @@
 # Here we assume that Fink or MacPorts is installed in /sw/ and we
 # should check for additional includes and libraries there.
 
-PLATFORM_CFLAGS = -I/sw/include -I/opt/local/include
-PLATFORM_LDFLAGS = -L/sw/lib -I/opt/local/lib
+C_COMPILER = /Developer/usr/bin/gcc-4.0
+PLATFORM_CFLAGS = -arch i386 -I/sw/include -I/opt/local/include
+PLATFORM_LDFLAGS = -arch i386 -L/sw/lib -I/opt/local/lib
 LIBRARIAN = ar
 LIBRARIAN_FLAGS = rcs
