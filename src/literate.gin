@@ -87,21 +87,21 @@ define Literate::weave-pdf (name tree)
           
           ; double newlines break paragraphs in the source, but
           ;  we only need one to break a paragraph when laying text
-          if (and (Char::eq? (String::nth x i) ascii-newline)
-          .. (Char::eq? (String::nth x (+ i 1)) ascii-newline))
-            set str (String::append str (Char->String ascii-newline))
+          if (and (Char::eq? (String::nth x i) newline_)
+          .. (Char::eq? (String::nth x (+ i 1)) newline_))
+            set str (String::append str (Char->String newline_))
             ++ i
           
           ; turn single newlines into spaces so long as the previous
           ;  character was not a space
-          elsif: (Char::eq? (String::nth x i) ascii-newline)
-            if (not (Char::eq? (String::nth x (- i 1)) ascii-space))
-              set str (String::append str (Char->String ascii-space))
+          elsif: (Char::eq? (String::nth x i) newline_)
+            if (not (Char::eq? (String::nth x (- i 1)) space_))
+              set str (String::append str (Char->String space_))
           
           ; eat double spaces 
-          elsif: (Char::eq? (String::nth x i) ascii-space)
-            if (not (Char::eq? (String::nth x (- i 1)) ascii-space))
-              set str (String::append str (Char->String ascii-space))
+          elsif: (Char::eq? (String::nth x i) space_)
+            if (not (Char::eq? (String::nth x (- i 1)) space_))
+              set str (String::append str (Char->String space_))
           
           else:
             set str (String::append str (Char->String (String::nth x i)))
@@ -220,7 +220,7 @@ define Literate::weave-pdf (name tree)
     
     define escape (x)
       define str ""
-      define components (String::split x ascii-less-than)
+      define components (String::split x <_)
       define len (length components)
       if (= len 1)
         set str x
@@ -248,7 +248,7 @@ define Literate::weave-pdf (name tree)
       define len (String::length x)
       define i 0
       while (< i len)
-        if (Char::eq? (String::nth x i) ascii-caret)
+        if (Char::eq? (String::nth x i) ^_)
           set str (String::append str "<sup><i>" (Char->String (String::nth x (+ i 1))) "</i></sup>")
           ++ i
         else:
