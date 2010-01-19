@@ -1,25 +1,25 @@
 /*
   Copyright 2009 by James Dean Palmer and others.
 
-  Licensed under the Apache License, Version 2.0 (the "License"); 
-  you may not use this file except in compliance with the License. 
-  You may obtain a copy of the License at 
- 
-    http://www.apache.org/licenses/LICENSE-2.0 
- 
-  Unless required by applicable law or agreed to in writing, software 
-  distributed under the License is distributed on an "AS IS" BASIS, 
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-  See the License for the specific language governing permissions and 
-  limitations under the License. 
- 
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
   Please report all bugs and problems to "bugs@ging3r.org".
 */
 
 #ifndef GINGER_H
 #define GINGER_H
 
-#define DEBUG
+//#define DEBUG 1
 //#define GC_DEBUG
 
 /// Section 0: Includes
@@ -35,7 +35,7 @@
 
 /// This is the primary reference used internally by Ginger.  It can hold
 /// immediate (chars, fixed ints, symbols, etc.) and non-immediates (a pointer
-/// to more complex data structures (foreign objects, floats, dictionaries, 
+/// to more complex data structures (foreign objects, floats, dictionaries,
 /// etc.)
 
 #define GIN_OBJ void*
@@ -64,6 +64,7 @@ typedef struct {
 } Frame_Narg;
 
 typedef struct {
+  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   GIN_OBJ left;
   GIN_OBJ right;
@@ -72,6 +73,7 @@ typedef struct {
 } GingerDictionaryCell;
 
 typedef struct {
+  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   GIN_OBJ root;
 } GingerDictionary;
@@ -85,7 +87,7 @@ typedef struct GingerClassDefinition_t {
   GIN_OBJ unmake;
 } GingerClassDefinition;
 
-/// Function are first class objects and we have to maintain some metadata 
+/// Function are first class objects and we have to maintain some metadata
 /// for them.
 
 typedef struct {
@@ -97,6 +99,7 @@ typedef struct {
 /// This is the primary object type.
 
 typedef struct {
+  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   union {
     void*  f0;
@@ -108,67 +111,75 @@ typedef struct {
   };
   union {
     void* f1;
+    Frame* previous_lexical_frame;
   };
   union {
     void* f2;
     long  str_length;
-    Frame* previous_lexical_frame;
   };
 } GingerObject;
 
 typedef struct {
+  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   double value;
 } GingerFlonum;
 
 typedef struct {
+  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   long value;
 } GingerInteger;
 
 typedef struct {
+  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   unsigned long length;
   unsigned long value[];
 } GingerBinary;
 
 typedef struct {
+  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   long length;
+  long pool_length;
   GIN_OBJ *value;
 } GingerVector;
 
 typedef struct {
+  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   GIN_OBJ index;  // Always NIM
   //  GIN_OBJ make;
   //  GIN_OBJ unmake;
   GIN_OBJ(*c_make) ();
   void(*c_unmake) (GIN_OBJ);
-     
+
 } GingerType;
 
 typedef struct {
   short num_bytes;
   short visited;
+  short active;
 } GCFastAllocHeader;
 
 typedef struct GCSysAllocHeader_t {
   short num_bytes;
   short visited;
+  short active;
   short requires_cleanup;
   struct GCSysAllocHeader_t* next;
 } GCSysAllocHeader;
 
 typedef struct GarbageCollector_t {
-  void* fast_heap_alpha;
-  void* fast_heap_beta;
+  char* fast_heap_alpha;
+  char* fast_heap_beta;
 
   // not set until collection starts
-  void* fast_heap_alpha_end;
-  void* fast_heap_beta_end;
+  char* fast_heap_alpha_end;
+  char* fast_heap_beta_end;
 
-  void* alpha_allocation_cursor;
+  char* alpha_allocation_cursor;
   int   alpha_remaining_bytes;
 
   void (*collection_callback)(struct GarbageCollector_t* data);
@@ -197,7 +208,7 @@ typedef struct GarbageCollector_t {
   // their cleanup method called.
   GCSysAllocHeader* pending_cleanup;
 
-  // Items on the persistent_list do not need to be referenced 
+  // Items on the persistent_list do not need to be referenced
   // during collections and are only freed at the end of the program.
   GCSysAllocHeader* persistent_list;
 
@@ -206,16 +217,21 @@ typedef struct GarbageCollector_t {
 /// Section 2: Macro definitions
 ///
 
-#define GIN_GC_MB 5
+#define GIN_GC_MB 50
 #define GIN_GC_INIT mm = gc_new(1024*1024*GIN_GC_MB); gc_set_collection_callback(mm, collect);
 #define GIN_ALLOCATE(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate(mm, size); \
 v = (type)safe_allocate;
+
+#define GIN_ALLOCATE_FRAME(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate_call(mm, size); \
+v = (type)safe_allocate;
+
+#define GIN_DEALLOCATE_FRAME(v) gc_deallocate_call(mm, v);
 
 #define GIN_ALLOCATE_WITH_CLEANUP(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate_system(mm, size); \
 v = (type)safe_allocate; \
 gc_mark_as_requiring_cleanup(mm, v);
 
-/// Calls are split into two macros.  First we allocate the call frame with 
+/// Calls are split into two macros.  First we allocate the call frame with
 /// CALL_ALLOCATE.  Then you copy any parameters.  Then use CALL.
 
 #define CALL_ALLOCATE(function) \
@@ -240,11 +256,12 @@ gc_mark_as_requiring_cleanup(mm, v);
 position_ ## seed : \
   result0 = frame->next_frame->result; \
   frame->next_frame->previous_frame = 0; \
-  frame->next_frame = 0; \
+  frame->next_frame->previous_lexical_frame = 0; \
   ENDDEBUG \
-  DEALLOCATE_FRAME___ ## function (frame->next_frame)
+  DEALLOCATE_FRAME___ ## function (frame->next_frame) \
+  frame->next_frame = 0;
 
-#define CALLN(previous_lframe,function,seed,result0,varn)	\
+#define CALLN(previous_lframe,function,seed,result0,varn)       \
   ALLOCATE_FRAME___ ## function (frame->next_frame) \
   frame->next_frame->previous_lexical_frame = previous_lframe; \
   frame->next_frame->previous_frame = frame; \
@@ -263,13 +280,14 @@ position_ ## seed : \
 position_ ## seed : \
   result0 = frame->next_frame->result; \
   frame->next_frame->previous_frame = 0; \
-  frame->next_frame = 0; \
-  DEALLOCATE_FRAME___ ## function (frame->next_frame)
+  frame->next_frame->previous_lexical_frame = 0; \
+  DEALLOCATE_FRAME___ ## function (frame->next_frame);  \
+  frame->next_frame = 0;
 
 // 1. if it's not a function and has no args, return the value.
 // 2. if it's not a function and has args - we need to determine the method to call. then do 3.
 // 3. if it is a function, use the signature to properly order the arguments and make the call.
-#define CALLNDYNAMIC(function,seed,result0,varn)	\
+#define CALLNDYNAMIC(function,seed,result0,varn)        \
   if ((varn == GIN_NULL) && !(GIN_IS_FUNCTION(function))) result0 = function; \
   else { \
   if (!GIN_IS_FUNCTION(function)) { \
@@ -294,9 +312,10 @@ position_ ## seed : \
 position_ ## seed : \
   result0 = frame->next_frame->result; \
   frame->next_frame->previous_frame = 0; \
+  frame->next_frame->previous_lexical_frame = 0; \
+  GIN_DEALLOCATE_FRAME(frame->next_frame); \
   frame->next_frame = 0; \
 }
-  //DEALLOCATE_FRAME___ ## function (frame->next_frame)
 
 #define GLOBALS int next_seed = 5000; \
 GIN_OBJ calln_temp; \
@@ -308,7 +327,7 @@ GIN_OBJ safe_allocate; \
 GarbageCollector* mm; \
 int gin_argc; \
 char **gin_argv; \
-int gin_debug = 0; \
+int gin_debug = 1; \
 int gin_debug_max_depth = -1; \
 int debug_depth = 0; \
 int debug_depth_iterator = 0; \
@@ -328,19 +347,19 @@ GIN_OBJ ginExec (GIN_OBJ fn, GIN_OBJ args) { \
 
 #define END_CODE end_code_return: return frame->result;  \
 } \
-int main(int argc, char *argv[]) {			\
+int main(int argc, char *argv[]) {                      \
   gin_argc = argc; \
   gin_argv = argv; \
   GIN_GC_INIT; \
   frame = 0; \
-  GIN_ALLOCATE(frame, Frame*, sizeof(Frame));	\
-  frame->previous_frame = 0;			\
+  GIN_ALLOCATE_FRAME(frame, Frame*, sizeof(Frame));     \
+  frame->previous_frame = 0;                    \
   frame->result = 0; \
   frame->next_frame = 0;  \
-  frame->previous_lexical_frame = 0;		\
+  frame->previous_lexical_frame = 0;            \
   ginExec(0, GIN_NULL); \
   GIN_OBJ main_fn; \
-  GIN_NEW_FN(main_fn, &(gin_function_table[0]), 0);	\
+  GIN_NEW_FN(main_fn, &(gin_function_table[0]), 0);     \
   ginExec(main_fn, GIN_NULL); \
   return 0; \
 }
@@ -350,7 +369,7 @@ int main(int argc, char *argv[]) {			\
 #define END_FUNCTION() frame = frame->previous_frame; \
   goto *(frame->next_frame->return_address);
 
-// GIN_OBJ is defined as a void* but in reality it can hold 
+// GIN_OBJ is defined as a void* but in reality it can hold
 // pointers (non-immediates) and certain useful primitives
 // (immediates).  The following describes how the bit string
 // works:
@@ -465,7 +484,7 @@ int main(int argc, char *argv[]) {			\
 #define GIN_TYPE_BOOL GIN_IM_FROM_INT(13)
 #define GIN_TYPE_NULL GIN_IM_FROM_INT(14)
 #define GIN_TYPE_CHAR GIN_IM_FROM_INT(15)
-//#define GIN_TYPE_FOREIGN 
+//#define GIN_TYPE_FOREIGN
 
 /*
 #define GIN_TYPE_STR8 1
@@ -541,11 +560,11 @@ int main(int argc, char *argv[]) {			\
  v = safe_pair;
 #define GIN_NEW_FIXNUM(v,a) v=GIN_IM_FROM_INT(a);
 /* #define GIN_NEW_INTEGER_FROM_INT(v, a) GIN_ALLOCATE_WITH_CLEANUP(v, GingerInteger*, sizeof(GingerInteger)); \ */
-/* ((GingerInteger*)v)->type_index = GIN_TYPE_INT;				\ */
+/* ((GingerInteger*)v)->type_index = GIN_TYPE_INT;                              \ */
 /* mpz_init_set_si(((GingerInteger*)v)->value, a); */
 /* #define GIN_NEW_INTEGER_FROM_STR(v, a) GIN_ALLOCATE_WITH_CLEANUP(v, GingerInteger*, sizeof(GingerInteger)); \ */
-/* ((GingerInteger*)v)->type_index = GIN_TYPE_INT;				\ */
-/* printf("herez!!?\n\n");						\ */
+/* ((GingerInteger*)v)->type_index = GIN_TYPE_INT;                              \ */
+/* printf("herez!!?\n\n");                                              \ */
 /* mpz_init ((((GingerInteger*)v)->value));  */
 /* mpz_init_set_str((((GingerInteger*)v)->value), a, 10); */
 #define GIN_NEW_FN(v,a,frame) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
@@ -563,14 +582,14 @@ memcpy(((GingerObject*)v)->str8_value, a, ((GingerObject*)v)->str_length); \
 #define GIN_NEW_EMPTY_STR8(v) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STR8; \
 ((GingerObject*)v)->str_length = 0;
-#define GIN_NEW_STR16(v,a) GIN_ALLOCATE(v, void*, sizeof(GingerObject));	\
+#define GIN_NEW_STR16(v,a) GIN_ALLOCATE(v, void*, sizeof(GingerObject));        \
 ((GingerObject*)v)->type_index = GIN_TYPE_STR16; \
 ((GingerObject*)v)->str16_value = a;
 #define GIN_NEW_SYM(v,a) v=GIN_IM_FROM_SYM(a);
 #define GIN_NEW_LABEL(v,a) v=GIN_IM_FROM_LABEL(a);
 #define GIN_NEW_BOOL(v,a) v=GIN_IM_FROM_BOOL(a);
 #define GIN_NEW_OBJ(v,a) v=a;
-#define GIN_NEW_FLONUM(v,a) GIN_ALLOCATE(v, void*, sizeof(GingerFlonum));	\
+#define GIN_NEW_FLONUM(v,a) GIN_ALLOCATE(v, void*, sizeof(GingerFlonum));       \
 ((GingerFlonum*)v)->type_index = GIN_TYPE_FLONUM; \
 ((GingerFlonum*)v)->value = a;
 #define GIN_NEW_NIM(v) GIN_ALLOCATE(v, void*, sizeof(GingerObject));
@@ -604,14 +623,14 @@ GIN_NIM_SET_STREAM_MODE(v,m);
 ((GingerObject*)v)->type_index = GIN_TYPE_STRING_STREAM; \
 GIN_NIM_SET_STRING_STREAM_LENGTH(v,strlen(s)); \
 GIN_NIM_SET_STRING_STREAM_POSITION(v,0);                        \
-GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, strlen(s)+1);	\
+GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, strlen(s)+1);       \
 memcpy(((GingerObject*)v)->str8_value, s, strlen(s)+1);
 
 #define GIN_NEW_EMPTY_STRING_STREAM(v,m) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STRING_STREAM; \
 GIN_NIM_SET_STRING_STREAM_LENGTH(v,0); \
 GIN_NIM_SET_STRING_STREAM_POSITION(v,0);              \
-GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, 1);	\
+GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, 1); \
 ((GingerObject*)v)->str8_value[0] = 0;
 
 
@@ -684,11 +703,11 @@ GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 // GC_DEFAULT_FAST_PAGE_SIZE
 //
 // 5 MB default fast memory page size.  Two of these will be
-// allocated for a total of 10MB.  Larger sizes result in less 
+// allocated for a total of 10MB.  Larger sizes result in less
 // frequent data collections with no other impact besides
 // the use of the memory itself.  Smaller allocations are certainly
 // viable when memory is tight.
-#define  GC_DEFAULT_FAST_PAGE_SIZE (5*1024*1024)
+#define  GC_DEFAULT_FAST_PAGE_SIZE (20*1024*1024)
 
 
 // GC_FAST_HEAP_THRESHOLD
@@ -701,10 +720,10 @@ GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 //
 // This is also the size limit of how many bytes may need to be
 // copied over per single long-lived object.  Larger sizes will
-// make the program faster only IF objects of the larger size 
+// make the program faster only IF objects of the larger size
 // are usually short-lived.  If they're more often long-lived,
 // the program will run slower due to frequent recopying.
-// This value should always been some fraction of the 
+// This value should always been some fraction of the
 // fast_heap_page_size - the heap threshold vs the page size
 // should be a fraction of (a guess here:) 1/100 or smaller.
 #if !defined(GC_FAST_HEAP_THRESHOLD)
@@ -729,6 +748,8 @@ extern void gc_report(GarbageCollector *m);
 extern void gc_mark_as_requiring_cleanup(GarbageCollector *mm, void *m);
 extern void* gc_get_next_pending_cleanup(GarbageCollector *mm);
 extern void gc_analyze(GarbageCollector* mm, void* addr);
+extern void* gc_allocate_call(GarbageCollector* mm, int num_bytes);
+extern void gc_deallocate_call(GarbageCollector* mm, void* data);
 
 extern GIN_OBJ ginExec (GIN_OBJ fn, GIN_OBJ args);
 extern void GIN_display(GIN_OBJ x, GIN_OBJ out, int was_not_cdr);
@@ -753,6 +774,7 @@ extern void collect (GarbageCollector* mm);
 
 extern GIN_OBJ gin_getenv(GIN_OBJ name, GIN_OBJ default_value);
 extern GIN_OBJ gin_file_exists(GIN_OBJ filename);
+extern GIN_OBJ gin_string_to_value(GIN_OBJ str);
 
 /// Section 4: Global variables
 ///
