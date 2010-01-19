@@ -160,8 +160,8 @@ define PDF::add-paragraph (document paragraph)
       while (< i len)
         ; Periods are great places to break
         ;  but period + space is even better
-        if (and (eq? (String::nth text i) ascii-period)
-        .. (eq? (String::nth text (+ i 1)) ascii-space)) 
+        if (and (eq? (String::nth text i) ._)
+        .. (eq? (String::nth text (+ i 1)) space_)) 
           set breaks (append breaks (list (+ i 1)))
         ++ i
       breaks
