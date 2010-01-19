@@ -783,8 +783,10 @@ define function-prototype-expansion (v kind)
     ++ j
   println output-h "} Frame___" c-name ";"
   println output-h ""
-  println output-h "#define ALLOCATE_FRAME___" c-name "(t000)  GIN_ALLOCATE(t000, Frame*, sizeof(Frame___" c-name "));"
-  println output-h "#define DEALLOCATE_FRAME___" c-name "(t000)"
+  println output-h "#define ALLOCATE_FRAME___" c-name "(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___" c-name "));"
+  println output-h "#define DEALLOCATE_FRAME___" c-name "(t000) GIN_DEALLOCATE_FRAME(t000);"
+;  println output-h "#define ALLOCATE_FRAME___" c-name "(t000)  GIN_ALLOCATE(t000, Frame*, sizeof(Frame___" c-name "));"
+;  println output-h "#define DEALLOCATE_FRAME___" c-name "(t000)"
   println output-h ""
 
 define func-def-exp-number 0  ; function definition expansion number
@@ -2340,28 +2342,28 @@ set GIN-CFLAGS (string-append GIN-CFLAGS " -g ")
 ;set GIN-LDFLAGS (string-append GIN-LDFLAGS " ")
 
 set GIN-CFLAGS (string-append GIN-CFLAGS " -Ilib ")
-set GIN-LDFLAGS (string-append GIN-LDFLAGS " -Llib -lginger -lgmp ")
+set GIN-LDFLAGS (string-append GIN-LDFLAGS " -Llib -lginger -arch i386")
 
 ; Add mode specific flags.
 if (cairo)
   println "Using Cairo."
-  set GIN-CFLAGS (string-append GIN-CFLAGS " $(pkg-config --cflags cairo) ")
-  set GIN-LDFLAGS (string-append GIN-LDFLAGS " $(pkg-config --libs cairo) ")
+  set GIN-CFLAGS (string-append GIN-CFLAGS " $(pkg-config --cflags cairo) -arch i386 ")
+  set GIN-LDFLAGS (string-append GIN-LDFLAGS " $(pkg-config --libs cairo) -arch i386 ")
 
 if (pango)
   println "Using Pango."
-  set GIN-CFLAGS (string-append GIN-CFLAGS " $(pkg-config --cflags pangocairo) ")
-  set GIN-LDFLAGS (string-append GIN-LDFLAGS " $(pkg-config --libs pangocairo) ")
+  set GIN-CFLAGS (string-append GIN-CFLAGS " $(pkg-config --cflags pangocairo) -arch i386 ")
+  set GIN-LDFLAGS (string-append GIN-LDFLAGS " $(pkg-config --libs pangocairo) -arch i386 ")
 
 if (and fltk (not opengl))
   println "Using Fltk."
-  set GIN-CFLAGS (string-append GIN-CFLAGS " `fltk2-config --cxxflags` ")
-  set GIN-LDFLAGS (string-append GIN-LDFLAGS " `fltk2-config --ldflags` ")
+  set GIN-CFLAGS (string-append GIN-CFLAGS " `fltk2-config --cxxflags` -arch i386")
+  set GIN-LDFLAGS (string-append GIN-LDFLAGS " `fltk2-config --ldflags` -arch i386")
 
 if (and fltk opengl)
   println "Using Fltk with OpenGL."
-  set GIN-CFLAGS (string-append GIN-CFLAGS " `fltk2-config --cxxflags` ")
-  set GIN-LDFLAGS (string-append GIN-LDFLAGS " `fltk2-config --ldflags --use-gl` -lfltk2_glut -framework GLUT ")
+  set GIN-CFLAGS (string-append GIN-CFLAGS " `fltk2-config --cxxflags` -arch i386")
+  set GIN-LDFLAGS (string-append GIN-LDFLAGS " `fltk2-config --ldflags --use-gl` -lfltk2_glut -framework GLUT -arch i386")
 
 if (objC)
   println "Using ObjC (and Cocoa)."

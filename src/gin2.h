@@ -503,25 +503,6 @@ GIN_OBJ loc484;
 GIN_OBJ loc485;
 GIN_OBJ loc486;
 GIN_OBJ loc487;
-GIN_OBJ loc488;
-GIN_OBJ loc489;
-GIN_OBJ loc490;
-GIN_OBJ loc491;
-GIN_OBJ loc492;
-GIN_OBJ loc493;
-GIN_OBJ loc494;
-GIN_OBJ loc495;
-GIN_OBJ loc496;
-GIN_OBJ loc497;
-GIN_OBJ loc498;
-GIN_OBJ loc499;
-GIN_OBJ loc500;
-GIN_OBJ loc501;
-GIN_OBJ loc502;
-GIN_OBJ loc503;
-GIN_OBJ loc504;
-GIN_OBJ loc505;
-GIN_OBJ loc506;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
 GIN_OBJ tmp2;
@@ -3385,7 +3366,6 @@ GIN_OBJ loc1;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
 GIN_OBJ tmp2;
-GIN_OBJ tmp3;
 } Frame___base_045name;
 
 #define ALLOCATE_FRAME___base_045name(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___base_045name));
@@ -4407,42 +4387,6 @@ Frame* previous_lexical_frame;
 GIN_OBJ return_address;
 GIN_OBJ result;
 GIN_OBJ arg0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-GIN_OBJ tmp3;
-} Frame___print_045properties;
-
-#define ALLOCATE_FRAME___print_045properties(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___print_045properties));
-#define DEALLOCATE_FRAME___print_045properties(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ loc0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-GIN_OBJ tmp3;
-GIN_OBJ tmp4;
-GIN_OBJ tmp5;
-GIN_OBJ tmp6;
-} Frame___print_045dictionary;
-
-#define ALLOCATE_FRAME___print_045dictionary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___print_045dictionary));
-#define DEALLOCATE_FRAME___print_045dictionary(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
 GIN_OBJ arg1;
 GIN_OBJ tmp0;
 } Frame___apply;
@@ -4756,37 +4700,6 @@ GIN_OBJ result;
 GIN_OBJ arg0;
 GIN_OBJ arg1;
 GIN_OBJ loc0;
-GIN_OBJ loc1;
-GIN_OBJ loc2;
-GIN_OBJ loc3;
-GIN_OBJ loc4;
-GIN_OBJ loc5;
-GIN_OBJ loc6;
-GIN_OBJ loc7;
-GIN_OBJ loc8;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-GIN_OBJ tmp3;
-GIN_OBJ tmp4;
-GIN_OBJ tmp5;
-GIN_OBJ tmp6;
-GIN_OBJ tmp7;
-GIN_OBJ tmp8;
-} Frame___fix_045parameters;
-
-#define ALLOCATE_FRAME___fix_045parameters(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fix_045parameters));
-#define DEALLOCATE_FRAME___fix_045parameters(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ arg1;
-GIN_OBJ loc0;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
 GIN_OBJ tmp2;
@@ -4911,300 +4824,10 @@ GIN_OBJ result;
 GIN_OBJ arg0;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-} Frame___String_045_062Boolean;
-
-#define ALLOCATE_FRAME___String_045_062Boolean(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Boolean));
-#define DEALLOCATE_FRAME___String_045_062Boolean(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
 } Frame___String_058_058ellipses_063;
 
 #define ALLOCATE_FRAME___String_058_058ellipses_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058ellipses_063));
 #define DEALLOCATE_FRAME___String_058_058ellipses_063(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ loc0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-} Frame___String_058_058numeric_063;
-
-#define ALLOCATE_FRAME___String_058_058numeric_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058numeric_063));
-#define DEALLOCATE_FRAME___String_058_058numeric_063(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-} Frame___string_045positive_045numeric_063;
-
-#define ALLOCATE_FRAME___string_045positive_045numeric_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___string_045positive_045numeric_063));
-#define DEALLOCATE_FRAME___string_045positive_045numeric_063(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ arg1;
-GIN_OBJ loc0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-} Frame___String_045_062digits;
-
-#define ALLOCATE_FRAME___String_045_062digits(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062digits));
-#define DEALLOCATE_FRAME___String_045_062digits(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ arg1;
-GIN_OBJ arg2;
-GIN_OBJ loc0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-GIN_OBJ tmp3;
-GIN_OBJ tmp4;
-GIN_OBJ tmp5;
-} Frame___string_045_062raw_045integer_045i;
-
-#define ALLOCATE_FRAME___string_045_062raw_045integer_045i(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___string_045_062raw_045integer_045i));
-#define DEALLOCATE_FRAME___string_045_062raw_045integer_045i(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ arg1;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-} Frame___String_058_058digits_063;
-
-#define ALLOCATE_FRAME___String_058_058digits_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058digits_063));
-#define DEALLOCATE_FRAME___String_058_058digits_063(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ loc0;
-GIN_OBJ loc1;
-GIN_OBJ loc2;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-GIN_OBJ tmp3;
-GIN_OBJ tmp4;
-GIN_OBJ tmp5;
-GIN_OBJ tmp6;
-} Frame___String_045_062Integer;
-
-#define ALLOCATE_FRAME___String_045_062Integer(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Integer));
-#define DEALLOCATE_FRAME___String_045_062Integer(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-} Frame___String_058_058Integer_063;
-
-#define ALLOCATE_FRAME___String_058_058Integer_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058Integer_063));
-#define DEALLOCATE_FRAME___String_058_058Integer_063(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ loc0;
-GIN_OBJ loc1;
-GIN_OBJ loc2;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-GIN_OBJ tmp3;
-GIN_OBJ tmp4;
-} Frame___String_045_062Ratio;
-
-#define ALLOCATE_FRAME___String_045_062Ratio(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Ratio));
-#define DEALLOCATE_FRAME___String_045_062Ratio(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-} Frame___String_058_058Ratio_063;
-
-#define ALLOCATE_FRAME___String_058_058Ratio_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058Ratio_063));
-#define DEALLOCATE_FRAME___String_058_058Ratio_063(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ loc0;
-GIN_OBJ loc1;
-GIN_OBJ loc2;
-GIN_OBJ loc3;
-GIN_OBJ loc4;
-GIN_OBJ loc5;
-GIN_OBJ loc6;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-GIN_OBJ tmp3;
-GIN_OBJ tmp4;
-GIN_OBJ tmp5;
-GIN_OBJ tmp6;
-GIN_OBJ tmp7;
-GIN_OBJ tmp8;
-GIN_OBJ tmp9;
-GIN_OBJ tmp10;
-} Frame___String_045_062Scientific;
-
-#define ALLOCATE_FRAME___String_045_062Scientific(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Scientific));
-#define DEALLOCATE_FRAME___String_045_062Scientific(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-} Frame___String_058_058scientific_063;
-
-#define ALLOCATE_FRAME___String_058_058scientific_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058scientific_063));
-#define DEALLOCATE_FRAME___String_058_058scientific_063(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-} Frame___String_058_058Rational_063;
-
-#define ALLOCATE_FRAME___String_058_058Rational_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058Rational_063));
-#define DEALLOCATE_FRAME___String_058_058Rational_063(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-} Frame___String_045_062Rational;
-
-#define ALLOCATE_FRAME___String_045_062Rational(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Rational));
-#define DEALLOCATE_FRAME___String_045_062Rational(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ loc0;
-GIN_OBJ loc1;
-GIN_OBJ loc2;
-GIN_OBJ loc3;
-GIN_OBJ loc4;
-GIN_OBJ loc5;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
-GIN_OBJ tmp3;
-GIN_OBJ tmp4;
-} Frame___String_045_062Complex;
-
-#define ALLOCATE_FRAME___String_045_062Complex(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Complex));
-#define DEALLOCATE_FRAME___String_045_062Complex(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-} Frame___String_058_058Complex_063;
-
-#define ALLOCATE_FRAME___String_058_058Complex_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058Complex_063));
-#define DEALLOCATE_FRAME___String_058_058Complex_063(t000) GIN_DEALLOCATE_FRAME(t000);
-
-typedef struct {
-Frame* next_frame;
-Frame* previous_frame;
-Frame* previous_lexical_frame;
-GIN_OBJ return_address;
-GIN_OBJ result;
-GIN_OBJ arg0;
-GIN_OBJ tmp0;
-} Frame___String_045_062Flonum;
-
-#define ALLOCATE_FRAME___String_045_062Flonum(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Flonum));
-#define DEALLOCATE_FRAME___String_045_062Flonum(t000) GIN_DEALLOCATE_FRAME(t000);
 
 typedef struct {
 Frame* next_frame;
@@ -5263,6 +4886,7 @@ GIN_OBJ result;
 GIN_OBJ arg0;
 GIN_OBJ loc0;
 GIN_OBJ loc1;
+GIN_OBJ loc2;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
 GIN_OBJ tmp2;
@@ -5342,8 +4966,6 @@ GIN_OBJ return_address;
 GIN_OBJ result;
 GIN_OBJ arg0;
 GIN_OBJ tmp0;
-GIN_OBJ tmp1;
-GIN_OBJ tmp2;
 } Frame___include_045filename;
 
 #define ALLOCATE_FRAME___include_045filename(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___include_045filename));
@@ -5404,7 +5026,6 @@ GIN_OBJ arg0;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
 GIN_OBJ tmp2;
-GIN_OBJ tmp3;
 } Frame___include_063;
 
 #define ALLOCATE_FRAME___include_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___include_063));
@@ -5477,7 +5098,6 @@ GIN_OBJ arg0;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
 GIN_OBJ tmp2;
-GIN_OBJ tmp3;
 } Frame___Group_063;
 
 #define ALLOCATE_FRAME___Group_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Group_063));
@@ -5705,7 +5325,6 @@ GIN_OBJ arg0;
 GIN_OBJ arg1;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
-GIN_OBJ tmp2;
 } Frame___tree_045add;
 
 #define ALLOCATE_FRAME___tree_045add(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___tree_045add));
@@ -7831,7 +7450,6 @@ GIN_OBJ tmp4;
 GIN_OBJ tmp5;
 GIN_OBJ tmp6;
 GIN_OBJ tmp7;
-GIN_OBJ tmp8;
 } Frame___weave_045tree;
 
 #define ALLOCATE_FRAME___weave_045tree(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___weave_045tree));
@@ -8163,7 +7781,6 @@ GIN_OBJ arg0;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
 GIN_OBJ tmp2;
-GIN_OBJ tmp3;
 } Frame___fmt_045chunk_045call_063;
 
 #define ALLOCATE_FRAME___fmt_045chunk_045call_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fmt_045chunk_045call_063));
@@ -8335,7 +7952,6 @@ GIN_OBJ result;
 GIN_OBJ arg0;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
-GIN_OBJ tmp2;
 } Frame___chunk_045name;
 
 #define ALLOCATE_FRAME___chunk_045name(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___chunk_045name));
@@ -8370,6 +7986,7 @@ GIN_OBJ tmp0;
 GIN_OBJ tmp1;
 GIN_OBJ tmp2;
 GIN_OBJ tmp3;
+GIN_OBJ tmp4;
 } Frame___discover_045chunks;
 
 #define ALLOCATE_FRAME___discover_045chunks(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___discover_045chunks));
@@ -8404,7 +8021,6 @@ GIN_OBJ arg0;
 GIN_OBJ tmp0;
 GIN_OBJ tmp1;
 GIN_OBJ tmp2;
-GIN_OBJ tmp3;
 } Frame___chunk_045call_063;
 
 #define ALLOCATE_FRAME___chunk_045call_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___chunk_045call_063));
@@ -8422,8 +8038,6 @@ GIN_OBJ tmp1;
 GIN_OBJ tmp2;
 GIN_OBJ tmp3;
 GIN_OBJ tmp4;
-GIN_OBJ tmp5;
-GIN_OBJ tmp6;
 } Frame___macro_045key;
 
 #define ALLOCATE_FRAME___macro_045key(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___macro_045key));
