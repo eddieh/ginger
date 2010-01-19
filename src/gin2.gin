@@ -193,7 +193,6 @@ if compile
         
     println "Discovering chunks.."
     discover-chunks tree
-    ;print-dictionary chunks
 
     define expand-chunk-calls (tree)
       define chunk-call? (node)
