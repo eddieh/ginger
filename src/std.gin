@@ -22,13 +22,10 @@ inline-c-header "#include <ctype.h>"
 ;;; Ginger supports several fundamental types:
 ;;; Boolean, Char, Cons, Flonum, Function, Port, Number, String, Symbol, Vector
 
-; Boot strap the type system..
-; Ginger supports the following fundamental types,
-;
-; Boolean
-; Char
-; Symbol
-; 
+; We begin by bootstrapping the type system.
+
+; TODO - remove this after the next build..  It's now part of compile.gin
+define null (inline-c result " = GIN_NULL;")
 
 define Ginger::type-table false
 
@@ -213,13 +210,12 @@ define type-of (term)
   elsif: (Char? term) "char"
   elsif: (Boolean? term) "boolean"
   elsif: (Fixnum? term) "fixnum"
-  elsif: (Integer? term) "interger"
+  elsif: (Integer? term) "integer"
   elsif: (Flonum? term) "flonum"
 ;  elsif: (Stream? term) "stream"
 ;  elsif: (String-Stream? term) "string-stream"
   elsif: (Vector? term) "vector"
   elsif: (Dict? term) "dict"
-;  elsif: (Class? term) "class"
   elsif: (Symbol? term) "symbol"
   else: "foreign"
 
@@ -301,11 +297,12 @@ define object->pretty-string (term)
       each i term
         
         ; add indention for these
-        if (or (eq? i "else:") (eq? i "elsif:"))
-          define inx 0
-          while (< inx if-block-indent)
-            set output (String::append output " ")
-            ++ inx
+        if (String? i)
+          if (or (String::eq? i "else:") (String::eq? i "elsif:"))
+            define inx 0
+            while (< inx if-block-indent)
+              set output (String::append output " ")
+              ++ inx
 
         ++ term-count
         if (or (= term-count num-terms)
@@ -343,7 +340,7 @@ define object->pretty-string (term)
     ;elsif: (Class? term) (set output (String::append (class-to-str term)))
     elsif: (Symbol? term) 
       
-      if (eq? term '<)
+      if (Symbol::eq? term '<)
         ; TODO - this only makes sense for printing to html or using pango
         ; we don't want to do this if we are printing to the shell or something else
         ; (this is a hack)
@@ -357,130 +354,9 @@ define object->pretty-string (term)
   
   object->pretty-string-internal term
 
-
 ;;;
 ;;; CONSTANTS
 ;;;
-
-; Lowercase ASCII characters
-define ascii-a (inline-c "GIN_NEW_CHAR8(" result ", 'a')")
-define ascii-b (inline-c "GIN_NEW_CHAR8(" result ", 'b')")
-define ascii-c (inline-c "GIN_NEW_CHAR8(" result ", 'c')")
-define ascii-d (inline-c "GIN_NEW_CHAR8(" result ", 'd')")
-define ascii-e (inline-c "GIN_NEW_CHAR8(" result ", 'e')")
-define ascii-f (inline-c "GIN_NEW_CHAR8(" result ", 'f')")
-define ascii-g (inline-c "GIN_NEW_CHAR8(" result ", 'g')")
-define ascii-h (inline-c "GIN_NEW_CHAR8(" result ", 'h')")
-define ascii-i (inline-c "GIN_NEW_CHAR8(" result ", 'i')")
-define ascii-j (inline-c "GIN_NEW_CHAR8(" result ", 'j')")
-define ascii-k (inline-c "GIN_NEW_CHAR8(" result ", 'k')")
-define ascii-l (inline-c "GIN_NEW_CHAR8(" result ", 'l')")
-define ascii-m (inline-c "GIN_NEW_CHAR8(" result ", 'm')")
-define ascii-n (inline-c "GIN_NEW_CHAR8(" result ", 'n')")
-define ascii-o (inline-c "GIN_NEW_CHAR8(" result ", 'o')")
-define ascii-p (inline-c "GIN_NEW_CHAR8(" result ", 'p')")
-define ascii-q (inline-c "GIN_NEW_CHAR8(" result ", 'q')")
-define ascii-r (inline-c "GIN_NEW_CHAR8(" result ", 'r')")
-define ascii-s (inline-c "GIN_NEW_CHAR8(" result ", 's')")
-define ascii-t (inline-c "GIN_NEW_CHAR8(" result ", 't')")
-define ascii-u (inline-c "GIN_NEW_CHAR8(" result ", 'u')")
-define ascii-v (inline-c "GIN_NEW_CHAR8(" result ", 'v')")
-define ascii-w (inline-c "GIN_NEW_CHAR8(" result ", 'w')")
-define ascii-x (inline-c "GIN_NEW_CHAR8(" result ", 'x')")
-define ascii-y (inline-c "GIN_NEW_CHAR8(" result ", 'y')")
-define ascii-z (inline-c "GIN_NEW_CHAR8(" result ", 'z')")
-
-; Uppercase ASCII characters
-define ascii-A (inline-c "GIN_NEW_CHAR8(" result ", 'A')")
-define ascii-B (inline-c "GIN_NEW_CHAR8(" result ", 'B')")
-define ascii-C (inline-c "GIN_NEW_CHAR8(" result ", 'C')")
-define ascii-D (inline-c "GIN_NEW_CHAR8(" result ", 'D')")
-define ascii-E (inline-c "GIN_NEW_CHAR8(" result ", 'E')")
-define ascii-F (inline-c "GIN_NEW_CHAR8(" result ", 'F')")
-define ascii-G (inline-c "GIN_NEW_CHAR8(" result ", 'G')")
-define ascii-H (inline-c "GIN_NEW_CHAR8(" result ", 'H')")
-define ascii-I (inline-c "GIN_NEW_CHAR8(" result ", 'I')")
-define ascii-J (inline-c "GIN_NEW_CHAR8(" result ", 'J')")
-define ascii-K (inline-c "GIN_NEW_CHAR8(" result ", 'K')")
-define ascii-L (inline-c "GIN_NEW_CHAR8(" result ", 'L')")
-define ascii-M (inline-c "GIN_NEW_CHAR8(" result ", 'M')")
-define ascii-N (inline-c "GIN_NEW_CHAR8(" result ", 'N')")
-define ascii-O (inline-c "GIN_NEW_CHAR8(" result ", 'O')")
-define ascii-P (inline-c "GIN_NEW_CHAR8(" result ", 'P')")
-define ascii-Q (inline-c "GIN_NEW_CHAR8(" result ", 'Q')")
-define ascii-R (inline-c "GIN_NEW_CHAR8(" result ", 'R')")
-define ascii-S (inline-c "GIN_NEW_CHAR8(" result ", 'S')")
-define ascii-T (inline-c "GIN_NEW_CHAR8(" result ", 'T')")
-define ascii-U (inline-c "GIN_NEW_CHAR8(" result ", 'U')")
-define ascii-V (inline-c "GIN_NEW_CHAR8(" result ", 'V')")
-define ascii-W (inline-c "GIN_NEW_CHAR8(" result ", 'W')")
-define ascii-X (inline-c "GIN_NEW_CHAR8(" result ", 'X')")
-define ascii-Y (inline-c "GIN_NEW_CHAR8(" result ", 'Y')")
-define ascii-Z (inline-c "GIN_NEW_CHAR8(" result ", 'Z')")
-
-; ASCII numbers
-define ascii-0 (inline-c "GIN_NEW_CHAR8(" result ", '0')")
-define ascii-1 (inline-c "GIN_NEW_CHAR8(" result ", '1')")
-define ascii-2 (inline-c "GIN_NEW_CHAR8(" result ", '2')")
-define ascii-3 (inline-c "GIN_NEW_CHAR8(" result ", '3')")
-define ascii-4 (inline-c "GIN_NEW_CHAR8(" result ", '4')")
-define ascii-5 (inline-c "GIN_NEW_CHAR8(" result ", '5')")
-define ascii-6 (inline-c "GIN_NEW_CHAR8(" result ", '6')")
-define ascii-7 (inline-c "GIN_NEW_CHAR8(" result ", '7')")
-define ascii-8 (inline-c "GIN_NEW_CHAR8(" result ", '8')")
-define ascii-9 (inline-c "GIN_NEW_CHAR8(" result ", '9')")
-
-; Other characters
-define ascii-newline (inline-c "GIN_NEW_CHAR8(" result ", '\\n')")
-define ascii-tab (inline-c "GIN_NEW_CHAR8(" result ", '\\t')")
-
-define ascii-space (inline-c "GIN_NEW_CHAR8(" result ", ' ')")
-define ascii-exclamation (inline-c "GIN_NEW_CHAR8(" result ", '!')") ; bang
-define ascii-double-quote (inline-c "GIN_NEW_CHAR8(" result ", '\"')") ;quotation
-define ascii-pound (inline-c "GIN_NEW_CHAR8(" result ", '#')") ; hash, number sign
-define ascii-dollar (inline-c "GIN_NEW_CHAR8(" result ", '$')")
-define ascii-percent (inline-c "GIN_NEW_CHAR8(" result ", '%')")
-define ascii-and (inline-c "GIN_NEW_CHAR8(" result ", '&')") ; ampersand
-define ascii-single-quote (inline-c "GIN_NEW_CHAR8(" result ", '\\'')") ; apostrophe
-
-define ascii-left-parenthesis (inline-c "GIN_NEW_CHAR8(" result ", '(')") ; left paren
-define ascii-right-parenthesis (inline-c "GIN_NEW_CHAR8(" result ", ')')") ; right paren
-define ascii-asterik (inline-c "GIN_NEW_CHAR8(" result ", '*')") ; mult, times, multiply
-define ascii-plus (inline-c "GIN_NEW_CHAR8(" result ", '+')") 
-define ascii-comma (inline-c "GIN_NEW_CHAR8(" result ", ',')")
-define ascii-minus (inline-c "GIN_NEW_CHAR8(" result ", '-')") ; hyphen, dash
-define ascii-period (inline-c "GIN_NEW_CHAR8(" result ", '.')") ; full stop, dot
-define ascii-slash (inline-c "GIN_NEW_CHAR8(" result ", '/')") ; div, division
-
-define ascii-colon (inline-c "GIN_NEW_CHAR8(" result ", ':')")
-define ascii-semi-colon (inline-c "GIN_NEW_CHAR8(" result ", ';')")
-define ascii-less-than (inline-c "GIN_NEW_CHAR8(" result ", '<')")
-define ascii-greater-than (inline-c "GIN_NEW_CHAR8(" result ", '>')")
-define ascii-equal (inline-c "GIN_NEW_CHAR8(" result ", '=')")
-define ascii-question (inline-c "GIN_NEW_CHAR8(" result ", '?')") ; question mark
-define ascii-at (inline-c "GIN_NEW_CHAR8(" result ", '@')")
-
-define ascii-left-bracket (inline-c "GIN_NEW_CHAR8(" result ", '[')") ; square bracket
-define ascii-backslash (inline-c "GIN_NEW_CHAR8(" result ", '\\\\')")
-define ascii-right-bracket (inline-c "GIN_NEW_CHAR8(" result ", ']')") ; square bracket
-define ascii-caret (inline-c "GIN_NEW_CHAR8(" result ", '^')") ; circumflex accent
-define ascii-underscore (inline-c "GIN_NEW_CHAR8(" result ", '_')") ; underline, understrike
-define ascii-grave-accent (inline-c "GIN_NEW_CHAR8(" result ", '`')") ; backtick, backquote
-
-define ascii-left-brace (inline-c "GIN_NEW_CHAR8(" result ", '{')") ; curly brace
-define ascii-vertical-bar (inline-c "GIN_NEW_CHAR8(" result ", '|')") ; pipe, broken bar
-define ascii-right-brace (inline-c "GIN_NEW_CHAR8(" result ", '}')") ; curly brace
-define ascii-tilde (inline-c "GIN_NEW_CHAR8(" result ", '~')")
-
-; Deprecated
-define ascii-return (inline-c "GIN_NEW_CHAR8(" result ", '\\n')")
-
-; Official ASCII abbreviations
-define ascii-null (inline-c "GIN_NEW_CHAR8(" result ", '\\0')")
-define ascii-cr (inline-c "GIN_NEW_CHAR8(" result ", '\\r')")
-define ascii-lf (inline-c "GIN_NEW_CHAR8(" result ", '\\f')")
-
-define null (inline-c result " = GIN_NULL;")
 
 ; Now lets bootstrap the symbol systems
 define Ginger::symbol->string (Vector::make)
@@ -496,7 +372,7 @@ define Ginger::String->Symbol (a)
     define n (Char->Integer (String::nth a 0))
     inline-c n " = GIN_IM_FROM_SYM(GIN_IM_TO_INT(" n "));"
     n
-  elsif: (not (eq? (Dict::get Ginger::string->symbol a) false))
+  elsif: (not (false? (Dict::get Ginger::string->symbol a)))
     Dict::get Ginger::string->symbol a
   else:
     define n (+ (Vector::length Ginger::symbol->string) 2048)
@@ -537,22 +413,25 @@ Ginger::bootstrap-symbols
 
 ; Similar to eqv? in Scheme.  No analogs of eq? or equal? are part of the Ginger std lib.
 define eq? (a b)
-  if (and (Type? a) (Type? b))
-    Type::eq? a b
-  elsif: (and (Number? a) (Number? b))
-    = a b
-  elsif: (and (Symbol? a) (Symbol? b))
-    Symbol::eq? a b
-  elsif: (and (String? a) (String? b))
-    String::eq? a b
-  elsif: (and (Binary? a) (Binary? b))
-    Binary::eq? a b
-  elsif: (and (Char? a) (Char? b))
-    Char::eq? a b
-  elsif: (and (Boolean? a) (Boolean? b))
-    inline-c result "= GIN_IM_FROM_BOOL(GIN_IM_TO_BOOL(" a ") == GIN_IM_TO_BOOL(" b "));"
+  if (or (Ginger::immediate? a) (Ginger::immediate? b))
+    inline-c result " = GIN_IM_FROM_BOOL(" a " == " b ");"
   else:
-    inline-c result "= GIN_IM_FROM_BOOL(" a " == " b ");"
+    if (and (Type? a) (Type? b))
+      Type::eq? a b
+    elsif: (and (Number? a) (Number? b))
+      = a b
+    elsif: (and (Symbol? a) (Symbol? b))
+      Symbol::eq? a b
+    elsif: (and (String? a) (String? b))
+      String::eq? a b
+    elsif: (and (Binary? a) (Binary? b))
+      Binary::eq? a b
+    elsif: (and (Char? a) (Char? b))
+      Char::eq? a b
+    elsif: (and (Boolean? a) (Boolean? b))
+      inline-c result "= GIN_IM_FROM_BOOL(GIN_IM_TO_BOOL(" a ") == GIN_IM_TO_BOOL(" b "));"
+    else:
+      inline-c result "= GIN_IM_FROM_BOOL(" a " == " b ");"
 
 ;;; BINARY - UNTYPED MEMORY
 ;;;
@@ -1181,12 +1060,18 @@ define Boolean->Binary (a)
   inline-c result "= GIN_IM_FROM_BINARY(GIN_IM_TO_BOOL(" a "),22);"
 
 define Boolean->String (a)
-  if (eq? a true) 
+  if (true? a)
     "true"
   else:
     "false"
 
 define not (a)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IS_FALSE(" a "));"
+
+define true? (a)
+  inline-c result " = GIN_IM_FROM_BOOL(GIN_IS_TRUE(" a "));"
+
+define false? (a)
   inline-c result " = GIN_IM_FROM_BOOL(GIN_IS_FALSE(" a "));"
 
 ;;;
@@ -1235,6 +1120,7 @@ define second* (a)
     inline-c result "= GIN_NIM_GET_F2(" a ");"
   else:
     println "Bad argument to second*"
+    println a
     exit
 
 define first! (p a)
@@ -1304,19 +1190,21 @@ define ninth* (a)
   nth* a 9
 
 define last (a)
-  nth a (length a)
+  while (Cons? (second* a))
+    set a (second* a)
+  first a
 
-define last* (c)
-  if (Null? (second* c))
-    c
-  else:
-    last* (second* c)
+define last* (a)
+  while (Cons? (second* a))
+    set a (second* a)
+  a
 
 define length (a)
-  if (Null? a)
-    0
-  else:
-    + 1 (length (second* a))
+  define len 0
+  while (Cons? a)
+    set a (second* a)
+    ++ len
+  len
 
 define append (a b)
   ; TODO - currently destructive. fix it.
@@ -1344,8 +1232,8 @@ define contains? (lst a)
   else: (contains? (second* lst) a)
 
 define split-list (lst v)
-  define a (list)
-  define b (list)
+  define a null
+  define b null
   define middle false
   each l lst
     if (eq? l v)
@@ -1361,7 +1249,6 @@ define List::duplicate (lst)
   if (Null? lst) null
   else:
     pair (first lst) (List::duplicate (second* lst))
-
 
 ;;; CHARACTERS
 ;;;
@@ -1430,10 +1317,29 @@ define Symbol->String (a)
   Ginger::Symbol->String a
 
 define Symbol eq? (a b)
-;  inline-c "print_bits32(" a ");"
-;  inline-c "print_bits32(" b ");"
-  inline-c result "= GIN_IM_FROM_BOOL(GIN_IM_TO_SYM(" a ") == GIN_IM_TO_SYM(" b "));"
+  inline-c result "= GIN_IM_FROM_BOOL(" a "==" b ");"
 
+;;;
+;;; LABELS
+;;;
+
+
+define Label? (v)
+  inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_LABEL(" v "));"
+
+define Label eq? (a b)
+  inline-c result "= GIN_IM_FROM_BOOL(" a "==" b ");"
+
+define Label->String (a)
+  define b false
+  inline-c b "= GIN_IM_FROM_SYM(GIN_IM_TO_LABEL(" a "));"
+  Symbol->String b
+
+define Ginger::String->Label (a)
+  define b (Ginger::String->Symbol a)
+  inline-c result "= GIN_IM_FROM_LABEL(GIN_IM_TO_SYM(" b "));"
+
+;;;
 ;;; STRINGS
 ;;;
 
@@ -1565,7 +1471,7 @@ define String split (str ch)
 
 ; Path functions
 define base-name (str)
-  define comp (String::split str ascii-period)
+  define comp (String::split str ._)
   define base-file-name (String::join (reverse (second* (reverse comp))) ".")
   base-file-name
 
@@ -1582,6 +1488,7 @@ define Vector make (residual: r)
   inline-c "GIN_ALLOCATE(" tmp ", GIN_OBJ, sizeof(GingerVector));"
   inline-c "((GingerVector*)(" tmp "))->type_index = GIN_TYPE_VECTOR;"
   inline-c "((GingerVector*)(" tmp "))->length = GIN_IM_TO_INT(" size ");"
+  inline-c "((GingerVector*)(" tmp "))->pool_length = GIN_IM_TO_INT(" size ");"
   if (> size 0)
     inline-c "GIN_ALLOCATE(((GingerVector*)(" tmp "))->value, GIN_OBJ*, sizeof(GIN_OBJ)*(GIN_IM_TO_INT(" size ")));"
     each i r
@@ -1593,9 +1500,12 @@ define Vector make (residual: r)
 
 define Vector push (self a)
   define tmp false
-  inline-c "GIN_ALLOCATE(" tmp ", GIN_OBJ, sizeof(GIN_OBJ)*(((GingerVector*)(" self "))->length + 1));"
-  inline-c "memcpy(" tmp ", ((GingerVector*)(" self "))->value, sizeof(GIN_OBJ)*(((GingerVector*)(" self "))->length));"
+  inline-c "if (((GingerVector*)(" self "))->length >= ((GingerVector*)(" self "))->pool_length) {"
+  inline-c "GIN_ALLOCATE(" tmp ", GIN_OBJ, sizeof(GIN_OBJ)*(((GingerVector*)(" self "))->length * 2 + 1));"
+  inline-c "if (((GingerVector*)(" self "))->length > 0) memcpy(" tmp ", ((GingerVector*)(" self "))->value, sizeof(GIN_OBJ)*(((GingerVector*)(" self "))->length));"
   inline-c "((GingerVector*)(" self "))->value = (GIN_OBJ*)(" tmp ");"
+  inline-c "((GingerVector*)(" self "))->pool_length = (((GingerVector*)(" self "))->length * 2 + 1);"
+  inline-c "}"
   inline-c "((GingerVector*)(" self "))->value[((GingerVector*)(" self "))->length] = " a ";"
   inline-c "((GingerVector*)(" self "))->length++;"
 
@@ -1625,6 +1535,15 @@ define Vector->String (a)
   ;   this also needs all the other to-str functions because a vector can
   ;   hold anything
   "*vector*"
+
+define Vector first (self)
+  inline-c result " = ((GingerVector*)(" self "))->value[0];"
+
+define Vector last (self)
+  inline-c result " = ((GingerVector*)(" self "))->value[((GingerVector*)(" self "))->length-1];"
+
+define Vector pop (self)
+  inline-c "((GingerVector*)(" self "))->length--;"
 
 ;;; DICTS
 ;;;
@@ -1762,11 +1681,11 @@ define close-input-stream (stream)
 define close-output-stream (stream)
   close-stream stream
 
-define read-char ((stream current-input-stream))
+define get-char ((stream current-input-stream))
   inline-c " \
     if (GIN_IS_STREAM(" stream ")) \
       " result "= GIN_IM_FROM_CHAR8(fgetc(GIN_NIM_GET_STREAM(" stream "))); \
-    if (GIN_IS_STRING_STREAM(" stream ")) { \
+    else if (GIN_IS_STRING_STREAM(" stream ")) { \
       if (GIN_NIM_GET_STRING_STREAM_LENGTH(" stream ") == GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")) { \
         " result "= GIN_IM_FROM_CHAR8(EOF); \
       } else { \
@@ -1784,7 +1703,7 @@ define peek-char ((stream current-input-stream))
       GIN_IM_TO_CHAR8(" c "), \
       GIN_NIM_GET_STREAM(" stream "))); \
     } \
-    if (GIN_IS_STRING_STREAM(" stream ")) { \
+    else if (GIN_IS_STRING_STREAM(" stream ")) { \
       if (GIN_NIM_GET_STRING_STREAM_LENGTH(" stream ") == GIN_NIM_GET_STRING_STREAM_POSITION(" stream ")) { \
         " result "= GIN_IM_FROM_CHAR8(EOF); \
       } else \
@@ -1811,7 +1730,7 @@ define char-ready? (stream)
   exit
 
 define newline ((stream current-output-stream))
-  write-char stream ascii-newline
+  write-char stream newline_
 
 define write-char (stream char)
   ; TODO - fputc returns integer (ignore it?)
@@ -1949,7 +1868,8 @@ define gin-debug ((a true) (max-depth -1))
 
 ; todo - make this an intrinsic and optimize it for each.
 define range (i j)
-   if (= i j) (list)
+   if (= i j) 
+     null
    else:
      if (> i j)
        pair i (range (- i 1) j)
@@ -1961,17 +1881,17 @@ define print-term (residual: z)
   define output false
   define term false
 
-  if (and (eq? (length z) 2) (Generic-Stream? (first z)))
+  if (and (= (length z) 2) (Generic-Stream? (first z)))
     set output (first z)
     set term (second z)
-  elsif: (eq? (length z) 1)
+  elsif: (= (length z) 1)
     set term (first z)
   else:
     println "Invalid number of terms to display."
     exit
 
   define print-primitive (term)
-    if (eq? output false)
+    if (false? output)
       inline-c "fprintf(stdout,\"%s\", GIN_STR_VALUE(" term "));"
     else:
       if (String-Stream? output)
@@ -2021,28 +1941,28 @@ define println (residual: terms)
   if (and (> (length terms) 0) (Generic-Stream? (first terms)))
     each i (second* terms)
       print-term (first terms) i
-    print-term (first terms) ascii-newline
+    print-term (first terms) newline_
   else:
     each i terms
       print-term i
-    print-term ascii-newline
+    print-term newline_
 
 ; write-term, write and writeln are for human readable output
 define write-term (residual: z)
   define output false
   define term false
 
-  if (and (eq? (length z) 2) (Generic-Stream? (first z)))
+  if (and (= (length z) 2) (Generic-Stream? (first z)))
     set output (first z)
     set term (second z)
-  elsif: (eq? (length z) 1)
+  elsif: (= (length z) 1)
     set term (first z)
   else:
     println "Invalid number of terms to display."
     exit
 
   define write-primitive (term)
-    if (eq? output false)
+    if (false? output)
       inline-c "fprintf(stdout,\"%s\", GIN_STR_VALUE(" term "));"
     else:
       if (String-Stream? output)
@@ -2095,30 +2015,11 @@ define writeln (residual: terms)
   if (and (> (length terms) 0) (Generic-Stream? (first terms)))
     each i (second* terms)
       write-term (first terms) i
-    write-term (first terms) ascii-newline
+    write-term (first terms) newline_
   else:
     each i terms
       write-term i
-    write-term ascii-newline
-
-define print-properties (cell)
-  println "{"
-  println "  parent => " (trait cell 'parent)
-  println "  head => " (trait cell 'head)
-  println "  type => " (trait cell 'type)
-  println "  paren-balance => " (trait cell 'paren-balance)
-  println "  parse-indent => " (trait cell 'parse-indent)
-  println "  line => " (trait cell 'line)
-  println "  column => " (trait cell 'column)
-  println "  begin => " (trait cell 'begin)
-  println "}"
-
-define print-dictionary (dict)
-  ; TODO - this causes a bus error, why?
-  println "{"
-  each key (Dict->keys dict)
-    println "  " key " => " (Dict::get dict key)
-  println "}"
+    write-term newline_
 
 define apply (fn args)
   inline-c "CALLNDYNAMIC(" fn ", next_seed, " result ", " args ");"
@@ -2138,13 +2039,10 @@ define command-line ()
 define exit ()
   inline-c "exit(0);"
 
-define <term> make (parent type parse-indent line column value)
-  cons value (Dict::make 'parent parent 'head null 'type type 'paren-balance 0 'parse-indent parse-indent 'line line 'column column 'begin false) null
-
 define trait (obj key)
   if (Null? (properties obj)) 
     false
-  elsif: (eq? (properties obj) false) 
+  elsif: (false? (properties obj)) 
     false
   else:
     Dict::get (properties obj) key
@@ -2208,21 +2106,27 @@ define <term> get-definition-arguments (self)
   else:
     false
 
+define Term::head (v)
+  if (Cons? (properties v))
+    Term::head (properties v)
+  else:
+    v
+
 define <term> parent (o)
-  set o (trait o 'head)
-  if (or (Null? o) (eq? o false)) false
+  set o (Term::head o)
+  if (or (Null? o) (false? o)) false
   else:
     set o (trait o 'parent)
-    if (or (Null? o) (eq? o false)) false
+    if (or (Null? o) (false? o)) false
     else:
-      set o (trait o 'head)
-      if (or (Null? o) (eq? o false))  false
+      set o (Term::head o)
+      if (or (Null? o) (false? o))  false
       else:
         o
 
 define <term> get-parent-function (f)
   define get-f (v)
-    if (or (Null? v) (eq? v false))
+    if (or (Null? v) (false? v))
       false
     elsif: (or (<term>::function-definition? v) (<term>::method-definition? v))
       v
@@ -2231,19 +2135,19 @@ define <term> get-parent-function (f)
   get-f (<term>::parent f)
 
 define <term> definition-symbol? (v)
-  and (Symbol? v) (or (eq? v 'define) (eq? v 'define!))
+  and (Symbol? v) (or (Symbol::eq? v 'define) (Symbol::eq? v 'define!))
 
 define <term> each-loop? (v)
-  and (list? v) (Symbol? (first v)) (eq? (first v) 'each)
+  and (list? v) (Symbol? (first v)) (Symbol::eq? (first v) 'each)
 
 define <term> definition? (f)
   and (Cons? f) (<term>::definition-symbol? (first f))
 
 define <term> immutable-definition? (f)
-  and (Symbol? (first f)) (eq? (first f) 'define!)
+  and (Symbol? (first f)) (Symbol::eq? (first f) 'define!)
 
 define <term> quoted-symbol? (v)
-  and (Cons? v) (Symbol? (first v)) (eq? (first v) 'quote)
+  and (Cons? v) (Symbol? (first v)) (Symbol::eq? (first v) 'quote)
 
 ; TODO - not sure if this documentation is correct
 ; Find parameters that are named as in (sender: obj)???
@@ -2259,167 +2163,6 @@ define find-named-parameter (plst a)
   else:
     find-named-parameter (second* plst) a
 
-; TODO - for this to work, we need to embed at least the function signatures in C.
-define fix-parameters (function-def residual: r)
-
-  define original-parameters (second* r)
-  define function (first r)
-
-  ; The new list of parameters without names attached
-  define new-parameters (list)
-
-  ; The list of required parameters as extracted from the function signature
-  define required-parameters (list)
-
-  ; The list of optional parameters as extracted from the function signature
-  define optional-parameters (list)
-
-  define anon-first true
-
-  ; Create the required parameters list
-  define has-residual false
-
-  each a (second* (<term>::get-definition-arguments function-def))
-    if (and (eq? (trait a 'type) 'symbol) (not has-residual))
-      ; The parameter is a symbol and we have not seen a residual keyword.
-      ; So..  We add it as a required parameter.
-      set required-parameters (append required-parameters (list a))
-    elsif: (and (eq? (trait a 'type) 'group) (not has-residual))
-      ; The parameter is a group and we have not seen a residual keyword.
-      ; So.. We add the first term as an optional parameter.
-      define t (first (second* a))
-      set optional-parameters (append optional-parameters (list a))
-    elsif: (and (eq? (trait a 'type) 'label) (String::eq? (first a) "residual:"))
-      ; We set the residual keyword.  The next symbol won't be added to either list.
-      set has-residual true
-
-;   define remove-named-parameter (plst a)
-;     if (Null? plst)
-;       plst
-;     elsif: (and (eq? (<term>::get (first plst) 'type) 'label) (String::eq? (<term>::get-value (first plst)) a))
-;       remove-named-parameter (second* (second* plst)) a
-;     else:
-;       pair (first plst) (remove-named-parameter (second* plst) a)
-
-;   ; Fill the required parameters in the new-parameters list.
-;   each a required-parameters
-;     define named-argument (find-named-parameter original-parameters (<term>::get-value a))
-;     ; println named-argument
-;     if named-argument
-;       ; 1. See if this argument is named in the call.
-;       ; if it is, then insert an unnamed call now.
-;       ; Then remove it from the old parameters.
-;       ; add new-parameters named-argument
-;       set new-parameters (append new-parameters (list (second* named-argument)))
-;       ; remove original-parameters named-argument
-;       set original-parameters (remove-named-parameter original-parameters (<term>::get-value (first named-argument)))
-;       set anon-first false
-;     elsif: (and (> (length original-parameters) 0) (not (eq? (trait (first original-parameters) 'type) 'label))) 
-;       ; 2. See if there is an unnamed parameter.  It must be this one..
-;       ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
-;       if (eq? anon-first false)
-;         println "Named arguments must follow unnamed arguments!"
-;         exit
-;       set new-parameters (append new-parameters (list (first original-parameters)))
-;       set original-parameters (second* original-parameters)
-;     else:
-;       ; This was a required arg but we didn't find a named term or an anon term that matched.
-;       println "No matching term found (req)"
-;       exit
-
-;   if (> (length required-parameters) (length new-parameters))
-;     ; TODO - better output state function, line and which parameters were missing.
-;     println "Some required parameters missing"
-;     exit
-
-;   ; TODO - Make this a LOT simpler - pass a zero for each parameter.  Let the function fill out the parameter IF it's zero.
-;   each a optional-parameters
-;     define named-argument (find-named-parameter original-parameters (<term>::get-value (first (second* a))))
-;     if named-argument
-;       set new-parameters (append new-parameters (list (second* named-argument)))
-;       set original-parameters (remove-named-parameter original-parameters (<term>::get-value (first named-argument)))
-;       set anon-first false
-;     elsif: (and (> (length original-parameters) 0) (not (eq? (trait (first original-parameters) 'type) 'label))) 
-;       ; 2. See if there is an unnamed parameter.  It must be this one..
-;       ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
-;       if (eq? anon-first false)
-;         println "Named arguments must follow unnamed arguments!"
-;         exit
-;       set new-parameters (append new-parameters (list (first original-parameters)))
-;       set original-parameters (second* original-parameters)
-;     else:
-;       ; This was an optional argument that was not given..
-;       ; original parameters doesn't change. but we add it to new parameters
-;       ; TODO - BUG - In the next section when we look up the lexical path of the "default value"
-;       ; we look it up using the calling function's lexical scope.  We should look it up using the called
-;       ; function's lexical scope.  The difference in behavior would be noticeable when using closures but
-;       ; also other common situations.
-;       ;
-;       ; define z 3
-;       ; define print-z ((a z))
-;       ;   println a
-;       ; define foo ()
-;       ;   define z 4
-;       ;   print-z
-;       ; foo
-;       ;
-;       ; should print 3! but it prints 4.
-
-;       set new-parameters (append new-parameters (list (second (second* a))))
-
-;   ; The next term must be the residual or nothing..
-;   if has-residual
-;     ; handle the residual..  The remaining arguments are turned into a list.
-;     define d (<term>::make false 'residual 0 0 0 original-parameters)
-;     if (= (length new-parameters) 0)
-;       set new-parameters (list d)
-;     else:
-;       set new-parameters (append new-parameters (list d))
-;   elsif: (= (length original-parameters) 0)
-;     ; Nothing in the original parameters so do nothing..
-;     noop
-;   else:
-;     println "Assertion - No residual and there are left over terms.."
-;     exit
-;   ; NOW..  use CALLNDYNAMIC and pass these parameters..
-
-define ascii-mult ascii-asterik
-define ascii-equals ascii-equal
-
-define last-char false
-define get-char (input)
-  require (input-stream? input)
-  ensure (or (eos-object? result) (Char? result))
-  if (not (last-char))
-    ; if its empty then get it from input
-    read-char input
-  else:
-    ; if its not empty then ...
-    if (Char? last-char)
-      ; if its just a char then grab it and reset buffer
-      define current-char last-char
-      set last-char false
-      current-char
-    else:
-      ; if its a string then ...
-      define current-char (String::first last-char)
-      if (= (String::length last-char) 2)
-        ; if this is the last time it will be a string
-        set last-char (String::first (String::rest last-char))
-      else:
-        ; otherwise there is more string left over
-        set last-char (String::rest last-char)
-      current-char
-
-; define unget-char (input c)
-;   require (input-stream? input)
-;   if (not (last-char))
-;     ; if its empty then just set it
-;     set last-char c
-;   else:
-;     ; if its not empty then add to the frount of it
-;     set last-char (new-string c last-char)
-
 define Char->digit (v (b 10))
   require (Integer? b)
   require (Char? v)
@@ -2429,12 +2172,12 @@ define Char->digit (v (b 10))
       false
     elsif: (> b 36)
       false
-    elsif: (>= (Char->Integer v) (Char->Integer ascii-a))
-      + (- (Char->Integer v) (Char->Integer ascii-a)) 10
-    elsif: (>= (Char->Integer v) (Char->Integer ascii-A))
-      + (- (Char->Integer v) (Char->Integer ascii-A)) 10
-    elsif: (>= (Char->Integer v) (Char->Integer ascii-0))
-      - (Char->Integer v) (Char->Integer ascii-0)
+    elsif: (>= (Char->Integer v) (Char->Integer a_))
+      + (- (Char->Integer v) (Char->Integer a_)) 10
+    elsif: (>= (Char->Integer v) (Char->Integer A_))
+      + (- (Char->Integer v) (Char->Integer A_)) 10
+    elsif: (>= (Char->Integer v) (Char->Integer 0_))
+      - (Char->Integer v) (Char->Integer 0_)
     else: false
   if (not c) false
   elsif: (< c b) c
@@ -2454,9 +2197,9 @@ define eos? (input)
 
 define Char eol? (c)
   require (Char? c)
-  if (Char::eq? c ascii-lf) true
-  elsif: (Char::eq? c ascii-cr) true
-  elsif: (Char::eq? c ascii-newline) true  ; could be a \n 
+  if (Char::eq? c lf_) true
+  elsif: (Char::eq? c cr_) true
+  elsif: (Char::eq? c newline_) true  ; could be a \n 
   else: false
 
 define new-string (a b)
@@ -2477,287 +2220,164 @@ define String Boolean? (v)
   if (or (String::eq? v "true") (String::eq? v "false")) true
   else: false
 
-; Is the string a Boolean?
-define String->Boolean (v)
-  require (String? v)
-  if (or (String::eq? v "true") (String::eq? v "false"))
-    if (String::eq? v "true") true
-    else: false
-  else: false
-
 define String ellipses? (v)
   require (String? v)
   if (String::eq? v "..") true
   else: false
 
-; Is the string composed of only digits 0-9
-define String numeric? (v)
-  require (String? v)
-  define string-positive-numeric? (v)
-    if (= (String::length v) 0) false
-    elsif: (and (= (String::length v) 1) (Char::numeric? (String::first v))) true
-    elsif: (Char::numeric? (String::first v)) (String::numeric? (String::rest v))
-    else: false
-  if (and (> (String::length v) 1) (Char::eq? ascii-minus (String::first v)))
-    string-positive-numeric? (String::rest v)
-  else:
-    string-positive-numeric? v
-
-; Is the string composed of only digits valid for a given base b.
-define String->digits (v (base 10))
-  require (String? v)
-  require (Integer? base)
-  define string->raw-integer-i (v b i)
-    require (String? v)
-    require (Integer? b)
-    require (Integer? i)
-    if (= (String::length v) 0) false
-    elsif: (and (= (String::length v) 1) (Char::digit? (String::first v) b))
-      Char->digit (String::first v) b
-    elsif: (Char::digit? (String::first v) b)
-      define n (string->raw-integer-i (String::rest v) b (- i 1))
-      if (not n) false
-      else: (+ (* (Char->digit (String::first v) b) (expt b (- i 1))) n)
-    else: false
-  string->raw-integer-i v base (String::length v)
-
-define String::digits? (v b)
-  require (String? v)
-  require (Integer? b)
-  if (not (String->digits v b)) false
-  else: true
-
-define String->Integer (v)
-  require (String? v)
-  define v0 (String::split v ascii-underscore)
-  define v1 (first v0)
-  define v2 (second* v0)
-  if (String::eq? v1 "") false ; _ without anything prefixing it is invalid.
-  elsif: (and (Null? v2) (String::numeric? v1)) 
-    if (Char::eq? (String::first v1) ascii-minus)
-      * -1 (String->digits (String::rest v1)) ;if -ve number
-    else:
-      String->digits v1 ; no base but okay
-  elsif: (Null? v2) false ; no base but not numeric
-  elsif: (and (Null? (second* v2)) (String::numeric? (first v2))  )
-    if (and (Char::eq? (String::first v1) ascii-minus) (String::digits? (String::rest v1) (String->digits (first v2))))
-      * -1 (String->digits (String::rest v1) (String->digits (first v2))) ;if -ve number
-    elsif: (String::digits? v1 (String->digits (first v2)))
-      String->digits v1 (String->digits (first v2))  ; base and number are okay
-  else: false
-
-define String Integer? (v)
-  require (String? v)
-  if (not (String->Integer v)) false
-  else: true
-
-define String->Ratio (v)
-  require (String? v)
-  define v0 (String::split v ascii-slash)
-  define v1 (first v0)
-  define v2 (second* v0)
-  if (String::eq? v1 "") false ; / without anything prefixing it is invalid.
-  elsif: (and (Null? v2) (String::Integer? v1)) (String->Integer v1) ; no denomenator but okay
-  elsif: (Null? v2) false ; no denomenator but not numeric
-  elsif: (and (Null? (second* v2)) (String::Integer? (first v2)) (String::Integer? v1)) ; numerator and denomenator
-    / (String->Integer v1) (String->Integer (first v2))
-  else: false
-
-define String Ratio? (v)
-  require (String? v)
-  if (not (String->Ratio v)) false
-  else: true
-
-define String->Scientific (v)
-  require (String? v)
-  define va false
-  define n1 "0"
-  define n2 "0"
-  define n3 "0"
-  define exponent "0"
-  define base "10"
-  define sign 1
-  set va (String::split v ascii-e)
-  if (not (Null? (second* va))) ; there IS an exponent
-    if (not (Null? (second* (second* va))))
-      ; but there is more than one "e" which is illegal..
-      set exponent false
-    else:
-      set exponent (first (second* va))
-  set va (String::split (first va) ascii-underscore)
-  if (not (Null? (second* va))) ; there IS a base
-    ; but there is more than one "_" which is illegal..
-    if (not (Null? (second* (second* va))))
-      set base false
-    else:
-        set base (first (second* va))
-  set va (String::split (first va) ascii-period)
-  if (not (Null? (second* va))) ; there IS a decimal
-    if (not (Null? (second* (second* va))))
-      ; but there is more than one "." which is illegal..
-      set n2 false
-    else:
-      set n2 (first (second* va))
-  set n1 (first va)
-  set va (String::split n1 ascii-minus)
-  if (not (Null? (second* va))) ; there IS a minus
-    if (not (Null? (second* (second* va))))
-      ; but there is more than one "." which is illegal..
-      set n1 false
-    else:
-      if (not (= (String::length (first va)) 0))
-        set n1 false
-      else:
-        set n1 (first (second* va))
-        set sign -1
-  if (and (not (not n1)) (not (not n2)) (not (not base)) (not (not exponent)) (String::numeric? exponent) (String::numeric? base) (String::digits? n1 (String->digits base)) (String::digits? n2 (String->digits base)))
-    ; add before decimal to after decimal
-    * (+ (* (String->digits n1 (String->digits base)) (expt (String->digits base) (String->digits exponent))) (/ (String->digits n2 (String->digits base)) (expt (String->digits base) (- (String::length n2) (String->digits exponent))))) sign
-  else:
-    false
-
-define String scientific? (v)
-  require (String? v)
-  if (not (String->Scientific v)) false
-  else: true
-
-define String Rational? (v)
-  require (String? v)
-  ; TODO - when DBC works remove the first conditional
-  if (not (String? v))
-    false
-  else:
-    if (String::Ratio? v) true
-    elsif: (String::scientific? v) true
-    else: false
-
-define String->Rational (v)
-  require (String? v)
-  ; TODO - when DBC works remove the first conditional
-  if (not (String? v))
-    false
-  else:
-    if (String::Ratio? v) (String->Ratio v)
-    elsif: (String::scientific? v) (String->Scientific v)
-    else: false
-
-define String->Complex (v)
-  require (String? v)
-  if (< (String::length v) 3)
-    false
-  else:
-    define va (String::split v ascii-plus)
-    if (Null? (second* va)) false ; + was not found
-    else:
-      define real-part (first va)
-      define vb (String::split (second va) ascii-i)
-      if (Null? (second* vb)) false ; i was not found
-      else:
-        define imaginary-part (first vb)
-        define rp
-          if (String::Integer? real-part) (String->Integer real-part)
-          elsif: (String::Ratio? real-part) (String->Ratio real-part)
-          elsif: (String::scientific? real-part) (String->Scientific real-part)
-          else: false
-        define ip
-          if (String::Integer? imaginary-part) (String->Integer imaginary-part)
-          elsif: (String::Ratio? imaginary-part) (String->Ratio imaginary-part)
-          elsif: (String::scientific? imaginary-part) (String->Scientific imaginary-part)
-          else: false
-        if (or (not rp) (not ip)) false ; either the real-part or imaginary part is not valid
-        else: (+ rp (* ip 1))
-;        else: (+ rp (* ip 0+1i))
-
-define String Complex? (v)
-  require (String? v)
-  if (not (String->Complex v)) false
-  else: true
-
-define String->Flonum (v)
-  inline-c result "= gin_string_to_float(" v ");"
-
-; TODO: This should return a symbol - not a string!!
 define String->Symbol (v)
   require (String? v)
+  if (String::Symbol? v)
+    Ginger::String->Symbol v
+  else:
+    false
+
+define String->Character (v)
+  define va (String::split v underscore_)
+  if (= (length va) 2) 
+    define name (first va)
+    define name-len (String::length (first va))
+    if (= (String::length (second va)) 0)
+      if (= name-len 1)
+        ; simple ascii conversion
+        ; TODO: Certain ones shouldn't be valid:
+        ; space, newline, tab, colon, etc.
+        String::first name
+      else:
+        ; Special cases
+        ; TODO: Replace with hash lookup for speed.
+        if (String::eq? name "at")
+          inline-c "GIN_NEW_CHAR8(" result ", '@')"
+        elsif: (String::eq? name "backslash")
+          inline-c "GIN_NEW_CHAR8(" result ", 92)"
+        elsif: (String::eq? name "colon")
+          inline-c "GIN_NEW_CHAR8(" result ", 58)"
+        elsif: (String::eq? name "cr")
+          inline-c "GIN_NEW_CHAR8(" result ", 13)"
+        elsif: (String::eq? name "double-quote")
+          inline-c "GIN_NEW_CHAR8(" result ", 34)"
+        elsif: (String::eq? name "lbrace")
+          inline-c "GIN_NEW_CHAR8(" result ", '{')"
+        elsif: (String::eq? name "lbracket")
+          inline-c "GIN_NEW_CHAR8(" result ", '[')"
+        elsif: (String::eq? name "lf")
+          inline-c "GIN_NEW_CHAR8(" result ", 10)"
+        elsif: (String::eq? name "lparen")
+          inline-c "GIN_NEW_CHAR8(" result ", '(')"
+        elsif: (String::eq? name "newline")
+          inline-c "GIN_NEW_CHAR8(" result ", 10)"
+        elsif: (String::eq? name "null")
+          inline-c "GIN_NEW_CHAR8(" result ", 0)"
+        elsif: (String::eq? name "pipe")
+          inline-c "GIN_NEW_CHAR8(" result ", '|')"
+        elsif: (String::eq? name "rbrace")
+          inline-c "GIN_NEW_CHAR8(" result ", '}')"
+        elsif: (String::eq? name "rbracket")
+          inline-c "GIN_NEW_CHAR8(" result ", ']')"
+        elsif: (String::eq? name "rparen")
+          inline-c "GIN_NEW_CHAR8(" result ", ')')"
+        elsif: (String::eq? name "semi-colon")
+          inline-c "GIN_NEW_CHAR8(" result ", 59)"
+        elsif: (String::eq? name "single-quote")
+          inline-c "GIN_NEW_CHAR8(" result ", 39)"
+        elsif: (String::eq? name "slash")
+          inline-c "GIN_NEW_CHAR8(" result ", '/')"
+        elsif: (String::eq? name "space")
+          inline-c "GIN_NEW_CHAR8(" result ", ' ')"
+        elsif: (String::eq? name "tab")
+          inline-c "GIN_NEW_CHAR8(" result ", 9)"
+        elsif: (String::eq? name "tilde")
+          inline-c "GIN_NEW_CHAR8(" result ", '~')"
+        elsif: (String::eq? name "underscore")
+          inline-c "GIN_NEW_CHAR8(" result ", '_')"
+        else:
+          false
+    elsif: (String::eq? (second va) "u")
+      ; TODO: Unicode not complete
+      false
+    else:
+      false
+  else: 
+    false
+
+define String Character? (v)
+  require (String? v)
+  if (not (String->Character v)) false
+  else: true
+
+define String Symbol? (v)
+  require (String? v)
+
   define char-legal-symbol? (v)
     if (Char::alphabetic? v) true
     elsif: (Char::numeric? v) true
-    elsif: (Char::eq? v ascii-plus) true
-    elsif: (Char::eq? v ascii-minus) true
-    elsif: (Char::eq? v ascii-mult) true
-    elsif: (Char::eq? v ascii-slash) true
-    elsif: (Char::eq? v ascii-percent) true
-    elsif: (Char::eq? v ascii-dollar) true
-    elsif: (Char::eq? v ascii-at) true
-    elsif: (Char::eq? v ascii-exclamation) true
-    elsif: (Char::eq? v ascii-less-than) true
-    elsif: (Char::eq? v ascii-greater-than) true
-    elsif: (Char::eq? v ascii-equals) true
-    elsif: (Char::eq? v ascii-question) true
-    elsif: (Char::eq? v ascii-question) true
-    elsif: (Char::eq? v ascii-colon) true
-    ; elsif: (Char::eq? v ascii-caret) true
+    elsif: (Char::eq? v +_) true
+    elsif: (Char::eq? v -_) true
+    elsif: (Char::eq? v *_) true
+    elsif: (Char::eq? v /_) true
+    elsif: (Char::eq? v %_) true
+    elsif: (Char::eq? v $_) true
+    elsif: (Char::eq? v @_) true
+    elsif: (Char::eq? v !_) true
+    elsif: (Char::eq? v <_) true
+    elsif: (Char::eq? v >_) true
+    elsif: (Char::eq? v =_) true
+    elsif: (Char::eq? v ?_) true
+    elsif: (Char::eq? v colon_) true
+    ; elsif: (Char::eq? v ^_) true
     else: false
+
   define string-legal-symbol? (v)
     if (= (String::length v) 0) false
     elsif: (and (= (String::length v) 1) (char-legal-symbol? (String::first v))) true
     elsif: (char-legal-symbol? (String::first v)) (string-legal-symbol? (String::rest v))
     else: false
-  if (not (not (String::Complex? v))) false
+
+  define t false
+  set sv-err false
+  inline-c t "= gin_string_to_value(" v ");"
+  inline-c "if (" t " == 0) { " sv-err " = GIN_TRUE;" t " = GIN_FALSE; }"
+  if (not (String? t))
+    false
   else:
     if (string-legal-symbol? v)
-      if (Char::eq? (String::first v) ascii-colon)
+      if (Char::eq? (String::first v) colon_)
         false
       else:
-        Ginger::String->Symbol v
+        true
     else: false
 
-define String Symbol? (v)
-  require (String? v)
-  if (not (String->Symbol v)) false
-  else: true
-
-define Label->String (v)
-  Symbol->String v
-
-define String->Label-Sym (v)
-  define tmp (String->Symbol v)
-  inline-c result "= GIN_IM_FROM_LABEL(GIN_IM_TO_SYM(" tmp "));"
-
-define Label? (v)
-  define check-label-flag (v)
-    inline-c result "= GIN_IM_FROM_BOOL(GIN_IS_LABEL(" v "));"
-  and (Symbol? v) (check-label-flag v)
-
-define String->Label (v)
-  if (< (String::length v) 2) false
+define sv-err false
+define String->Value (v)
+  define t false
+  set sv-err false
+  inline-c t "= gin_string_to_value(" v ");"
+  inline-c "if (" t " == 0) { " sv-err " = GIN_TRUE;" t " = GIN_FALSE; }"
+  if (String? t)
+    define tmp (Ginger::String->Symbol v)
+    if (Char::eq? (String::last t) colon_)
+      inline-c result "= GIN_IM_FROM_LABEL(GIN_IM_TO_SYM(" tmp "));"
+    else:
+      tmp
   else:
-    define c (String::Symbol? (String::substring v 0 (- (String::length v) 1)))
-    if (and c (Char::eq? (String::last v) ascii-colon)) v
-    else: false
+    t
 
 define String Label? (v)
   require (String? v)
   ; TODO - when DBC works remove the first conditional
-  if (not (String? v))
-    false
+  if (String? v)
+    if (Char::eq? (String::last v) colon_)
+      define t false
+      inline-c t "= gin_string_to_value(" v ");"
+      inline-c "if (" t " == 0) { " t " = GIN_FALSE; }"
+      if (String? t)
+        true
+      else:
+        false
+    else: 
+      false
   else:
-    if (not (String->Label v)) false
-    else: true
-
-define Residual? (v)
-  and (Label? v) (String::eq? (Label->String v) "residual:")
-
-define String::Residual? (v)
-  if (not (String? v))
     false
-  else:
-    and (String::Label? v) (String::eq? v "residual:")
-
-define String colon-command? (v)
-  require (String? v)
-  if (and (eq? (String::first v) ascii-colon) (or (String::Symbol? (String::rest v)) (= (String::length v) 1))) true
-  else: false
 
 define include-filename (terms)
   first (second* (first terms))
@@ -2769,7 +2389,7 @@ define open-include-file (filename)
     set found-include-file true
     set include-file-path filename
   else:
-    define inc-paths (String::split (getenv "GIN_INCLUDE_PATH" "") ascii-colon)
+    define inc-paths (String::split (getenv "GIN_INCLUDE_PATH" "") colon_)
     while (and (not found-include-file) (not (Null? inc-paths)))
       define path (String::append (first inc-paths) "/" filename)
       if (file-exists? path)
@@ -2786,7 +2406,9 @@ define expand-includes (tree)
 
   define include? (node)
     if (and (Cons? node) (Cons? (first node)) (Symbol? (first (first node))))
-      eq? (first (first node)) 'include
+      Symbol::eq? (first (first node)) 'include
+    else:
+      false
 
   define expand-include (node)
     ; TODO - Test if '(include "hello") get's expanded
@@ -2803,144 +2425,156 @@ define expand-includes (tree)
     
     close-input-stream input
 
-  if (Null? tree) 
-    false
-  elsif: (include? tree) 
-    expand-include tree
-  ;   ; TODO - make this iterative
-  if (list? (first tree)) (expand-includes (first tree))
-  if (list? (second* tree)) (expand-includes (second* tree))
+  define includes (trait tree 'includes)
 
-define <group>::make (line column)
-  <term>::make null 'group 0 line column false
+  each i includes
+    define node (trait i 'parent)
+    if (include? node)
+      expand-include node
+
+; TODO: deprecate this
+define <term>::make (parent parse-indent line value)
+  cons value (Dict::make 'parent parent 'paren-balance 0 'parse-indent parse-indent 'line line 'begin false) null
+
+define <group>::make (line)
+  ; TODO: make this a bcons
+  ; <term>::make null 0 line false
+  cons null (Dict::make 'parent null 'paren-balance 0 'parse-indent 0 'line line 'begin false) null
 
 define Group? (a)
-  and (Cons? a) (not (Null? (properties a))) (eq? (trait a 'type) 'group)
-
-define <begin>::make (line column)
-  <term>::make null 'begin 0 line column false
-
-define <value>::make (value-type value line column)
-  <term>::make null value-type -1 line column value
+  ; TODO check bcons
+  if (Cons? a)
+    if (not (Null? (properties a)))
+      true
+    else:
+      false
+  else:
+    false
 
 define read (input (tree-head null))
 
+  define includes null
   define line 1
   define column 0
   define cbq-indent 0
 
-  define state-stack (list)
+  define state-stack (Vector::make)
 
   define state-push (s)
-    set state-stack (append state-stack (list s))
+    Vector::push state-stack s
 
   define state-top ()
-    last state-stack
+    Vector::last state-stack
 
   define state-pop ()
-    if (= (length state-stack) 1)
-      println "Error: Can't have empty state stack"
-      exit
-    else:
-      second*! (nth* state-stack (- (length state-stack) 1)) null  
+    ;if (or (Null? state-stack) (Null? (second* state-stack)))
+    ;  println "Error: Can't have empty state stack"
+    ;  exit
+    Vector::pop state-stack
 
   define begin-group? (t)
-    if (eq? (trait t 'begin) true)
+    if (true? (trait t 'begin))
       true
     else: false
 
   define paren-balanced ()
     define paren-balanced2 (t)
-      require (not (eq? t false))
+      require (not (false? t))
       if (begin-group? t)
-        if (= (trait t 'paren-balance) 0) (list)
+        if (= (trait t 'paren-balance) 0) null
         else: t
       else:
-        paren-balanced2 (trait (trait t 'parent) 'head)
-    paren-balanced2 tree-current
+        paren-balanced2 (Term::head (trait t 'parent))
+    paren-balanced2 tree-current-head
 
   define paren-add ()
     define add-paren2 (t)
-      require (not (eq? t false))
+      require (not (false? t))
       if (begin-group? t)
         trait! t 'paren-balance (+ (trait t 'paren-balance) 1)
       else:
-        add-paren2 (trait (trait t 'parent) 'head)
-    add-paren2 tree-current
+        add-paren2 (Term::head (trait t 'parent))
+    add-paren2 tree-current-head
 
   define paren-remove ()
     define remove-paren2 (t)
-      require (not (eq? t false))
+      require (not (false? t))
       if (begin-group? t)
         trait! t 'paren-balance (- (trait t 'paren-balance) 1)
       else:
-        remove-paren2 (trait (trait t 'parent) 'head)
-    remove-paren2 tree-current
+        remove-paren2 (Term::head (trait t 'parent))
+    remove-paren2 tree-current-head
  
-  if (Null? tree-head) (set tree-head (<group>::make 0 0))
-  define tree-current tree-head
+  if (Null? tree-head) (set tree-head (<group>::make 0))
+
+  define tree-current-head tree-head
   define tree-current-cell tree-head
   define tree-current-cell-free true
 
-  define tree-add (v)
+  define tree-add (v line)
     ; If the current cell is empty use it, otherwise add a new one.
     if (tree-current-cell-free)
       set tree-current-cell-free false
       ; Use the value
-      first! tree-current-cell (first v)
-      ; Merge dictionaries... TODO: do more attributes?
-      trait! tree-current-cell 'type (trait v 'type)
+      first! tree-current-cell v
     else:
+      set v (cons v tree-current-cell null)
       second*! tree-current-cell v
+      ; properties! v tree-current-cell
       set tree-current-cell v
-    trait! tree-current-cell 'head tree-current
+    if (not (Cons? (properties tree-current-cell)))
+      trait! tree-current-cell 'line line
+
+    tree-current-cell
 
   define tree-push ()
-    ;println ":debug TREE-PUSH"
     define g0 false
     if (tree-current-cell-free)
       set g0 tree-current-cell
-      trait! g0 'parent (trait tree-current-cell 'parent)
     else:
-      set g0 (<group>::make line column)
-      trait! g0 'parent tree-current-cell
-    define g1 (<group>::make line column)
-    trait! g0 'head g0
-    trait! g1 'head g1
+      set g0 (cons null tree-current-cell null)
+    define g1 (<group>::make line)
     first! g0 g1
-    tree-add g0
+    if (tree-current-cell-free)
+      set tree-current-cell-free false
+    else:
+      second*! tree-current-cell g0
+      properties! g0 tree-current-cell
+      set tree-current-cell g0
     trait! g1 'parent g0
 
-    set tree-current g1
+    set tree-current-head g1
     set tree-current-cell g1
     set tree-current-cell-free true
 
   define tree-pop ()
-    if (not (eq? (trait tree-current 'parent) null))
-      set tree-current-cell (trait tree-current 'parent)
-      set tree-current (trait tree-current-cell 'head)
+    if (not (Null? (trait tree-current-head 'parent)))
+      set tree-current-cell (trait tree-current-head 'parent)
+      set tree-current-head (Term::head tree-current-cell)
       set tree-current-cell-free false
     else:
       println "Could not find parent."
       exit
 
   define tree-unpop ()
-    set tree-current (last tree-current)
-    set tree-current-cell (last* tree-current)
+    set tree-current-head (last tree-current-head)
+    set tree-current-cell (last* tree-current-head)
 
   define tree-set-begin ()
-    trait! tree-current 'begin true
+    trait! tree-current-head 'begin true
 
   define tree-sibling-count ()
-    - (length tree-current) 1
+    - (length tree-current-head) 1
 
   if (String? input)
-    set input (String::append input (String::string ascii-newline))
+    set input (String::append input (String::string newline_))
     set input (open-input-string input)
 
   define c false
   define p false
   define buffer ""
+  define buffer-begin 0
+  define buffer-end 0
   define eos false
   define parse-indent -1
   define is-quote 0
@@ -2954,18 +2588,18 @@ define read (input (tree-head null))
   while (not eos)
     if (eos? input)
       set eos true ; terminate next time through the loop
-      set c ascii-space ; set c to space.
+      set c space_ ; set c to space.
 
       ; if its eos we need to check for paren balence because its usualy done by
       ; indentation checking but there will be no more lines to check the last line
       if (not (Null? (paren-balanced)))
-        println "Error in code block starting on line " (trait tree-current 'line) ": unbalanced parenthesis.1"
+        println "Error in code block starting on line " (trait tree-current-head 'line) ": unbalanced parenthesis.1"
         exit
     else:
       set c (get-char input) ; get the next character
 
       ; windows consideration for dual eol's
-      if (and (Char::eq? c ascii-cr) (Char::eq? (peek-char input) ascii-lf))
+      if (and (Char::eq? c cr_) (Char::eq? (peek-char input) lf_))
         set c (get-char input)
 
       if (not (Char::whitespace? c))
@@ -2978,26 +2612,29 @@ define read (input (tree-head null))
     ; 3. Reading Commands
 
     define current-state (state-top)
-    ; println "C=" c
-    ; println "buffer=" buffer
+    ;println "C=" c
+    ;println "buffer=" buffer
+    ;println tree-head
+    ;println "-------------------------------------------------------------------"
 
-    if (eq? current-state 'colon-quote)
+    if (Symbol::eq? current-state 'colon-quote)
       ; if we are allready in colon quote state then it can never be the first term on the line
       set first-term-on-line false
-      if (or (Char::eq? c ascii-left-parenthesis) (Char::eq? c ascii-right-parenthesis) (Char::eol? c) (eq? eos true))
-        if (and (Char::eq? p ascii-backslash) (not (Char::eol? c)))
+      if (or (Char::eq? c lparen_) (Char::eq? c rparen_) (Char::eol? c) (eq? eos true))
+        if (and (Char::eq? p backslash_) (not (Char::eol? c)))
           ; removed the \\ created becuase of the one \ and add the current char ( or )
           set buffer (String::substring buffer 0 (- (String::length buffer) 2))
           set buffer (new-string buffer c)
         else:
           ; if p was not a backslash, we have three options:
-          if (Char::eq? c ascii-left-parenthesis)
+          if (Char::eq? c lparen_)
 
             ; Option 1 - We encounter a left parenthesis
             ; The beginning of a command temporarily suspends this colon quote
             ; Add what we have so far to the concatenation operator
 
-            tree-add (<value>::make 'string buffer line column)
+            ; tree-add (cons buffer null null) line
+            tree-add buffer line
 
             ; Clear the buffer
             set buffer ""
@@ -3006,12 +2643,12 @@ define read (input (tree-head null))
 
             ; Add a new group for the command
             tree-push
-            trait! tree-current 'parse-indent parse-indent
+            trait! tree-current-head 'parse-indent parse-indent
 
             ; And then add commands..
             state-push 'command
 
-          elsif: (or (Char::eq? c ascii-right-parenthesis) (Char::eol? c) (eq? eos true))
+          elsif: (or (Char::eq? c rparen_) (Char::eol? c) (eq? eos true))
 
             ; Option 2 - we encounter a right parenthesis, eol, or eos
             ; The end of a colon quote so we need to check for
@@ -3023,12 +2660,12 @@ define read (input (tree-head null))
               ; if its a right parenthis or eos
               set exit-colon-quote true
               ; if its a right parenthis make sure we ajust the tree to account for it
-              if (Char::eq? c ascii-right-parenthesis)
+              if (Char::eq? c rparen_)
                 paren-remove
                 ; if there is to many right parens we imeadetly know we should error
                 if (not (Null? (paren-balanced)))
                   if (< (trait (paren-balanced) 'paren-balance) 0)
-                    println "Error in code block starting on line " (trait tree-current 'line) ": unbalanced parenthesis.2"
+                    println "Error in code block starting on line " (trait tree-current-head 'line) ": unbalanced parenthesis.2"
                     exit
             else:
               ; Handle the EOL
@@ -3043,12 +2680,12 @@ define read (input (tree-head null))
                 ; count all leading spaces
                 define valid-line false
                 while (not (valid-line))
-                  while (Char::eq? (peek-char input) ascii-space)
+                  while (Char::eq? (peek-char input) space_)
                     get-char input
                     ++ look-ahead-count
                     ++ next-indent-count
                   ; TODO - fix for crlf
-                  if (Char::eq? (peek-char input) ascii-newline)
+                  if (Char::eq? (peek-char input) newline_)
                     set valid-line false
                     set next-indent-count 0
                     ; eat newline so we can start counting the space for the next line
@@ -3057,55 +2694,55 @@ define read (input (tree-head null))
                   else:
                     set valid-line true
                 ; if its indented then save the indent
-                if (> next-indent-count (trait tree-current 'parse-indent))
+                if (> next-indent-count (trait tree-current-head 'parse-indent))
                   set cbq-indent next-indent-count
                   set look-ahead-count 0
                   ; if there is something in the buffer then we need to
                   ; add an eol to it
                   if (not (= (String::length buffer) 0))
-                    set buffer (new-string buffer ascii-newline)
+                    set buffer (new-string buffer newline_)
                 else:
                   ; since we did not find indentation we undo the last few lines
                   ; and wrap up colon-quote
-;                if (not (eq? buffer ""))
+;                if (not (String::eq? buffer ""))
                   ; Don't do this in a block quote..
                   ;set undo-block-quote-check true
                   set exit-colon-quote true
               ; if we have been working with a colon-block-quote
               else:
                 ; count all leading spaces up to the first colon-block-quote-indent
-                ;while (and (Char::eq? (peek-char input) ascii-space) (< next-indent-count cbq-indent))
+                ;while (and (Char::eq? (peek-char input) space_) (< next-indent-count cbq-indent))
                 ;  get-char input
                 ;  ++ next-indent-count
                 
                 define valid-line false
                 while (not (valid-line))
-                  while (Char::eq? (peek-char input) ascii-space)
+                  while (Char::eq? (peek-char input) space_)
                     get-char input
                     ++ look-ahead-count
                     ++ next-indent-count
                   
                   ; TODO - fix for crlf
-                  if (Char::eq? (peek-char input) ascii-newline)
+                  if (Char::eq? (peek-char input) newline_)
                     ; eat newline, so we can start counting the space for the next line
                     get-char input
                     
-                    if (Char::eq? (peek-char input) ascii-space)
+                    if (Char::eq? (peek-char input) space_)
                       ; count spaces
                       define num-spaces 0
-                      while (Char::eq? (peek-char input) ascii-space)
-                        read-char input
+                      while (Char::eq? (peek-char input) space_)
+                        get-char input
                         ++ num-spaces
 
                       ; put back spaces
                       define i 0
                       while (< i num-spaces)
-                        unget-char input ascii-space
+                        unget-char input space_
                         ++ i
                       
                       if (= num-spaces cbq-indent)
                         ; add a newline
-                        set buffer (new-string buffer ascii-newline)
+                        set buffer (new-string buffer newline_)
 
                     set valid-line false
                     set next-indent-count 0
@@ -3121,7 +2758,7 @@ define read (input (tree-head null))
                 if (>= next-indent-count cbq-indent)
                   set look-ahead-count 0
                   if (not (= (String::length buffer) 0))
-                    set buffer (new-string buffer ascii-newline)
+                    set buffer (new-string buffer newline_)
                 ; if its not the we reset cbq-indent and un what we did in the last few lines
                 ; and wrap up colon-quote
                 else:
@@ -3132,13 +2769,14 @@ define read (input (tree-head null))
               ; undo the check for colon-block-quoteing
               if (> look-ahead-count 0) ; (undo-block-quote-check)
                 while (> next-indent-count 0)
-                  unget-char input ascii-space
+                  unget-char input space_
                   -- next-indent-count
 
             ; wraps up colon-quoteing
             if (exit-colon-quote)
               ; add buffer to tree and clear it
-              tree-add (<value>::make 'string buffer line column)
+              ; tree-add (cons buffer null null) line column
+              tree-add buffer line
               set buffer ""
               
               tree-pop ; pop the String::append              
@@ -3154,97 +2792,108 @@ define read (input (tree-head null))
         ; uses \ for escape chars we just assume all \ are not
         ; escape chars and conver them to \\.
 
-        if (Char::eq? c ascii-backslash)
+        if (Char::eq? c backslash_)
           define dbs (new-string c c)
           set buffer (new-string buffer dbs)
         else:
           set buffer (new-string buffer c)
 
 
-    elsif: (eq? current-state 'single-quote)
+    elsif: (Symbol::eq? current-state 'single-quote)
 
-      if (or (Char::whitespace? c) (Char::eq? c ascii-right-parenthesis))
+      if (or (Char::whitespace? c) (Char::eq? c rparen_))
         ; Push the character back so it can be handled properly next time..
         unget-char input c
         ; Set c to the more innocuos space so the eol stuff at the end of the loop
         ; doesnt trip us up
-        set c ascii-space
+        set c space_
         state-pop
         ; Set is-quote to one if the buffer has something in it.
         set is-quote -1
-        if (String::eq? buffer "")
+        if (= (String::length buffer) 0)
           ; If the buffer is empty set is-quote to 2
           set is-quote -2
           set buffer "null"
       else:
         set buffer (new-string buffer c)
 
-    elsif: (eq? current-state 'double-quote)
+    elsif: (Symbol::eq? current-state 'double-quote)
 
-      if (Char::eq? p ascii-backslash)
+      if (Char::eq? p backslash_)
         
         define escape-char (c)
           require (Char? c)
-          if (Char::eq? c ascii-n) 
-            String::string ascii-newline
-          elsif: (Char::eq? c ascii-r) 
-            String::string ascii-cr
-          elsif: (Char::eq? c ascii-double-quote) 
-            String::string ascii-double-quote
+          if (Char::eq? c n_) 
+            String::string newline_
+          elsif: (Char::eq? c r_) 
+            String::string cr_
+          elsif: (Char::eq? c double-quote_) 
+            String::string double-quote_
           else: c
 
         set buffer (new-string buffer (escape-char c))
         ; Set c to something other than \ so that p doesn't become \ and we escape the next time.
-        set c ascii-space
+        set c space_
 
       else:
-        if (Char::eq? c ascii-double-quote)
+        if (Char::eq? c double-quote_)
           ; An ending double quote ends a double quote.
           state-pop
           set is-quote 1
-          if (String::eq? buffer "")
+          if (= (String::length buffer) 0)
             set is-quote 2
             set buffer "null"
-        elsif: (Char::eq? c ascii-backslash)
+        elsif: (Char::eq? c backslash_)
           ; eat it.
           noop
         else:
           set buffer (new-string buffer c)
 
-    elsif: (eq? current-state 'comment)
+    elsif: (Symbol::eq? current-state 'comment)
       if (Char::eol? c)
         state-pop ; pop comment state
-        if (and (not (eq? (state-top) 'begin)) (not first-term-on-line))
+        if (and (not (Symbol::eq? (state-top) 'begin)) (not first-term-on-line))
           ; this is inline comment so need to unget c and set it to a space
           ; so the defult code for the line can wrap things up
           unget-char input c
-          set c ascii-space
+          set c space_
 
-    elsif: (or (eq? current-state 'begin) (eq? current-state 'command))
+    elsif: (or (Symbol::eq? current-state 'begin) (Symbol::eq? current-state 'command))
 
-      if (Char::eq? c ascii-semi-colon)
+      if (Char::eq? c semi-colon_)
         state-push 'comment
 
-      elsif: (Char::eq? c ascii-double-quote)
-        state-push 'double-quote ; FIXME - not quite right?
+        ; This next bit of code simply skips through the commments a little faster
+        ; by avoiding another pass through the main loop
+        define z true
+        while (z)
+          set z (get-char input)
+          if (or (Char::eol? z) (eof-object? z))
+            unget-char input z
+            set z false
+          else:
+            set z true
 
-      elsif: (Char::eq? c ascii-single-quote)
+      elsif: (Char::eq? c double-quote_)
+        state-push 'double-quote
+
+      elsif: (Char::eq? c single-quote_)
         state-push 'single-quote
 
-      elsif: (or (Char::eq? c ascii-left-parenthesis) (Char::eq? c ascii-right-parenthesis) (Char::whitespace? c))
+      elsif: (or (Char::eq? c lparen_) (Char::eq? c rparen_) (Char::whitespace? c))
 
-        if (Char::eq? c ascii-left-parenthesis)
+        if (Char::eq? c lparen_)
           if (and (String::eq? buffer ":") (= is-quote 0))
             println "Error on line " line ", column " column ": illegal colon-quote."
             exit
           else:
             set buffer "("
 
-        if (Char::eq? c ascii-right-parenthesis)
+        if (Char::eq? c rparen_)
           paren-remove
           if (not (Null? (paren-balanced)))
             if (< (trait (paren-balanced) 'paren-balance) 0)
-              println "Error in code block starting on line " (trait tree-current 'line) ": unbalanced parenthesis.3"
+              println "Error in code block starting on line " (trait tree-current-head 'line) ": unbalanced parenthesis.3"
               exit
 
         if (and (Char::whitespace? c) (not (Char::eol? c)) (= (String::length buffer) 0))
@@ -3254,48 +2903,48 @@ define read (input (tree-head null))
           if (and (String::eq? buffer ":") (= is-quote 0))
             ; defult colon-quote (:_something) or :_something or (:)
             ; if whitespace follows a : then do not error but ...
-            if (or (Char::eq? ascii-space c) (Char::eol? c) (Char::eq? ascii-right-parenthesis c))
+            if (or (Char::eq? space_ c) (Char::eol? c) (Char::eq? rparen_ c))
               ; allthough (:) is useless it should be a valid placeholder
               unget-char input c ; put the char back
-              if (Char::eq? c ascii-right-parenthesis)
+              if (Char::eq? c rparen_)
                 ; conter act the paren-remove above because we are going to process it twice
                 paren-add
-                unget-char input ascii-space
+                unget-char input space_
               else:
                 set buffer ":String::append" ; override the buffer with the defult command
-                set p ascii-d ; update p with what it should be
-              set c ascii-space ; reset c to a space
+                set p d_ ; update p with what it should be
+              set c space_ ; reset c to a space
 
           elsif: (= (String::length buffer) 0)
             ; There is nothing in the buffer
             if (Char::eol? c)
               ; Nothing in the buffer and it is an EOL
-              if (and (not (eq? (state-top) 'begin)) (not first-term-on-line))
-              ; if (not (eq? (state-top) 'begin))
+              if (and (not (Symbol::eq? (state-top) 'begin)) (not first-term-on-line))
+              ; if (not (Symbol::eq? (state-top) 'begin))
                 ; EOL - we need to undo this if we find an ..
                 state-pop
                 tree-pop
-            if (Char::eq? c ascii-right-parenthesis)
+            if (Char::eq? c rparen_)
               if (= (tree-sibling-count) 0)
-                trait! tree-current 'parse-indent parse-indent
+                trait! tree-current-head 'parse-indent parse-indent
               state-pop
               tree-pop
           else:
             ; TODO - this if statement is not necc?
-            ; if (or (eq? (state-top) 'begin) (eq? (state-top) 'command))
-            if (eq? first-term-on-line true)
+            ; if (or (Symbol::eq? (state-top) 'begin) (Symbol::eq? (state-top) 'command))
+            if (true? first-term-on-line)
               set first-term-on-line false
               if (> (String::length buffer) 0)
-                if (< (trait tree-current 'parse-indent) parse-indent)
+                if (< (trait tree-current-head 'parse-indent) parse-indent)
 
                   ; CASE 1 - The current indentation is more than the previous
                   ; indentation.  This indicates a code block associated with the
                   ; previous line.
 
-                  ; println "CASE 1  - " (trait tree-current 'parse-indent) " - " parse-indent
+                  ; println "CASE 1  - " (trait tree-current-head 'parse-indent) " - " parse-indent
 
                   if (not (Null? (paren-balanced)))
-                    println "Error in code block starting on line " (trait tree-current 'line) ": unbalanced parenthesis.4"
+                    println "Error in code block starting on line " (trait tree-current-head 'line) ": unbalanced parenthesis.4"
                     exit
 
                   if (String::ellipses? buffer)
@@ -3305,7 +2954,7 @@ define read (input (tree-head null))
 
                   if (String::Label? buffer)
                     ; Over indented labels don't make any sense!
-                    println "Error on line " line ", column " column ": illegal label indentation. (" (trait 'parse-indent tree-current) ", " parse-indent ")"
+                    println "Error on line " line ", column " column ": illegal label indentation. (" (trait 'parse-indent tree-current-head) ", " parse-indent ")"
                     exit
 
                   ; We need to "continue" the last line with a code block
@@ -3319,7 +2968,7 @@ define read (input (tree-head null))
                   ; Add a new group
                   tree-push
                   ;println ":debug ADDING " buffer " as GROUP"
-                  trait! tree-current 'parse-indent parse-indent
+                  trait! tree-current-head 'parse-indent parse-indent
                   state-push 'begin
 
                   ; Add a new begin
@@ -3327,19 +2976,19 @@ define read (input (tree-head null))
 
                   ; Add a group for this command
                   tree-push
-                  trait! tree-current 'parse-indent parse-indent
+                  trait! tree-current-head 'parse-indent parse-indent
                   state-push 'command
 
-                elsif: (> (trait tree-current 'parse-indent) parse-indent)
+                elsif: (> (trait tree-current-head 'parse-indent) parse-indent)
 
                   ; CASE 2 - The current indentation is less than the previous
                   ; indentation.  We need to "close" some code blocks and
                   ; begin adding to a different block.
 
-                  ; println "Case 2 - " (trait tree-current 'parse-indent) " - " parse-indent
+                  ; println "Case 2 - " (trait tree-current-head 'parse-indent) " - " parse-indent
 
                   ; Keep popping the tree until we get to an indent <= the current
-                  while (< parse-indent (trait tree-current 'parse-indent))
+                  while (< parse-indent (trait tree-current-head 'parse-indent))
                     if (not (Null? (paren-balanced)))
                       println "Error in code block starting on line " (trait (paren-balanced) 'line) ": unbalanced parenthesis.5"
                       exit
@@ -3350,9 +2999,9 @@ define read (input (tree-head null))
                   state-pop
 
                   ; The indent should now be equal
-                  if (not (= parse-indent (trait tree-current 'parse-indent)))
+                  if (not (= parse-indent (trait tree-current-head 'parse-indent)))
                     println "Error on line " line ", column " column ": illegal indentation."
-                    println "[ " parse-indent ", " (trait tree-current 'parse-indent) "]"
+                    println "[ " parse-indent ", " (trait tree-current-head 'parse-indent) "]"
                     exit
 
                   ; And we should be at a State.Begin..
@@ -3363,7 +3012,7 @@ define read (input (tree-head null))
                   else:
                   ; Add a group for this command
                     tree-push
-                    trait! tree-current 'parse-indent parse-indent
+                    trait! tree-current-head 'parse-indent parse-indent
                     state-push 'command
 
                 else:
@@ -3377,24 +3026,27 @@ define read (input (tree-head null))
                     state-push 'command
                   else:
                     if (not (Null? (paren-balanced)))
-                      println "Error in code block starting on line " (trait 'line tree-current) ": unbalanced parenthesis.6"
+                      println "Error in code block starting on line " (trait 'line tree-current-head) ": unbalanced parenthesis.6"
                       exit
                     ; Add a group for this command
                     tree-push
-                    trait! tree-current 'parse-indent parse-indent
+                    trait! tree-current-head 'parse-indent parse-indent
                     state-push 'command
 
             if (= (tree-sibling-count) 0)
-              trait! tree-current 'parse-indent parse-indent
+              trait! tree-current-head 'parse-indent parse-indent
 
             if (> is-quote 0)
               ; String
+              ;println "----1"
               if (= is-quote 2)
                 set buffer ""
-              tree-add (<value>::make 'string buffer line column)
+              ; tree-add (cons buffer null null) line column
+              tree-add buffer line
               set is-quote 0
 
             elsif: (< is-quote 0)
+              ;println "----2"
               ;println ":debug READ QS " buffer
               ; TODO - Add a surrounding (quote ###) in a similar
               ; fashion to adding a colon command.
@@ -3405,100 +3057,92 @@ define read (input (tree-head null))
               
               ; Add a new group for the command
               tree-push                                           
-              trait! tree-current 'parse-indent parse-indent 
+              trait! tree-current-head 'parse-indent parse-indent 
               
-              tree-add (<value>::make 'quoted-symbol (String->Symbol "quote") line column)
-              tree-add (<value>::make 'quoted-symbol (String->Symbol buffer) line column)
+              ; tree-add (cons (String->Symbol "quote") null null) line column
+              ; tree-add (cons (String->Symbol buffer) null null) line column
+              tree-add (Ginger::String->Symbol "quote") line
+              tree-add (Ginger::String->Symbol buffer) line
               
               tree-pop
 
               set is-quote 0
 
-              ;tree-add (<value>::make 'symbol (String->Symbol (String::rest buffer)) line column)
+              ;tree-add (<value>::make 'symbol (Ginger::String->Symbol (String::rest buffer)) line column)
               ;tree-push
-              ;trait! tree-current 'parse-indent parse-indent
+              ;trait! tree-current-head 'parse-indent parse-indent
               ;tree-add (<value>::make 'quoted-symbol (String->Symbol "quote") line column)
               ; 
               ;state-push 'single-quote
               ;if (Char::eol? c)
               ;  ; reuse eol for colon-quote
               ;  unget-char input c
-              ;  set c ascii-space
+              ;  set c space_
               ;else:
               ;  ; remove spaces between command and string
-              ;  while (Char::eq? ascii-space (peek-char input))
+              ;  while (Char::eq? space_ (peek-char input))
               ;    get-char input
               ;set buffer ""
 
-            elsif: (String::Integer? buffer)
-              ; Integer
-              tree-add (<value>::make 'integer (String->Integer buffer) line column)
-
-            elsif: (String::Rational? buffer)
-              ; Rational
-              tree-add (<value>::make 'rational (String->Flonum buffer) line column)
-
-            elsif: (String::Complex? buffer)
-              ; Complex
-              tree-add (<value>::make 'rational (String->Complex buffer) line column)
-
-            elsif: (String::Boolean? buffer)
-              ; Boolean
-              tree-add (<value>::make 'boolean (String->Boolean buffer) line column)
-
-            elsif: (String::colon-command? buffer)
+            elsif: (Char::eq? (String::nth buffer 0) colon_)
+              ;println "COLON QUOTE"
+              ; TODO: check for illegal symbols
               ; (:something ... ) or :something
               ; We have already added a group for the line and then a group for the
               ; begin paren. which is right...
 
-              tree-add (<value>::make 'symbol (String->Symbol (String::rest buffer)) line column)
+              ; tree-add (<value>::make 'symbol (String->Symbol (String::rest buffer)) line column)
+              tree-add (Ginger::String->Symbol (String::rest buffer)) line
               tree-push
-              trait! tree-current 'parse-indent parse-indent
-              tree-add (<value>::make 'symbol (String->Symbol "String::append") line column)
+              trait! tree-current-head 'parse-indent parse-indent
+              ; tree-add (<value>::make 'symbol (String->Symbol "String::append") line column)
+              tree-add (Ginger::String->Symbol "String::append") line
               state-push 'colon-quote
               if (Char::eol? c)
                 ; reuse eol for colon-quote
                 unget-char input c
-                set c ascii-space
+                set c space_
               else:
                 ; remove spaces between command and string
-                while (Char::eq? ascii-space (peek-char input))
+                while (Char::eq? space_ (peek-char input))
                   get-char input
               set buffer ""
 
-            elsif: (String::Label? buffer)
-              ; Label
-              tree-add (<value>::make 'label (String->Label-Sym buffer) line column)
-
-            elsif: (String::Symbol? buffer)
-              ; Symbol
-              tree-add (<value>::make 'symbol (String->Symbol buffer) line column)
-
             elsif: (String::ellipses? buffer)
+              ;println "ELLIPSES"
               ; Ellipses
-              if (= (trait tree-current 'line) 0)
+              if (= (trait tree-current-head 'line) 0)
                 ; Files that begin with ellipses don't make any sense!
-                println "Error on line " line ", column " column ": illegal ellipses."
+                println "Error on line " line ", " column ": illegal ellipses."
                 exit
 
-            elsif: (Char::eq? c ascii-left-parenthesis)
+            elsif: (Char::eq? c lparen_)
+              ;println "PAREN ADD"
               paren-add
 
               tree-push
-              trait! tree-current 'parse-indent parse-indent
+              trait! tree-current-head 'parse-indent parse-indent
               state-push 'command
 
             else:
-              ; Anything else is an error
-              println "Error on line " line ", column " column ": invalid symbol '" buffer "'."
-              exit
+              ;println "STRING->VALUE " buffer
+              define v (String->Value buffer)
+              if (sv-err)
+                ; Anything else is an error
+                println "Error on line " line ", column: " column "invalid symbol '" buffer "'."
+                exit
+              else:
+                define z (tree-add v line)
+                if (Symbol? v)
+                  if (Symbol::eq? v 'include)
+                    set includes (pair z includes)
 
             if (Char::eol? c)
-              if (not (eq? (state-top) 'begin))
+              if (not (Symbol::eq? (state-top) 'begin))
                 state-pop
                 tree-pop
 
-            if (Char::eq? c ascii-right-parenthesis)
+            if (Char::eq? c rparen_)
               state-pop
               tree-pop
 
@@ -3508,13 +3152,14 @@ define read (input (tree-head null))
 
     if (not (eos-object? input))
       if (Char::eol? c)
-        set line (+ line 1)
+        ++ line
         set column 0
         set parse-indent -1
         set first-term-on-line true
       else:
-        set column (+ column 1)
+        ++ column
 
     set p c
 
+  trait! tree-head 'includes includes
   tree-head
