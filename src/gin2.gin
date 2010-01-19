@@ -16,7 +16,7 @@
 
 include "compiler.gin"
 
-define ginger-version "20090518"
+define ginger-version "20100119"
 define banner (String::append "This is Ginger, version " ginger-version)
 
 define output-c false
@@ -65,7 +65,7 @@ define process-arguments (args)
     elsif: (String::eq? (String::substring (first args) 0 8) "--target")
 
       define target null
-      define tmp (String::split (first args) ascii-equals)
+      define tmp (String::split (first args) =_)
       if (= (length tmp) 2)
         set target (String->Symbol (second tmp))
       ; check if user provided a target
@@ -118,19 +118,25 @@ if (not input-file-name)
 
 println "The Literate Gingerbread Man: Opening file.."
 
-define tree-head (<group>::make 0 0)
+define tree-head (<group>::make 0)
 trait! tree-head 'begin true
 
 println "Inserting auto includes.."
-define std-include (append (<value>::make 'symbol 'include 0 0) (<value>::make 'string "std.gin" 0 0))
+define std-include (append (cons 'include (Dict::make 'parent null 'paren-balance 0 'parse-indent 0 'line 0 'column 0 'begin false) null) (cons "std.gin" null null))
 first! tree-head std-include
-second*! tree-head (<group>::make 0 0)
+second*! tree-head (<group>::make 0)
 
 ; Read input file
 println "Reading " input-file-name
 define input (open-input-file input-file-name)
 read input (second* tree-head)
 close-input-stream input
+
+properties! tree-head (properties (second* tree-head))
+trait! tree-head 'includes (pair (first tree-head) (trait tree-head 'includes))
+trait! (first tree-head) 'parent tree-head
+
+println (trait tree-head 'includes)
 
 if print-debug-tree
   println tree-head
@@ -154,12 +160,25 @@ if compile
       object->string (first (second* node))
 
     define chunk? (node)
-      ; TODO - Don't use <term> functions
-      and (eq? (trait node 'type) 'symbol) (eq? (first node) 'chunk)
+      if (Cons? node)
+        if (Symbol? (first node))
+          if (Cons? (properties node))
+            false
+          else:
+            if (Symbol::eq? (first node) 'chunk)
+              true
+            else:
+              false
+        else:
+          false
+      else:
+        false
     
     define discover-chunks (tree)
       ; find chunks and add them to chunk dict based on names
       if (Null? tree)
+        null
+      elsif: (not (Cons? tree))
         null
       elsif: (chunk? tree)
         println "Discovered " (chunk-name tree)
@@ -191,11 +210,11 @@ if compile
       
       define expand-chunk-call (node)
         println "Expanding chunk: " (macro-key node)
-        
+
         define macro-def (Dict::get chunks (macro-key node))
 
         if (not macro-def)
-          ;println "couldn't find chunck " (macro-key node)
+          ;println "Couldn't find chunk " (macro-key node)
           println "Error on line " (Dict::get (properties node) 'line) ": couldn't find chunk " (macro-key node) "."
           exit
 
@@ -273,12 +292,15 @@ if compile
   discover-local-variables tree-head 'main
    
   ; Discover quoted symbols
+  println "Discover quoted symbols.."
   discover-quoted-symbols tree-head
    
   println "Writing quoted symbols.."
   println output-c "char* qsdef[] = {"
   define qdef-index 0
   each i quoted-symbols
+    if (Symbol? i)
+      set i (Symbol->String i)
     if (= (String::length i) 1)
       define n (Char->Integer (String::nth i 0))
       println output-c "#define qsdef___" (name->c-name i) " " (Fixnum->String n)
@@ -329,9 +351,9 @@ if compile
   close-output-stream output-h
    
   ; Gather information about the environment
-  define GIN-C (getenv "GIN_C" "")
+  define GIN-C (getenv "GIN_C" "gcc")
   define GIN-CFLAGS (getenv "GIN_CFLAGS" "")
-  define GIN-LDFLAGS (getenv "GIN_LDFLAGS" "")
+  define GIN-LDFLAGS (getenv "GIN_LDFLAGS" "-L. -lginger")
   define GIN-INCLUDE-PATH (getenv "GIN_INCLUDE_PATH" "")
   define GIN-IMPORT-PATH (getenv "GIN_IMPORT_PATH" "")
    
@@ -346,33 +368,23 @@ if compile
   ;set GIN-LDFLAGS (String::append GIN-LDFLAGS " ")
    
   set GIN-CFLAGS (String::append GIN-CFLAGS " -Ilib ")
-  set GIN-LDFLAGS (String::append GIN-LDFLAGS " -Llib -lginger -lgmp ")
-   
+  set GIN-LDFLAGS (String::append GIN-LDFLAGS " -Llib -lginger ")
+
   ; Add mode specific flags.
   if (cairo)
     println "Using Cairo."
-    set GIN-CFLAGS (String::append GIN-CFLAGS " $(pkg-config --cflags cairo) ")
-    set GIN-LDFLAGS (String::append GIN-LDFLAGS " $(pkg-config --libs cairo) ")
-   
+    set GIN-CFLAGS (String::append GIN-CFLAGS " $(pkg-config --cflags cairo) -arch i386 ")
+    set GIN-LDFLAGS (String::append GIN-LDFLAGS " $(pkg-config --libs cairo) -arch i386 ")
+
   if (pango)
     println "Using Pango."
-    set GIN-CFLAGS (String::append GIN-CFLAGS " $(pkg-config --cflags pangocairo) ")
-    set GIN-LDFLAGS (String::append GIN-LDFLAGS " $(pkg-config --libs pangocairo) ")
-   
-  if (and fltk (not opengl))
-    println "Using Fltk."
-    set GIN-CFLAGS (String::append GIN-CFLAGS " `fltk2-config --cxxflags` ")
-    set GIN-LDFLAGS (String::append GIN-LDFLAGS " `fltk2-config --ldflags` ")
-   
-  if (and fltk opengl)
-    println "Using Fltk with OpenGL."
-    set GIN-CFLAGS (String::append GIN-CFLAGS " `fltk2-config --cxxflags` ")
-    set GIN-LDFLAGS (String::append GIN-LDFLAGS " `fltk2-config --ldflags --use-gl` -lfltk2_glut -framework GLUT ")
-   
+    set GIN-CFLAGS (String::append GIN-CFLAGS " $(pkg-config --cflags pangocairo) -arch i386 ")
+    set GIN-LDFLAGS (String::append GIN-LDFLAGS " $(pkg-config --libs pangocairo) -arch i386 ")
+
   if (objC)
     println "Using ObjC (and Cocoa)."
     set GIN-LDFLAGS (String::append GIN-LDFLAGS " -framework Cocoa ")
-   
+
   ; Compile the program.
   if (eq? compile true)
     println (String::append "Compiling with " GIN-C)
@@ -395,5 +407,5 @@ if compile
       execute (String::append GIN-C " " GIN-CFLAGS " " output-c-file-name " -o " base-file-name " " GIN-LDFLAGS)
       println (String::append GIN-C " " GIN-CFLAGS " " output-c-file-name " -o " base-file-name " " GIN-LDFLAGS)
     println "Executable: " base-file-name
-   
+
   println "Done."
