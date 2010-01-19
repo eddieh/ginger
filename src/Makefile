@@ -46,4 +46,4 @@ libginger.a: $(OBJS)
 	$(LIBRARIAN) $(LIBRARIAN_FLAGS) $@ $(OBJS)
 
 $(OBJS):
-	$(CPP_COMPILER) $(CFLAGS) -c $*.c
+	$(C_COMPILER) $(CFLAGS) -c $*.c
