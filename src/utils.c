@@ -176,13 +176,6 @@ GIN_OBJ fmt_float(float d) {
   return r;
 }
 
-GIN_OBJ gin_string_to_float(GIN_OBJ str) {
-  GIN_OBJ r;
-  double f = atof(GIN_STR_VALUE(str));
-  GIN_NEW_FLONUM(r, f);
-  return r;
-}
-
 // log_e 10
 #define M_LN10b 2.30258509299404568402
 double exp10 (double arg) {
