@@ -222,10 +222,10 @@ typedef struct GarbageCollector_t {
 #define GIN_ALLOCATE(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate(mm, size); \
 v = (type)safe_allocate;
 
-#define GIN_ALLOCATE_FRAME(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate_call(mm, size); \
+#define GIN_ALLOCATE_FRAME(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate(mm, size); \
 v = (type)safe_allocate;
 
-#define GIN_DEALLOCATE_FRAME(v) gc_deallocate_call(mm, v);
+#define GIN_DEALLOCATE_FRAME(v)
 
 #define GIN_ALLOCATE_WITH_CLEANUP(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate_system(mm, size); \
 v = (type)safe_allocate; \
