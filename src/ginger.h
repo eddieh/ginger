@@ -49,7 +49,7 @@ typedef struct Frame_t {
   struct Frame_t* next_frame;
   struct Frame_t* previous_frame;
   struct Frame_t* previous_lexical_frame;
-  GIN_OBJ return_address;
+  GIN_OBJ return_address; // deprecated
   GIN_OBJ result;
 } Frame;
 
@@ -57,7 +57,7 @@ typedef struct {
   Frame* next_frame;
   Frame* previous_frame;
   Frame* previous_lexical_frame;
-  GIN_OBJ return_address;
+  GIN_OBJ return_address; // deprecated
   GIN_OBJ result;
   // Flexible array member:
   GIN_OBJ argn[];
@@ -92,7 +92,7 @@ typedef struct GingerClassDefinition_t {
 
 typedef struct {
   int frame_size;
-  void* code;
+  void (*code)();
   char* name;
 } GingerFunctionDefinition;
 
@@ -254,11 +254,9 @@ gc_mark_as_requiring_cleanup(mm, v);
   frame->next_frame->previous_lexical_frame = previous_lframe; \
   CALLDEBUG(#function); \
   frame->next_frame->previous_frame = frame; \
-  frame->next_frame->return_address = &&position_ ## seed ; \
   frame = frame->next_frame; \
   frame->next_frame = 0; \
-  goto code_ ## function ; \
-position_ ## seed : \
+  code_ ## function ();                    \
   result0 = frame->next_frame->result; \
   frame->next_frame->previous_frame = 0; \
   frame->next_frame->previous_lexical_frame = 0; \
@@ -270,7 +268,6 @@ position_ ## seed : \
   ALLOCATE_FRAME___ ## function (frame->next_frame) \
   frame->next_frame->previous_lexical_frame = previous_lframe; \
   frame->next_frame->previous_frame = frame; \
-  frame->next_frame->return_address = &&position_ ## seed ; \
   calln_i = 0; \
   calln_temp = varn; \
   while(1) { \
@@ -281,8 +278,7 @@ position_ ## seed : \
   } \
   frame = frame->next_frame; \
   frame->next_frame = 0; \
-  goto code_ ## function ; \
-position_ ## seed : \
+  code_ ## function ();                 \
   result0 = frame->next_frame->result; \
   frame->next_frame->previous_frame = 0; \
   frame->next_frame->previous_lexical_frame = 0; \
@@ -300,7 +296,6 @@ position_ ## seed : \
   GIN_ALLOCATE(frame->next_frame, Frame*, GIN_NIM_GET_FUNCTION(function)->frame_size); \
   frame->next_frame->previous_lexical_frame = GIN_NIM_GET_PREVIOUS_LEXICAL_FRAME(function); \
   frame->next_frame->previous_frame = frame; \
-  frame->next_frame->return_address = &&position_ ## seed ; \
   calln_i = 0; \
   calln_temp = varn; \
   while(1) { \
@@ -313,8 +308,7 @@ position_ ## seed : \
   next_func = function; \
   frame = frame->next_frame; \
   frame->next_frame = 0; \
-  goto *(GIN_NIM_GET_FUNCTION(next_func)->code); \
-position_ ## seed : \
+  GIN_NIM_GET_FUNCTION(next_func)->code();      \
   result0 = frame->next_frame->result; \
   frame->next_frame->previous_frame = 0; \
   frame->next_frame->previous_lexical_frame = 0; \
@@ -349,10 +343,10 @@ GIN_OBJ ginExec (GIN_OBJ fn, GIN_OBJ args) { \
 #define MID_CODE return 0; \
   } \
   CALLNDYNAMIC(fn, 4999, frame->result, args); \
-  goto end_code_return;
+  return frame->result; \
+}
 
-#define END_CODE end_code_return: return frame->result;  \
-} \
+#define END_CODE \
 int main(int argc, char *argv[]) {                      \
   gin_argc = argc; \
   gin_argv = argv; \
@@ -370,10 +364,10 @@ int main(int argc, char *argv[]) {                      \
   return 0; \
 }
 
-#define BEGIN_FUNCTION(function) code_ ## function:
+#define BEGIN_FUNCTION(function) void code_ ## function () {
 
 #define END_FUNCTION() frame = frame->previous_frame; \
-  goto *(frame->next_frame->return_address);
+}
 
 // GIN_OBJ is defined as a void* but in reality it can hold
 // pointers (non-immediates) and certain useful primitives
@@ -815,5 +809,5 @@ extern int gin_argc;
 extern char** gin_argv;
 extern GIN_OBJ type_table;
 extern int global_uid;
-
+extern void main_entry ();
 #endif /* GINGER_H */

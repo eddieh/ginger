@@ -200,6 +200,7 @@ define function-prototype-expansion (v kind)
   println output-h ""
   println output-h "#define ALLOCATE_FRAME___" c-name "(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___" c-name "));"
   println output-h "#define DEALLOCATE_FRAME___" c-name "(t000) GIN_DEALLOCATE_FRAME(t000);"
+  println output-h "extern void code_" c-name " ();"
   println output-h ""
 
 define function-definition-expansion (v kind)
@@ -216,9 +217,9 @@ define function-definition-expansion (v kind)
   println output-c "gin_function_table[" func-def-exp-number "].frame_size = sizeof(Frame___" c-name ");"
 
   if (Symbol::eq? kind 'function)
-    println output-c "gin_function_table[" func-def-exp-number "].code = &&code_" c-name ";"
+    println output-c "gin_function_table[" func-def-exp-number "].code = code_" c-name ";"
   else:
-    println output-c "gin_function_table[" func-def-exp-number "].code = &&main_entry;"
+    println output-c "gin_function_table[" func-def-exp-number "].code = main_entry;"
 
   println output-c "gin_function_table[" func-def-exp-number "].name = \"" name "\";"
   ++ func-def-exp-number
@@ -307,7 +308,8 @@ define function-expansion (v kind)
   
   if (Symbol::eq? kind 'function)
     set function-name (name->c-name (<term>::get-definition-name function))
-    println output-c "BEGIN_FUNCTION(" function-name ")"
+    ; println output-c "BEGIN_FUNCTION(" function-name ")"
+    println output-c "void code_" function-name " () {"
   define tmp-number 0
   define tmp-number-max 0
 
@@ -1044,7 +1046,8 @@ define function-expansion (v kind)
     flatten (<term>::get-definition-body function)
     println output-c (get-output-string output-delayed-c)
     ; println output-c "frame->result = ((Frame___" function-name " *)(frame))->tmp" tmp-number ";"
-    println output-c "END_FUNCTION()"
+    ; println output-c "END_FUNCTION()"
+    println output-c "frame = frame->previous_frame; }"
     set tmp-variables (append tmp-variables (list (list v tmp-number-max)))
   else:
     flatten v
