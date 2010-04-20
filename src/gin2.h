@@ -517,6 +517,7 @@ GIN_OBJ tmp12;
 
 #define ALLOCATE_FRAME___MAIN(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___MAIN));
 #define DEALLOCATE_FRAME___MAIN(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_MAIN ();
 
 typedef struct {
 Frame* next_frame;
@@ -532,6 +533,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Type_058_058make(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Type_058_058make));
 #define DEALLOCATE_FRAME___Type_058_058make(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Type_058_058make ();
 
 typedef struct {
 Frame* next_frame;
@@ -545,6 +547,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Type_058_058index(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Type_058_058index));
 #define DEALLOCATE_FRAME___Type_058_058index(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Type_058_058index ();
 
 typedef struct {
 Frame* next_frame;
@@ -559,6 +562,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Type_058_058eq_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Type_058_058eq_063));
 #define DEALLOCATE_FRAME___Type_058_058eq_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Type_058_058eq_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -573,6 +577,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Type_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Type_063));
 #define DEALLOCATE_FRAME___Type_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Type_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -586,6 +591,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Ginger_058_058immediate_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Ginger_058_058immediate_063));
 #define DEALLOCATE_FRAME___Ginger_058_058immediate_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Ginger_058_058immediate_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -606,6 +612,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___Ginger_058_058im_045type(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Ginger_058_058im_045type));
 #define DEALLOCATE_FRAME___Ginger_058_058im_045type(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Ginger_058_058im_045type ();
 
 typedef struct {
 Frame* next_frame;
@@ -622,6 +629,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Ginger_058_058im_045_062Binary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Ginger_058_058im_045_062Binary));
 #define DEALLOCATE_FRAME___Ginger_058_058im_045_062Binary(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Ginger_058_058im_045_062Binary ();
 
 typedef struct {
 Frame* next_frame;
@@ -635,6 +643,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Ginger_058_058nim_045type(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Ginger_058_058nim_045type));
 #define DEALLOCATE_FRAME___Ginger_058_058nim_045type(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Ginger_058_058nim_045type ();
 
 typedef struct {
 Frame* next_frame;
@@ -650,6 +659,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___type(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___type));
 #define DEALLOCATE_FRAME___type(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_type ();
 
 typedef struct {
 Frame* next_frame;
@@ -663,6 +673,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___type_045of(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___type_045of));
 #define DEALLOCATE_FRAME___type_045of(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_type_045of ();
 
 typedef struct {
 Frame* next_frame;
@@ -685,6 +696,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___object_045_062string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___object_045_062string));
 #define DEALLOCATE_FRAME___object_045_062string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_object_045_062string ();
 
 typedef struct {
 Frame* next_frame;
@@ -701,6 +713,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___object_045_062pretty_045string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___object_045_062pretty_045string));
 #define DEALLOCATE_FRAME___object_045_062pretty_045string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_object_045_062pretty_045string ();
 
 typedef struct {
 Frame* next_frame;
@@ -731,6 +744,7 @@ GIN_OBJ tmp11;
 
 #define ALLOCATE_FRAME___object_045_062pretty_045string_045internal(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___object_045_062pretty_045string_045internal));
 #define DEALLOCATE_FRAME___object_045_062pretty_045string_045internal(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_object_045_062pretty_045string_045internal ();
 
 typedef struct {
 Frame* next_frame;
@@ -744,6 +758,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Ginger_058_058Symbol_045_062Number(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Ginger_058_058Symbol_045_062Number));
 #define DEALLOCATE_FRAME___Ginger_058_058Symbol_045_062Number(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Ginger_058_058Symbol_045_062Number ();
 
 typedef struct {
 Frame* next_frame;
@@ -762,6 +777,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Ginger_058_058String_045_062Symbol(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Ginger_058_058String_045_062Symbol));
 #define DEALLOCATE_FRAME___Ginger_058_058String_045_062Symbol(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Ginger_058_058String_045_062Symbol ();
 
 typedef struct {
 Frame* next_frame;
@@ -781,6 +797,7 @@ GIN_OBJ tmp5;
 
 #define ALLOCATE_FRAME___Ginger_058_058Symbol_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Ginger_058_058Symbol_045_062String));
 #define DEALLOCATE_FRAME___Ginger_058_058Symbol_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Ginger_058_058Symbol_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -798,6 +815,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Ginger_058_058bootstrap_045symbols(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Ginger_058_058bootstrap_045symbols));
 #define DEALLOCATE_FRAME___Ginger_058_058bootstrap_045symbols(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Ginger_058_058bootstrap_045symbols ();
 
 typedef struct {
 Frame* next_frame;
@@ -814,6 +832,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___eq_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___eq_063));
 #define DEALLOCATE_FRAME___eq_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_eq_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -831,6 +850,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Binary_058_058make(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058make));
 #define DEALLOCATE_FRAME___Binary_058_058make(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058make ();
 
 typedef struct {
 Frame* next_frame;
@@ -846,6 +866,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Binary_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_063));
 #define DEALLOCATE_FRAME___Binary_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -860,6 +881,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Binary_045_062Integer(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_045_062Integer));
 #define DEALLOCATE_FRAME___Binary_045_062Integer(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_045_062Integer ();
 
 typedef struct {
 Frame* next_frame;
@@ -874,6 +896,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Binary_058_058length(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058length));
 #define DEALLOCATE_FRAME___Binary_058_058length(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058length ();
 
 typedef struct {
 Frame* next_frame;
@@ -901,6 +924,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Binary_058_058_043(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_043));
 #define DEALLOCATE_FRAME___Binary_058_058_043(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_043 ();
 
 typedef struct {
 Frame* next_frame;
@@ -923,6 +947,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_045(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_045));
 #define DEALLOCATE_FRAME___Binary_058_058_045(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_045 ();
 
 typedef struct {
 Frame* next_frame;
@@ -942,6 +967,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_042));
 #define DEALLOCATE_FRAME___Binary_058_058_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -961,6 +987,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_047(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_047));
 #define DEALLOCATE_FRAME___Binary_058_058_047(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_047 ();
 
 typedef struct {
 Frame* next_frame;
@@ -980,6 +1007,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_062(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_062));
 #define DEALLOCATE_FRAME___Binary_058_058_062(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_062 ();
 
 typedef struct {
 Frame* next_frame;
@@ -999,6 +1027,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_062_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_062_061));
 #define DEALLOCATE_FRAME___Binary_058_058_062_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_062_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1018,6 +1047,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_060(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_060));
 #define DEALLOCATE_FRAME___Binary_058_058_060(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_060 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1037,6 +1067,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_060_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_060_061));
 #define DEALLOCATE_FRAME___Binary_058_058_060_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_060_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1056,6 +1087,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058eq_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058eq_063));
 #define DEALLOCATE_FRAME___Binary_058_058eq_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058eq_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1075,6 +1107,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_033_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_033_061));
 #define DEALLOCATE_FRAME___Binary_058_058_033_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_033_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1095,6 +1128,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_060_060(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_060_060));
 #define DEALLOCATE_FRAME___Binary_058_058_060_060(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_060_060 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1115,6 +1149,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_060_060_060(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_060_060_060));
 #define DEALLOCATE_FRAME___Binary_058_058_060_060_060(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_060_060_060 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1135,6 +1170,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_062_062(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_062_062));
 #define DEALLOCATE_FRAME___Binary_058_058_062_062(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_062_062 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1155,6 +1191,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_058_058_062_062_062(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_058_058_062_062_062));
 #define DEALLOCATE_FRAME___Binary_058_058_062_062_062(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_058_058_062_062_062 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1176,6 +1213,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Binary_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Binary_045_062String));
 #define DEALLOCATE_FRAME___Binary_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Binary_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -1192,6 +1230,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___bin(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___bin));
 #define DEALLOCATE_FRAME___bin(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_bin ();
 
 typedef struct {
 Frame* next_frame;
@@ -1207,6 +1246,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____043(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____043));
 #define DEALLOCATE_FRAME____043(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__043 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1222,6 +1262,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____045(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____045));
 #define DEALLOCATE_FRAME____045(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__045 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1237,6 +1278,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____042));
 #define DEALLOCATE_FRAME____042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1252,6 +1294,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____047(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____047));
 #define DEALLOCATE_FRAME____047(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__047 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1267,6 +1310,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____060(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060));
 #define DEALLOCATE_FRAME____060(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1282,6 +1326,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____060_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060_061));
 #define DEALLOCATE_FRAME____060_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1297,6 +1342,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____062(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____062));
 #define DEALLOCATE_FRAME____062(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__062 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1312,6 +1358,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____062_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____062_061));
 #define DEALLOCATE_FRAME____062_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__062_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1327,6 +1374,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____061));
 #define DEALLOCATE_FRAME____061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1341,6 +1389,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___max(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___max));
 #define DEALLOCATE_FRAME___max(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_max ();
 
 typedef struct {
 Frame* next_frame;
@@ -1355,6 +1404,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___min(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___min));
 #define DEALLOCATE_FRAME___min(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_min ();
 
 typedef struct {
 Frame* next_frame;
@@ -1368,6 +1418,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___abs(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___abs));
 #define DEALLOCATE_FRAME___abs(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_abs ();
 
 typedef struct {
 Frame* next_frame;
@@ -1382,6 +1433,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___modulo(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___modulo));
 #define DEALLOCATE_FRAME___modulo(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_modulo ();
 
 typedef struct {
 Frame* next_frame;
@@ -1395,6 +1447,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___zero_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___zero_063));
 #define DEALLOCATE_FRAME___zero_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_zero_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1408,6 +1461,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___positive_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___positive_063));
 #define DEALLOCATE_FRAME___positive_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_positive_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1421,6 +1475,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___negative_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___negative_063));
 #define DEALLOCATE_FRAME___negative_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_negative_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1434,6 +1489,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___odd_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___odd_063));
 #define DEALLOCATE_FRAME___odd_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_odd_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1447,6 +1503,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___even_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___even_063));
 #define DEALLOCATE_FRAME___even_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_even_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1461,6 +1518,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___remainder(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___remainder));
 #define DEALLOCATE_FRAME___remainder(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_remainder ();
 
 typedef struct {
 Frame* next_frame;
@@ -1477,6 +1535,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___gcd(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___gcd));
 #define DEALLOCATE_FRAME___gcd(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_gcd ();
 
 typedef struct {
 Frame* next_frame;
@@ -1491,6 +1550,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Number_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Number_063));
 #define DEALLOCATE_FRAME___Number_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Number_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1504,6 +1564,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___nocall(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___nocall));
 #define DEALLOCATE_FRAME___nocall(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_nocall ();
 
 typedef struct {
 Frame* next_frame;
@@ -1518,6 +1579,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___degree_045_062radian(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___degree_045_062radian));
 #define DEALLOCATE_FRAME___degree_045_062radian(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_degree_045_062radian ();
 
 typedef struct {
 Frame* next_frame;
@@ -1531,6 +1593,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___sin(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___sin));
 #define DEALLOCATE_FRAME___sin(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_sin ();
 
 typedef struct {
 Frame* next_frame;
@@ -1544,6 +1607,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cos(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cos));
 #define DEALLOCATE_FRAME___cos(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cos ();
 
 typedef struct {
 Frame* next_frame;
@@ -1560,6 +1624,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___expt(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___expt));
 #define DEALLOCATE_FRAME___expt(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_expt ();
 
 typedef struct {
 Frame* next_frame;
@@ -1575,6 +1640,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Fixnum_058_058make(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058make));
 #define DEALLOCATE_FRAME___Fixnum_058_058make(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058make ();
 
 typedef struct {
 Frame* next_frame;
@@ -1589,6 +1655,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Fixnum_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_063));
 #define DEALLOCATE_FRAME___Fixnum_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1602,6 +1669,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_045_062Binary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_045_062Binary));
 #define DEALLOCATE_FRAME___Fixnum_045_062Binary(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_045_062Binary ();
 
 typedef struct {
 Frame* next_frame;
@@ -1615,6 +1683,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_045_062String));
 #define DEALLOCATE_FRAME___Fixnum_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -1628,6 +1697,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_045_062Flonum(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_045_062Flonum));
 #define DEALLOCATE_FRAME___Fixnum_045_062Flonum(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_045_062Flonum ();
 
 typedef struct {
 Frame* next_frame;
@@ -1641,6 +1711,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_045_062Char(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_045_062Char));
 #define DEALLOCATE_FRAME___Fixnum_045_062Char(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_045_062Char ();
 
 typedef struct {
 Frame* next_frame;
@@ -1655,6 +1726,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_058_058_043(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058_043));
 #define DEALLOCATE_FRAME___Fixnum_058_058_043(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058_043 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1669,6 +1741,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_058_058_045(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058_045));
 #define DEALLOCATE_FRAME___Fixnum_058_058_045(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058_045 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1683,6 +1756,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_058_058_047(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058_047));
 #define DEALLOCATE_FRAME___Fixnum_058_058_047(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058_047 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1697,6 +1771,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_058_058_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058_042));
 #define DEALLOCATE_FRAME___Fixnum_058_058_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1711,6 +1786,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_058_058_060(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058_060));
 #define DEALLOCATE_FRAME___Fixnum_058_058_060(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058_060 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1725,6 +1801,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_058_058_062(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058_062));
 #define DEALLOCATE_FRAME___Fixnum_058_058_062(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058_062 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1739,6 +1816,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_058_058_062_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058_062_061));
 #define DEALLOCATE_FRAME___Fixnum_058_058_062_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058_062_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1753,6 +1831,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_058_058_060_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058_060_061));
 #define DEALLOCATE_FRAME___Fixnum_058_058_060_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058_060_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1767,6 +1846,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Fixnum_058_058_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Fixnum_058_058_061));
 #define DEALLOCATE_FRAME___Fixnum_058_058_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Fixnum_058_058_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1782,6 +1862,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_063));
 #define DEALLOCATE_FRAME___Integer_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1799,6 +1880,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Integer_045_062Binary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_045_062Binary));
 #define DEALLOCATE_FRAME___Integer_045_062Binary(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_045_062Binary ();
 
 typedef struct {
 Frame* next_frame;
@@ -1816,6 +1898,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Integer_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_045_062String));
 #define DEALLOCATE_FRAME___Integer_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -1833,6 +1916,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Integer_045_062Flonum(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_045_062Flonum));
 #define DEALLOCATE_FRAME___Integer_045_062Flonum(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_045_062Flonum ();
 
 typedef struct {
 Frame* next_frame;
@@ -1846,6 +1930,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Integer_045_062Char(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_045_062Char));
 #define DEALLOCATE_FRAME___Integer_045_062Char(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_045_062Char ();
 
 typedef struct {
 Frame* next_frame;
@@ -1863,6 +1948,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_058_058_043(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_058_058_043));
 #define DEALLOCATE_FRAME___Integer_058_058_043(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_058_058_043 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1880,6 +1966,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_058_058_045(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_058_058_045));
 #define DEALLOCATE_FRAME___Integer_058_058_045(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_058_058_045 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1897,6 +1984,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_058_058_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_058_058_042));
 #define DEALLOCATE_FRAME___Integer_058_058_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_058_058_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1914,6 +2002,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_058_058_047(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_058_058_047));
 #define DEALLOCATE_FRAME___Integer_058_058_047(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_058_058_047 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1930,6 +2019,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_058_058_060(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_058_058_060));
 #define DEALLOCATE_FRAME___Integer_058_058_060(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_058_058_060 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1946,6 +2036,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_058_058_060_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_058_058_060_061));
 #define DEALLOCATE_FRAME___Integer_058_058_060_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_058_058_060_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1962,6 +2053,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_058_058_062(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_058_058_062));
 #define DEALLOCATE_FRAME___Integer_058_058_062(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_058_058_062 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1978,6 +2070,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_058_058_062_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_058_058_062_061));
 #define DEALLOCATE_FRAME___Integer_058_058_062_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_058_058_062_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -1994,6 +2087,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Integer_058_058_061(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Integer_058_058_061));
 #define DEALLOCATE_FRAME___Integer_058_058_061(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Integer_058_058_061 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2008,6 +2102,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Flonum_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Flonum_063));
 #define DEALLOCATE_FRAME___Flonum_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Flonum_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2024,6 +2119,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Flonum_045_062Binary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Flonum_045_062Binary));
 #define DEALLOCATE_FRAME___Flonum_045_062Binary(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Flonum_045_062Binary ();
 
 typedef struct {
 Frame* next_frame;
@@ -2037,6 +2133,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Flonum_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Flonum_045_062String));
 #define DEALLOCATE_FRAME___Flonum_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Flonum_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -2050,6 +2147,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Flonum_045_062Integer(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Flonum_045_062Integer));
 #define DEALLOCATE_FRAME___Flonum_045_062Integer(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Flonum_045_062Integer ();
 
 typedef struct {
 Frame* next_frame;
@@ -2064,6 +2162,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Flonum_058_058_043(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Flonum_058_058_043));
 #define DEALLOCATE_FRAME___Flonum_058_058_043(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Flonum_058_058_043 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2078,6 +2177,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Flonum_058_058_045(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Flonum_058_058_045));
 #define DEALLOCATE_FRAME___Flonum_058_058_045(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Flonum_058_058_045 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2092,6 +2192,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Flonum_058_058_047(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Flonum_058_058_047));
 #define DEALLOCATE_FRAME___Flonum_058_058_047(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Flonum_058_058_047 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2106,6 +2207,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Flonum_058_058_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Flonum_058_058_042));
 #define DEALLOCATE_FRAME___Flonum_058_058_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Flonum_058_058_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2119,6 +2221,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Boolean_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Boolean_063));
 #define DEALLOCATE_FRAME___Boolean_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Boolean_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2132,6 +2235,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Boolean_045_062Binary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Boolean_045_062Binary));
 #define DEALLOCATE_FRAME___Boolean_045_062Binary(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Boolean_045_062Binary ();
 
 typedef struct {
 Frame* next_frame;
@@ -2146,6 +2250,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Boolean_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Boolean_045_062String));
 #define DEALLOCATE_FRAME___Boolean_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Boolean_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -2159,6 +2264,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___not(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___not));
 #define DEALLOCATE_FRAME___not(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_not ();
 
 typedef struct {
 Frame* next_frame;
@@ -2172,6 +2278,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___true_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___true_063));
 #define DEALLOCATE_FRAME___true_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_true_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2185,6 +2292,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___false_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___false_063));
 #define DEALLOCATE_FRAME___false_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_false_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2200,6 +2308,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Cons_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Cons_063));
 #define DEALLOCATE_FRAME___Cons_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Cons_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2214,6 +2323,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___bcons_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___bcons_063));
 #define DEALLOCATE_FRAME___bcons_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_bcons_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2227,6 +2337,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Null_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Null_063));
 #define DEALLOCATE_FRAME___Null_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Null_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2240,6 +2351,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___empty_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___empty_063));
 #define DEALLOCATE_FRAME___empty_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_empty_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2255,6 +2367,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___list_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___list_063));
 #define DEALLOCATE_FRAME___list_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_list_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2269,6 +2382,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___pair(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___pair));
 #define DEALLOCATE_FRAME___pair(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_pair ();
 
 typedef struct {
 Frame* next_frame;
@@ -2284,6 +2398,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cons(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cons));
 #define DEALLOCATE_FRAME___cons(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cons ();
 
 typedef struct {
 Frame* next_frame;
@@ -2300,6 +2415,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___bcons(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___bcons));
 #define DEALLOCATE_FRAME___bcons(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_bcons ();
 
 typedef struct {
 Frame* next_frame;
@@ -2313,6 +2429,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___first(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___first));
 #define DEALLOCATE_FRAME___first(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_first ();
 
 typedef struct {
 Frame* next_frame;
@@ -2326,6 +2443,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___properties(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___properties));
 #define DEALLOCATE_FRAME___properties(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_properties ();
 
 typedef struct {
 Frame* next_frame;
@@ -2343,6 +2461,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___second_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___second_042));
 #define DEALLOCATE_FRAME___second_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_second_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2357,6 +2476,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___first_033(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___first_033));
 #define DEALLOCATE_FRAME___first_033(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_first_033 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2371,6 +2491,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___properties_033(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___properties_033));
 #define DEALLOCATE_FRAME___properties_033(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_properties_033 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2385,6 +2506,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___second_042_033(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___second_042_033));
 #define DEALLOCATE_FRAME___second_042_033(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_second_042_033 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2402,6 +2524,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___nth(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___nth));
 #define DEALLOCATE_FRAME___nth(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_nth ();
 
 typedef struct {
 Frame* next_frame;
@@ -2415,6 +2538,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___second(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___second));
 #define DEALLOCATE_FRAME___second(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_second ();
 
 typedef struct {
 Frame* next_frame;
@@ -2428,6 +2552,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___third(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___third));
 #define DEALLOCATE_FRAME___third(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_third ();
 
 typedef struct {
 Frame* next_frame;
@@ -2441,6 +2566,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___fourth(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fourth));
 #define DEALLOCATE_FRAME___fourth(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_fourth ();
 
 typedef struct {
 Frame* next_frame;
@@ -2454,6 +2580,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___fifth(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fifth));
 #define DEALLOCATE_FRAME___fifth(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_fifth ();
 
 typedef struct {
 Frame* next_frame;
@@ -2467,6 +2594,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___sixth(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___sixth));
 #define DEALLOCATE_FRAME___sixth(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_sixth ();
 
 typedef struct {
 Frame* next_frame;
@@ -2480,6 +2608,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___seventh(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___seventh));
 #define DEALLOCATE_FRAME___seventh(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_seventh ();
 
 typedef struct {
 Frame* next_frame;
@@ -2493,6 +2622,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___eigth(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___eigth));
 #define DEALLOCATE_FRAME___eigth(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_eigth ();
 
 typedef struct {
 Frame* next_frame;
@@ -2506,6 +2636,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___ninth(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___ninth));
 #define DEALLOCATE_FRAME___ninth(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_ninth ();
 
 typedef struct {
 Frame* next_frame;
@@ -2523,6 +2654,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___nth_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___nth_042));
 #define DEALLOCATE_FRAME___nth_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_nth_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2536,6 +2668,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___third_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___third_042));
 #define DEALLOCATE_FRAME___third_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_third_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2549,6 +2682,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___fourth_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fourth_042));
 #define DEALLOCATE_FRAME___fourth_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_fourth_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2562,6 +2696,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___fifth_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fifth_042));
 #define DEALLOCATE_FRAME___fifth_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_fifth_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2575,6 +2710,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___sixth_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___sixth_042));
 #define DEALLOCATE_FRAME___sixth_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_sixth_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2588,6 +2724,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___seventh_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___seventh_042));
 #define DEALLOCATE_FRAME___seventh_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_seventh_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2601,6 +2738,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___eigth_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___eigth_042));
 #define DEALLOCATE_FRAME___eigth_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_eigth_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2614,6 +2752,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___ninth_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___ninth_042));
 #define DEALLOCATE_FRAME___ninth_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_ninth_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2629,6 +2768,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___last(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___last));
 #define DEALLOCATE_FRAME___last(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_last ();
 
 typedef struct {
 Frame* next_frame;
@@ -2644,6 +2784,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___last_042(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___last_042));
 #define DEALLOCATE_FRAME___last_042(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_last_042 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2660,6 +2801,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___length(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___length));
 #define DEALLOCATE_FRAME___length(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_length ();
 
 typedef struct {
 Frame* next_frame;
@@ -2676,6 +2818,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___append(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___append));
 #define DEALLOCATE_FRAME___append(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_append ();
 
 typedef struct {
 Frame* next_frame;
@@ -2695,6 +2838,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___reverse(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___reverse));
 #define DEALLOCATE_FRAME___reverse(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_reverse ();
 
 typedef struct {
 Frame* next_frame;
@@ -2708,6 +2852,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___list(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___list));
 #define DEALLOCATE_FRAME___list(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_list ();
 
 typedef struct {
 Frame* next_frame;
@@ -2723,6 +2868,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___contains_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___contains_063));
 #define DEALLOCATE_FRAME___contains_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_contains_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2750,6 +2896,7 @@ GIN_OBJ tmp9;
 
 #define ALLOCATE_FRAME___split_045list(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___split_045list));
 #define DEALLOCATE_FRAME___split_045list(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_split_045list ();
 
 typedef struct {
 Frame* next_frame;
@@ -2767,6 +2914,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___List_058_058duplicate(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___List_058_058duplicate));
 #define DEALLOCATE_FRAME___List_058_058duplicate(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_List_058_058duplicate ();
 
 typedef struct {
 Frame* next_frame;
@@ -2781,6 +2929,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Char_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_063));
 #define DEALLOCATE_FRAME___Char_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2794,6 +2943,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Char_045_062Binary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_045_062Binary));
 #define DEALLOCATE_FRAME___Char_045_062Binary(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_045_062Binary ();
 
 typedef struct {
 Frame* next_frame;
@@ -2810,6 +2960,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Char_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_045_062String));
 #define DEALLOCATE_FRAME___Char_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -2823,6 +2974,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Char_045_062Integer(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_045_062Integer));
 #define DEALLOCATE_FRAME___Char_045_062Integer(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_045_062Integer ();
 
 typedef struct {
 Frame* next_frame;
@@ -2837,6 +2989,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Char_058_058eq_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058eq_063));
 #define DEALLOCATE_FRAME___Char_058_058eq_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058eq_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2850,6 +3003,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Char_058_058alphabetic_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058alphabetic_063));
 #define DEALLOCATE_FRAME___Char_058_058alphabetic_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058alphabetic_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2863,6 +3017,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Char_058_058numeric_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058numeric_063));
 #define DEALLOCATE_FRAME___Char_058_058numeric_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058numeric_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2876,6 +3031,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Char_058_058whitespace_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058whitespace_063));
 #define DEALLOCATE_FRAME___Char_058_058whitespace_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058whitespace_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2892,6 +3048,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Char_058_058upper_045case_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058upper_045case_063));
 #define DEALLOCATE_FRAME___Char_058_058upper_045case_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058upper_045case_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2908,6 +3065,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Char_058_058lower_045case_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058lower_045case_063));
 #define DEALLOCATE_FRAME___Char_058_058lower_045case_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058lower_045case_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2924,6 +3082,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Char_058_058upcase(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058upcase));
 #define DEALLOCATE_FRAME___Char_058_058upcase(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058upcase ();
 
 typedef struct {
 Frame* next_frame;
@@ -2940,6 +3099,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Char_058_058downcase(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058downcase));
 #define DEALLOCATE_FRAME___Char_058_058downcase(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058downcase ();
 
 typedef struct {
 Frame* next_frame;
@@ -2954,6 +3114,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Symbol_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Symbol_063));
 #define DEALLOCATE_FRAME___Symbol_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Symbol_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -2967,6 +3128,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Symbol_045_062Binary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Symbol_045_062Binary));
 #define DEALLOCATE_FRAME___Symbol_045_062Binary(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Symbol_045_062Binary ();
 
 typedef struct {
 Frame* next_frame;
@@ -2980,6 +3142,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Symbol_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Symbol_045_062String));
 #define DEALLOCATE_FRAME___Symbol_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Symbol_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -2994,6 +3157,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Symbol_058_058eq_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Symbol_058_058eq_063));
 #define DEALLOCATE_FRAME___Symbol_058_058eq_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Symbol_058_058eq_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3007,6 +3171,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Label_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Label_063));
 #define DEALLOCATE_FRAME___Label_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Label_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3021,6 +3186,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Label_058_058eq_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Label_058_058eq_063));
 #define DEALLOCATE_FRAME___Label_058_058eq_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Label_058_058eq_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3035,6 +3201,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Label_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Label_045_062String));
 #define DEALLOCATE_FRAME___Label_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Label_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -3049,6 +3216,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Ginger_058_058String_045_062Label(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Ginger_058_058String_045_062Label));
 #define DEALLOCATE_FRAME___Ginger_058_058String_045_062Label(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Ginger_058_058String_045_062Label ();
 
 typedef struct {
 Frame* next_frame;
@@ -3063,6 +3231,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___String_058_058make(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058make));
 #define DEALLOCATE_FRAME___String_058_058make(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058make ();
 
 typedef struct {
 Frame* next_frame;
@@ -3083,6 +3252,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___String_058_058string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058string));
 #define DEALLOCATE_FRAME___String_058_058string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058string ();
 
 typedef struct {
 Frame* next_frame;
@@ -3107,6 +3277,7 @@ GIN_OBJ tmp5;
 
 #define ALLOCATE_FRAME___String_058_058join(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058join));
 #define DEALLOCATE_FRAME___String_058_058join(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058join ();
 
 typedef struct {
 Frame* next_frame;
@@ -3120,6 +3291,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___String_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_063));
 #define DEALLOCATE_FRAME___String_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3136,6 +3308,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___String_045_062Binary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Binary));
 #define DEALLOCATE_FRAME___String_045_062Binary(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_045_062Binary ();
 
 typedef struct {
 Frame* next_frame;
@@ -3149,6 +3322,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___String_058_058length(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058length));
 #define DEALLOCATE_FRAME___String_058_058length(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058length ();
 
 typedef struct {
 Frame* next_frame;
@@ -3163,6 +3337,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___String_058_058nth(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058nth));
 #define DEALLOCATE_FRAME___String_058_058nth(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058nth ();
 
 typedef struct {
 Frame* next_frame;
@@ -3176,6 +3351,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___String_058_058first(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058first));
 #define DEALLOCATE_FRAME___String_058_058first(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058first ();
 
 typedef struct {
 Frame* next_frame;
@@ -3191,6 +3367,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___String_058_058last(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058last));
 #define DEALLOCATE_FRAME___String_058_058last(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058last ();
 
 typedef struct {
 Frame* next_frame;
@@ -3206,6 +3383,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___String_058_058nth_033(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058nth_033));
 #define DEALLOCATE_FRAME___String_058_058nth_033(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058nth_033 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3222,6 +3400,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___String_058_058eq_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058eq_063));
 #define DEALLOCATE_FRAME___String_058_058eq_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058eq_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3241,6 +3420,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___String_058_058compare(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058compare));
 #define DEALLOCATE_FRAME___String_058_058compare(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058compare ();
 
 typedef struct {
 Frame* next_frame;
@@ -3258,6 +3438,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___String_058_058substring(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058substring));
 #define DEALLOCATE_FRAME___String_058_058substring(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058substring ();
 
 typedef struct {
 Frame* next_frame;
@@ -3279,6 +3460,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___String_058_058append(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058append));
 #define DEALLOCATE_FRAME___String_058_058append(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058append ();
 
 typedef struct {
 Frame* next_frame;
@@ -3297,6 +3479,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___String_058_058put_045string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058put_045string));
 #define DEALLOCATE_FRAME___String_058_058put_045string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058put_045string ();
 
 typedef struct {
 Frame* next_frame;
@@ -3315,6 +3498,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___String_058_058replace(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058replace));
 #define DEALLOCATE_FRAME___String_058_058replace(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058replace ();
 
 typedef struct {
 Frame* next_frame;
@@ -3331,6 +3515,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___String_058_058split(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058split));
 #define DEALLOCATE_FRAME___String_058_058split(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058split ();
 
 typedef struct {
 Frame* next_frame;
@@ -3351,6 +3536,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___split(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___split));
 #define DEALLOCATE_FRAME___split(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_split ();
 
 typedef struct {
 Frame* next_frame;
@@ -3368,6 +3554,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___base_045name(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___base_045name));
 #define DEALLOCATE_FRAME___base_045name(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_base_045name ();
 
 typedef struct {
 Frame* next_frame;
@@ -3389,6 +3576,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Vector_058_058make(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_058_058make));
 #define DEALLOCATE_FRAME___Vector_058_058make(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_058_058make ();
 
 typedef struct {
 Frame* next_frame;
@@ -3404,6 +3592,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Vector_058_058push(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_058_058push));
 #define DEALLOCATE_FRAME___Vector_058_058push(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_058_058push ();
 
 typedef struct {
 Frame* next_frame;
@@ -3418,6 +3607,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Vector_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_063));
 #define DEALLOCATE_FRAME___Vector_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3432,6 +3622,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Vector_058_058get(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_058_058get));
 #define DEALLOCATE_FRAME___Vector_058_058get(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_058_058get ();
 
 typedef struct {
 Frame* next_frame;
@@ -3447,6 +3638,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Vector_058_058set(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_058_058set));
 #define DEALLOCATE_FRAME___Vector_058_058set(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_058_058set ();
 
 typedef struct {
 Frame* next_frame;
@@ -3460,6 +3652,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Vector_058_058length(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_058_058length));
 #define DEALLOCATE_FRAME___Vector_058_058length(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_058_058length ();
 
 typedef struct {
 Frame* next_frame;
@@ -3476,6 +3669,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Vector_045_062list(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_045_062list));
 #define DEALLOCATE_FRAME___Vector_045_062list(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_045_062list ();
 
 typedef struct {
 Frame* next_frame;
@@ -3493,6 +3687,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Vector_058_058fill(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_058_058fill));
 #define DEALLOCATE_FRAME___Vector_058_058fill(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_058_058fill ();
 
 typedef struct {
 Frame* next_frame;
@@ -3506,6 +3701,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Vector_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_045_062String));
 #define DEALLOCATE_FRAME___Vector_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -3519,6 +3715,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Vector_058_058first(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_058_058first));
 #define DEALLOCATE_FRAME___Vector_058_058first(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_058_058first ();
 
 typedef struct {
 Frame* next_frame;
@@ -3532,6 +3729,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Vector_058_058last(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_058_058last));
 #define DEALLOCATE_FRAME___Vector_058_058last(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_058_058last ();
 
 typedef struct {
 Frame* next_frame;
@@ -3545,6 +3743,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Vector_058_058pop(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Vector_058_058pop));
 #define DEALLOCATE_FRAME___Vector_058_058pop(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Vector_058_058pop ();
 
 typedef struct {
 Frame* next_frame;
@@ -3567,6 +3766,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Dict_058_058make(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_058_058make));
 #define DEALLOCATE_FRAME___Dict_058_058make(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_058_058make ();
 
 typedef struct {
 Frame* next_frame;
@@ -3584,6 +3784,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Dict_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_045_062String));
 #define DEALLOCATE_FRAME___Dict_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -3598,6 +3799,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Dict_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_063));
 #define DEALLOCATE_FRAME___Dict_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3611,6 +3813,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Dict_045_062keys(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_045_062keys));
 #define DEALLOCATE_FRAME___Dict_045_062keys(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_045_062keys ();
 
 typedef struct {
 Frame* next_frame;
@@ -3624,6 +3827,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Dict_045_062values(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_045_062values));
 #define DEALLOCATE_FRAME___Dict_045_062values(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_045_062values ();
 
 typedef struct {
 Frame* next_frame;
@@ -3640,6 +3844,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Dict_058_058set(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_058_058set));
 #define DEALLOCATE_FRAME___Dict_058_058set(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_058_058set ();
 
 typedef struct {
 Frame* next_frame;
@@ -3656,6 +3861,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Dict_058_058get(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_058_058get));
 #define DEALLOCATE_FRAME___Dict_058_058get(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_058_058get ();
 
 typedef struct {
 Frame* next_frame;
@@ -3672,6 +3878,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Dict_058_058contains_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_058_058contains_063));
 #define DEALLOCATE_FRAME___Dict_058_058contains_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_058_058contains_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3689,6 +3896,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Dict_058_058remove(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_058_058remove));
 #define DEALLOCATE_FRAME___Dict_058_058remove(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_058_058remove ();
 
 typedef struct {
 Frame* next_frame;
@@ -3705,6 +3913,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Dict_058_058clear(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_058_058clear));
 #define DEALLOCATE_FRAME___Dict_058_058clear(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_058_058clear ();
 
 typedef struct {
 Frame* next_frame;
@@ -3721,6 +3930,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Dict_058_058size(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Dict_058_058size));
 #define DEALLOCATE_FRAME___Dict_058_058size(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Dict_058_058size ();
 
 typedef struct {
 Frame* next_frame;
@@ -3735,6 +3945,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Function_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Function_063));
 #define DEALLOCATE_FRAME___Function_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Function_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3748,6 +3959,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Function_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Function_045_062String));
 #define DEALLOCATE_FRAME___Function_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Function_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -3761,6 +3973,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Null_045_062Binary(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Null_045_062Binary));
 #define DEALLOCATE_FRAME___Null_045_062Binary(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Null_045_062Binary ();
 
 typedef struct {
 Frame* next_frame;
@@ -3778,6 +3991,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Foreign_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Foreign_045_062String));
 #define DEALLOCATE_FRAME___Foreign_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Foreign_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -3791,6 +4005,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___input_045stream_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___input_045stream_063));
 #define DEALLOCATE_FRAME___input_045stream_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_input_045stream_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3804,6 +4019,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___output_045stream_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___output_045stream_063));
 #define DEALLOCATE_FRAME___output_045stream_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_output_045stream_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3819,6 +4035,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___open_045file(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___open_045file));
 #define DEALLOCATE_FRAME___open_045file(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_open_045file ();
 
 typedef struct {
 Frame* next_frame;
@@ -3832,6 +4049,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___open_045input_045file(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___open_045input_045file));
 #define DEALLOCATE_FRAME___open_045input_045file(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_open_045input_045file ();
 
 typedef struct {
 Frame* next_frame;
@@ -3845,6 +4063,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___open_045output_045file(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___open_045output_045file));
 #define DEALLOCATE_FRAME___open_045output_045file(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_open_045output_045file ();
 
 typedef struct {
 Frame* next_frame;
@@ -3858,6 +4077,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___close_045stream(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___close_045stream));
 #define DEALLOCATE_FRAME___close_045stream(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_close_045stream ();
 
 typedef struct {
 Frame* next_frame;
@@ -3871,6 +4091,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___close_045input_045stream(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___close_045input_045stream));
 #define DEALLOCATE_FRAME___close_045input_045stream(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_close_045input_045stream ();
 
 typedef struct {
 Frame* next_frame;
@@ -3884,6 +4105,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___close_045output_045stream(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___close_045output_045stream));
 #define DEALLOCATE_FRAME___close_045output_045stream(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_close_045output_045stream ();
 
 typedef struct {
 Frame* next_frame;
@@ -3897,6 +4119,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___get_045char(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___get_045char));
 #define DEALLOCATE_FRAME___get_045char(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_get_045char ();
 
 typedef struct {
 Frame* next_frame;
@@ -3911,6 +4134,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___peek_045char(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___peek_045char));
 #define DEALLOCATE_FRAME___peek_045char(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_peek_045char ();
 
 typedef struct {
 Frame* next_frame;
@@ -3925,6 +4149,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___unget_045char(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___unget_045char));
 #define DEALLOCATE_FRAME___unget_045char(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_unget_045char ();
 
 typedef struct {
 Frame* next_frame;
@@ -3938,6 +4163,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___eof_045object_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___eof_045object_063));
 #define DEALLOCATE_FRAME___eof_045object_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_eof_045object_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3954,6 +4180,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___char_045ready_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___char_045ready_063));
 #define DEALLOCATE_FRAME___char_045ready_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_char_045ready_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -3967,6 +4194,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___newline(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___newline));
 #define DEALLOCATE_FRAME___newline(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_newline ();
 
 typedef struct {
 Frame* next_frame;
@@ -3981,6 +4209,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___write_045char(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___write_045char));
 #define DEALLOCATE_FRAME___write_045char(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_write_045char ();
 
 typedef struct {
 Frame* next_frame;
@@ -3996,6 +4225,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___stream_045seek(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___stream_045seek));
 #define DEALLOCATE_FRAME___stream_045seek(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_stream_045seek ();
 
 typedef struct {
 Frame* next_frame;
@@ -4009,6 +4239,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___stream_045tell(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___stream_045tell));
 #define DEALLOCATE_FRAME___stream_045tell(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_stream_045tell ();
 
 typedef struct {
 Frame* next_frame;
@@ -4022,6 +4253,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Stream_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Stream_063));
 #define DEALLOCATE_FRAME___Stream_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Stream_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4035,6 +4267,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___String_045Stream_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045Stream_063));
 #define DEALLOCATE_FRAME___String_045Stream_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_045Stream_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4049,6 +4282,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Generic_045Stream_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Generic_045Stream_063));
 #define DEALLOCATE_FRAME___Generic_045Stream_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Generic_045Stream_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4066,6 +4300,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Stream_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Stream_045_062String));
 #define DEALLOCATE_FRAME___Stream_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Stream_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -4083,6 +4318,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___String_045Stream_045_062String(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045Stream_045_062String));
 #define DEALLOCATE_FRAME___String_045Stream_045_062String(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_045Stream_045_062String ();
 
 typedef struct {
 Frame* next_frame;
@@ -4096,6 +4332,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___open_045input_045string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___open_045input_045string));
 #define DEALLOCATE_FRAME___open_045input_045string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_open_045input_045string ();
 
 typedef struct {
 Frame* next_frame;
@@ -4108,6 +4345,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___open_045output_045string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___open_045output_045string));
 #define DEALLOCATE_FRAME___open_045output_045string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_open_045output_045string ();
 
 typedef struct {
 Frame* next_frame;
@@ -4121,6 +4359,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___get_045output_045string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___get_045output_045string));
 #define DEALLOCATE_FRAME___get_045output_045string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_get_045output_045string ();
 
 typedef struct {
 Frame* next_frame;
@@ -4134,6 +4373,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___string_045output_045stream_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___string_045output_045stream_063));
 #define DEALLOCATE_FRAME___string_045output_045stream_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_string_045output_045stream_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4154,6 +4394,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___write_045string_045stream(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___write_045string_045stream));
 #define DEALLOCATE_FRAME___write_045string_045stream(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_write_045string_045stream ();
 
 typedef struct {
 Frame* next_frame;
@@ -4168,6 +4409,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___getenv(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___getenv));
 #define DEALLOCATE_FRAME___getenv(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_getenv ();
 
 typedef struct {
 Frame* next_frame;
@@ -4181,6 +4423,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___file_045exists_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___file_045exists_063));
 #define DEALLOCATE_FRAME___file_045exists_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_file_045exists_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4194,6 +4437,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___execute(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___execute));
 #define DEALLOCATE_FRAME___execute(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_execute ();
 
 typedef struct {
 Frame* next_frame;
@@ -4208,6 +4452,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___gin_045debug(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___gin_045debug));
 #define DEALLOCATE_FRAME___gin_045debug(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_gin_045debug ();
 
 typedef struct {
 Frame* next_frame;
@@ -4226,6 +4471,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___range(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___range));
 #define DEALLOCATE_FRAME___range(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_range ();
 
 typedef struct {
 Frame* next_frame;
@@ -4251,6 +4497,7 @@ GIN_OBJ tmp8;
 
 #define ALLOCATE_FRAME___print_045term(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___print_045term));
 #define DEALLOCATE_FRAME___print_045term(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_print_045term ();
 
 typedef struct {
 Frame* next_frame;
@@ -4266,6 +4513,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___print_045primitive(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___print_045primitive));
 #define DEALLOCATE_FRAME___print_045primitive(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_print_045primitive ();
 
 typedef struct {
 Frame* next_frame;
@@ -4287,6 +4535,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___print(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___print));
 #define DEALLOCATE_FRAME___print(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_print ();
 
 typedef struct {
 Frame* next_frame;
@@ -4308,6 +4557,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___println(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___println));
 #define DEALLOCATE_FRAME___println(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_println ();
 
 typedef struct {
 Frame* next_frame;
@@ -4332,6 +4582,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___write_045term(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___write_045term));
 #define DEALLOCATE_FRAME___write_045term(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_write_045term ();
 
 typedef struct {
 Frame* next_frame;
@@ -4347,6 +4598,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___write_045primitive(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___write_045primitive));
 #define DEALLOCATE_FRAME___write_045primitive(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_write_045primitive ();
 
 typedef struct {
 Frame* next_frame;
@@ -4368,6 +4620,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___write(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___write));
 #define DEALLOCATE_FRAME___write(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_write ();
 
 typedef struct {
 Frame* next_frame;
@@ -4389,6 +4642,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___writeln(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___writeln));
 #define DEALLOCATE_FRAME___writeln(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_writeln ();
 
 typedef struct {
 Frame* next_frame;
@@ -4403,6 +4657,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___apply(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___apply));
 #define DEALLOCATE_FRAME___apply(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_apply ();
 
 typedef struct {
 Frame* next_frame;
@@ -4420,6 +4675,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___command_045line(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___command_045line));
 #define DEALLOCATE_FRAME___command_045line(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_command_045line ();
 
 typedef struct {
 Frame* next_frame;
@@ -4432,6 +4688,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___exit(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___exit));
 #define DEALLOCATE_FRAME___exit(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_exit ();
 
 typedef struct {
 Frame* next_frame;
@@ -4448,6 +4705,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___trait(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___trait));
 #define DEALLOCATE_FRAME___trait(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_trait ();
 
 typedef struct {
 Frame* next_frame;
@@ -4464,6 +4722,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___trait_033(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___trait_033));
 #define DEALLOCATE_FRAME___trait_033(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_trait_033 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4481,6 +4740,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME____060term_062_058_058function_045definition_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058function_045definition_063));
 #define DEALLOCATE_FRAME____060term_062_058_058function_045definition_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058function_045definition_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4498,6 +4758,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME____060term_062_058_058method_045definition_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058method_045definition_063));
 #define DEALLOCATE_FRAME____060term_062_058_058method_045definition_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058method_045definition_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4516,6 +4777,7 @@ GIN_OBJ tmp5;
 
 #define ALLOCATE_FRAME____060term_062_058_058get_045definition_045name(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058get_045definition_045name));
 #define DEALLOCATE_FRAME____060term_062_058_058get_045definition_045name(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058get_045definition_045name ();
 
 typedef struct {
 Frame* next_frame;
@@ -4530,6 +4792,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____060term_062_058_058get_045definition_045body(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058get_045definition_045body));
 #define DEALLOCATE_FRAME____060term_062_058_058get_045definition_045body(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058get_045definition_045body ();
 
 typedef struct {
 Frame* next_frame;
@@ -4544,6 +4807,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____060term_062_058_058get_045definition_045arguments(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058get_045definition_045arguments));
 #define DEALLOCATE_FRAME____060term_062_058_058get_045definition_045arguments(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058get_045definition_045arguments ();
 
 typedef struct {
 Frame* next_frame;
@@ -4560,6 +4824,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Term_058_058head(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Term_058_058head));
 #define DEALLOCATE_FRAME___Term_058_058head(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Term_058_058head ();
 
 typedef struct {
 Frame* next_frame;
@@ -4576,6 +4841,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME____060term_062_058_058parent(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058parent));
 #define DEALLOCATE_FRAME____060term_062_058_058parent(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058parent ();
 
 typedef struct {
 Frame* next_frame;
@@ -4591,6 +4857,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____060term_062_058_058get_045parent_045function(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058get_045parent_045function));
 #define DEALLOCATE_FRAME____060term_062_058_058get_045parent_045function(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058get_045parent_045function ();
 
 typedef struct {
 Frame* next_frame;
@@ -4606,6 +4873,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___get_045f(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___get_045f));
 #define DEALLOCATE_FRAME___get_045f(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_get_045f ();
 
 typedef struct {
 Frame* next_frame;
@@ -4621,6 +4889,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME____060term_062_058_058definition_045symbol_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058definition_045symbol_063));
 #define DEALLOCATE_FRAME____060term_062_058_058definition_045symbol_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058definition_045symbol_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4636,6 +4905,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME____060term_062_058_058each_045loop_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058each_045loop_063));
 #define DEALLOCATE_FRAME____060term_062_058_058each_045loop_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058each_045loop_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4651,6 +4921,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME____060term_062_058_058definition_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058definition_063));
 #define DEALLOCATE_FRAME____060term_062_058_058definition_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058definition_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4666,6 +4937,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME____060term_062_058_058immutable_045definition_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058immutable_045definition_063));
 #define DEALLOCATE_FRAME____060term_062_058_058immutable_045definition_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058immutable_045definition_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4681,6 +4953,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME____060term_062_058_058quoted_045symbol_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058quoted_045symbol_063));
 #define DEALLOCATE_FRAME____060term_062_058_058quoted_045symbol_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058quoted_045symbol_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4701,6 +4974,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___find_045named_045parameter(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___find_045named_045parameter));
 #define DEALLOCATE_FRAME___find_045named_045parameter(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_find_045named_045parameter ();
 
 typedef struct {
 Frame* next_frame;
@@ -4721,6 +4995,7 @@ GIN_OBJ tmp5;
 
 #define ALLOCATE_FRAME___Char_045_062digit(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_045_062digit));
 #define DEALLOCATE_FRAME___Char_045_062digit(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_045_062digit ();
 
 typedef struct {
 Frame* next_frame;
@@ -4736,6 +5011,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Char_058_058digit_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058digit_063));
 #define DEALLOCATE_FRAME___Char_058_058digit_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058digit_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4749,6 +5025,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___eos_045object_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___eos_045object_063));
 #define DEALLOCATE_FRAME___eos_045object_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_eos_045object_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4763,6 +5040,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___eos_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___eos_063));
 #define DEALLOCATE_FRAME___eos_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_eos_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4776,6 +5054,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Char_058_058eol_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Char_058_058eol_063));
 #define DEALLOCATE_FRAME___Char_058_058eol_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Char_058_058eol_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4796,6 +5075,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___new_045string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___new_045string));
 #define DEALLOCATE_FRAME___new_045string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_new_045string ();
 
 typedef struct {
 Frame* next_frame;
@@ -4810,6 +5090,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___String_058_058rest(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058rest));
 #define DEALLOCATE_FRAME___String_058_058rest(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058rest ();
 
 typedef struct {
 Frame* next_frame;
@@ -4825,6 +5106,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___String_058_058Boolean_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058Boolean_063));
 #define DEALLOCATE_FRAME___String_058_058Boolean_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058Boolean_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4839,6 +5121,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___String_058_058ellipses_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058ellipses_063));
 #define DEALLOCATE_FRAME___String_058_058ellipses_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058ellipses_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4853,6 +5136,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___String_045_062Symbol(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Symbol));
 #define DEALLOCATE_FRAME___String_045_062Symbol(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_045_062Symbol ();
 
 typedef struct {
 Frame* next_frame;
@@ -4873,6 +5157,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___String_045_062Character(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Character));
 #define DEALLOCATE_FRAME___String_045_062Character(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_045_062Character ();
 
 typedef struct {
 Frame* next_frame;
@@ -4887,6 +5172,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___String_058_058Character_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058Character_063));
 #define DEALLOCATE_FRAME___String_058_058Character_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058Character_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4906,6 +5192,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___String_058_058Symbol_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058Symbol_063));
 #define DEALLOCATE_FRAME___String_058_058Symbol_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058Symbol_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4919,6 +5206,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___char_045legal_045symbol_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___char_045legal_045symbol_063));
 #define DEALLOCATE_FRAME___char_045legal_045symbol_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_char_045legal_045symbol_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4934,6 +5222,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___string_045legal_045symbol_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___string_045legal_045symbol_063));
 #define DEALLOCATE_FRAME___string_045legal_045symbol_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_string_045legal_045symbol_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4951,6 +5240,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___String_045_062Value(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_045_062Value));
 #define DEALLOCATE_FRAME___String_045_062Value(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_045_062Value ();
 
 typedef struct {
 Frame* next_frame;
@@ -4968,6 +5258,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___String_058_058Label_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___String_058_058Label_063));
 #define DEALLOCATE_FRAME___String_058_058Label_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_String_058_058Label_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -4981,6 +5272,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___include_045filename(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___include_045filename));
 #define DEALLOCATE_FRAME___include_045filename(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_include_045filename ();
 
 typedef struct {
 Frame* next_frame;
@@ -5004,6 +5296,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___open_045include_045file(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___open_045include_045file));
 #define DEALLOCATE_FRAME___open_045include_045file(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_open_045include_045file ();
 
 typedef struct {
 Frame* next_frame;
@@ -5026,6 +5319,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___expand_045includes(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___expand_045includes));
 #define DEALLOCATE_FRAME___expand_045includes(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_expand_045includes ();
 
 typedef struct {
 Frame* next_frame;
@@ -5041,6 +5335,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___include_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___include_063));
 #define DEALLOCATE_FRAME___include_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_include_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -5061,6 +5356,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___expand_045include(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___expand_045include));
 #define DEALLOCATE_FRAME___expand_045include(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_expand_045include ();
 
 typedef struct {
 Frame* next_frame;
@@ -5081,6 +5377,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME____060term_062_058_058make(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058make));
 #define DEALLOCATE_FRAME____060term_062_058_058make(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058make ();
 
 typedef struct {
 Frame* next_frame;
@@ -5098,6 +5395,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME____060group_062_058_058make(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060group_062_058_058make));
 #define DEALLOCATE_FRAME____060group_062_058_058make(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060group_062_058_058make ();
 
 typedef struct {
 Frame* next_frame;
@@ -5113,6 +5411,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Group_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Group_063));
 #define DEALLOCATE_FRAME___Group_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Group_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -5185,6 +5484,7 @@ GIN_OBJ tmp16;
 
 #define ALLOCATE_FRAME___read(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___read));
 #define DEALLOCATE_FRAME___read(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_read ();
 
 typedef struct {
 Frame* next_frame;
@@ -5198,6 +5498,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___state_045push(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___state_045push));
 #define DEALLOCATE_FRAME___state_045push(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_state_045push ();
 
 typedef struct {
 Frame* next_frame;
@@ -5210,6 +5511,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___state_045top(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___state_045top));
 #define DEALLOCATE_FRAME___state_045top(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_state_045top ();
 
 typedef struct {
 Frame* next_frame;
@@ -5222,6 +5524,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___state_045pop(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___state_045pop));
 #define DEALLOCATE_FRAME___state_045pop(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_state_045pop ();
 
 typedef struct {
 Frame* next_frame;
@@ -5236,6 +5539,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___begin_045group_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___begin_045group_063));
 #define DEALLOCATE_FRAME___begin_045group_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_begin_045group_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -5249,6 +5553,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___paren_045balanced(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___paren_045balanced));
 #define DEALLOCATE_FRAME___paren_045balanced(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_paren_045balanced ();
 
 typedef struct {
 Frame* next_frame;
@@ -5265,6 +5570,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___paren_045balanced_050(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___paren_045balanced_050));
 #define DEALLOCATE_FRAME___paren_045balanced_050(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_paren_045balanced_050 ();
 
 typedef struct {
 Frame* next_frame;
@@ -5278,6 +5584,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___paren_045add(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___paren_045add));
 #define DEALLOCATE_FRAME___paren_045add(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_paren_045add ();
 
 typedef struct {
 Frame* next_frame;
@@ -5294,6 +5601,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___add_045paren_050(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___add_045paren_050));
 #define DEALLOCATE_FRAME___add_045paren_050(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_add_045paren_050 ();
 
 typedef struct {
 Frame* next_frame;
@@ -5307,6 +5615,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___paren_045remove(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___paren_045remove));
 #define DEALLOCATE_FRAME___paren_045remove(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_paren_045remove ();
 
 typedef struct {
 Frame* next_frame;
@@ -5323,6 +5632,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___remove_045paren_050(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___remove_045paren_050));
 #define DEALLOCATE_FRAME___remove_045paren_050(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_remove_045paren_050 ();
 
 typedef struct {
 Frame* next_frame;
@@ -5338,6 +5648,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___tree_045add(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___tree_045add));
 #define DEALLOCATE_FRAME___tree_045add(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_tree_045add ();
 
 typedef struct {
 Frame* next_frame;
@@ -5353,6 +5664,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___tree_045push(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___tree_045push));
 #define DEALLOCATE_FRAME___tree_045push(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_tree_045push ();
 
 typedef struct {
 Frame* next_frame;
@@ -5369,6 +5681,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___tree_045pop(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___tree_045pop));
 #define DEALLOCATE_FRAME___tree_045pop(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_tree_045pop ();
 
 typedef struct {
 Frame* next_frame;
@@ -5381,6 +5694,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___tree_045unpop(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___tree_045unpop));
 #define DEALLOCATE_FRAME___tree_045unpop(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_tree_045unpop ();
 
 typedef struct {
 Frame* next_frame;
@@ -5393,6 +5707,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___tree_045set_045begin(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___tree_045set_045begin));
 #define DEALLOCATE_FRAME___tree_045set_045begin(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_tree_045set_045begin ();
 
 typedef struct {
 Frame* next_frame;
@@ -5406,6 +5721,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___tree_045sibling_045count(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___tree_045sibling_045count));
 #define DEALLOCATE_FRAME___tree_045sibling_045count(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_tree_045sibling_045count ();
 
 typedef struct {
 Frame* next_frame;
@@ -5423,6 +5739,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___escape_045char(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___escape_045char));
 #define DEALLOCATE_FRAME___escape_045char(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_escape_045char ();
 
 typedef struct {
 Frame* next_frame;
@@ -5442,6 +5759,7 @@ GIN_OBJ tmp5;
 
 #define ALLOCATE_FRAME___dq_045escape(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___dq_045escape));
 #define DEALLOCATE_FRAME___dq_045escape(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_dq_045escape ();
 
 typedef struct {
 Frame* next_frame;
@@ -5456,6 +5774,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___sq_045escape(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___sq_045escape));
 #define DEALLOCATE_FRAME___sq_045escape(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_sq_045escape ();
 
 typedef struct {
 Frame* next_frame;
@@ -5475,6 +5794,7 @@ GIN_OBJ tmp5;
 
 #define ALLOCATE_FRAME___flatten_045functions(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___flatten_045functions));
 #define DEALLOCATE_FRAME___flatten_045functions(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_flatten_045functions ();
 
 typedef struct {
 Frame* next_frame;
@@ -5503,6 +5823,7 @@ GIN_OBJ tmp9;
 
 #define ALLOCATE_FRAME___discover_045local_045variables(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___discover_045local_045variables));
 #define DEALLOCATE_FRAME___discover_045local_045variables(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_discover_045local_045variables ();
 
 typedef struct {
 Frame* next_frame;
@@ -5530,6 +5851,7 @@ GIN_OBJ tmp8;
 
 #define ALLOCATE_FRAME___add_045local_045variable(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___add_045local_045variable));
 #define DEALLOCATE_FRAME___add_045local_045variable(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_add_045local_045variable ();
 
 typedef struct {
 Frame* next_frame;
@@ -5552,6 +5874,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___search(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___search));
 #define DEALLOCATE_FRAME___search(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_search ();
 
 typedef struct {
 Frame* next_frame;
@@ -5569,6 +5892,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___name_045_062c_045name(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___name_045_062c_045name));
 #define DEALLOCATE_FRAME___name_045_062c_045name(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_name_045_062c_045name ();
 
 typedef struct {
 Frame* next_frame;
@@ -5588,6 +5912,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___p(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___p));
 #define DEALLOCATE_FRAME___p(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_p ();
 
 typedef struct {
 Frame* next_frame;
@@ -5617,6 +5942,7 @@ GIN_OBJ tmp5;
 
 #define ALLOCATE_FRAME___function_045prototype_045expansion(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___function_045prototype_045expansion));
 #define DEALLOCATE_FRAME___function_045prototype_045expansion(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_function_045prototype_045expansion ();
 
 typedef struct {
 Frame* next_frame;
@@ -5638,6 +5964,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___function_045definition_045expansion(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___function_045definition_045expansion));
 #define DEALLOCATE_FRAME___function_045definition_045expansion(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_function_045definition_045expansion ();
 
 typedef struct {
 Frame* next_frame;
@@ -5652,6 +5979,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME____060term_062_058_058register_045class_045symbol_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060term_062_058_058register_045class_045symbol_063));
 #define DEALLOCATE_FRAME____060term_062_058_058register_045class_045symbol_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060term_062_058_058register_045class_045symbol_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -5670,6 +5998,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME____060list_062_045remove(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060list_062_045remove));
 #define DEALLOCATE_FRAME____060list_062_045remove(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060list_062_045remove ();
 
 typedef struct {
 Frame* next_frame;
@@ -5697,6 +6026,7 @@ GIN_OBJ tmp8;
 
 #define ALLOCATE_FRAME___lexical_045path(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___lexical_045path));
 #define DEALLOCATE_FRAME___lexical_045path(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_lexical_045path ();
 
 typedef struct {
 Frame* next_frame;
@@ -5723,6 +6053,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___lexical_045path_045i(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___lexical_045path_045i));
 #define DEALLOCATE_FRAME___lexical_045path_045i(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_lexical_045path_045i ();
 
 typedef struct {
 Frame* next_frame;
@@ -5756,6 +6087,7 @@ GIN_OBJ tmp8;
 
 #define ALLOCATE_FRAME___function_045expansion(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___function_045expansion));
 #define DEALLOCATE_FRAME___function_045expansion(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_function_045expansion ();
 
 typedef struct {
 Frame* next_frame;
@@ -5769,6 +6101,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___next_045tmp(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___next_045tmp));
 #define DEALLOCATE_FRAME___next_045tmp(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_next_045tmp ();
 
 typedef struct {
 Frame* next_frame;
@@ -5781,6 +6114,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___previous_045tmp(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___previous_045tmp));
 #define DEALLOCATE_FRAME___previous_045tmp(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_previous_045tmp ();
 
 typedef struct {
 Frame* next_frame;
@@ -5805,6 +6139,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___flatten_045term(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___flatten_045term));
 #define DEALLOCATE_FRAME___flatten_045term(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_flatten_045term ();
 
 typedef struct {
 Frame* next_frame;
@@ -5832,6 +6167,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___flatten_045set(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___flatten_045set));
 #define DEALLOCATE_FRAME___flatten_045set(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_flatten_045set ();
 
 typedef struct {
 Frame* next_frame;
@@ -5898,6 +6234,7 @@ GIN_OBJ tmp16;
 
 #define ALLOCATE_FRAME___flatten(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___flatten));
 #define DEALLOCATE_FRAME___flatten(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_flatten ();
 
 typedef struct {
 Frame* next_frame;
@@ -5915,6 +6252,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___test(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___test));
 #define DEALLOCATE_FRAME___test(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_test ();
 
 typedef struct {
 Frame* next_frame;
@@ -5931,6 +6269,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Residual_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Residual_063));
 #define DEALLOCATE_FRAME___Residual_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Residual_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -5952,6 +6291,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___find_045named_045parameter_048(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___find_045named_045parameter_048));
 #define DEALLOCATE_FRAME___find_045named_045parameter_048(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_find_045named_045parameter_048 ();
 
 typedef struct {
 Frame* next_frame;
@@ -5970,6 +6310,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___remove_045named_045parameter(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___remove_045named_045parameter));
 #define DEALLOCATE_FRAME___remove_045named_045parameter(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_remove_045named_045parameter ();
 
 typedef struct {
 Frame* next_frame;
@@ -5982,6 +6323,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___delayed_045previous_045tmp(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___delayed_045previous_045tmp));
 #define DEALLOCATE_FRAME___delayed_045previous_045tmp(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_delayed_045previous_045tmp ();
 
 typedef struct {
 Frame* next_frame;
@@ -5999,6 +6341,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___string_045n(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___string_045n));
 #define DEALLOCATE_FRAME___string_045n(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_string_045n ();
 
 typedef struct {
 Frame* next_frame;
@@ -6019,6 +6362,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___discover_045quoted_045symbols(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___discover_045quoted_045symbols));
 #define DEALLOCATE_FRAME___discover_045quoted_045symbols(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_discover_045quoted_045symbols ();
 
 typedef struct {
 Frame* next_frame;
@@ -6034,6 +6378,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___print_045version(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___print_045version));
 #define DEALLOCATE_FRAME___print_045version(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_print_045version ();
 
 typedef struct {
 Frame* next_frame;
@@ -6056,6 +6401,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___process_045arguments(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___process_045arguments));
 #define DEALLOCATE_FRAME___process_045arguments(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_process_045arguments ();
 
 typedef struct {
 Frame* next_frame;
@@ -6069,6 +6415,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cairo_045create(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cairo_045create));
 #define DEALLOCATE_FRAME___cairo_045create(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cairo_045create ();
 
 typedef struct {
 Frame* next_frame;
@@ -6082,6 +6429,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cairo_045destroy(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cairo_045destroy));
 #define DEALLOCATE_FRAME___cairo_045destroy(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cairo_045destroy ();
 
 typedef struct {
 Frame* next_frame;
@@ -6096,6 +6444,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cairo_045image_045surface_045create(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cairo_045image_045surface_045create));
 #define DEALLOCATE_FRAME___cairo_045image_045surface_045create(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cairo_045image_045surface_045create ();
 
 typedef struct {
 Frame* next_frame;
@@ -6111,6 +6460,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cairo_045pdf_045surface_045create(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cairo_045pdf_045surface_045create));
 #define DEALLOCATE_FRAME___cairo_045pdf_045surface_045create(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cairo_045pdf_045surface_045create ();
 
 typedef struct {
 Frame* next_frame;
@@ -6124,6 +6474,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cairo_045image_045surface_045create_045from_045png(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cairo_045image_045surface_045create_045from_045png));
 #define DEALLOCATE_FRAME___cairo_045image_045surface_045create_045from_045png(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cairo_045image_045surface_045create_045from_045png ();
 
 typedef struct {
 Frame* next_frame;
@@ -6137,6 +6488,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cairo_045win_051_050_045surface_045create(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cairo_045win_051_050_045surface_045create));
 #define DEALLOCATE_FRAME___cairo_045win_051_050_045surface_045create(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cairo_045win_051_050_045surface_045create ();
 
 typedef struct {
 Frame* next_frame;
@@ -6154,6 +6506,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cairo_045xlib_045surface_045create(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cairo_045xlib_045surface_045create));
 #define DEALLOCATE_FRAME___cairo_045xlib_045surface_045create(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cairo_045xlib_045surface_045create ();
 
 typedef struct {
 Frame* next_frame;
@@ -6167,6 +6520,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___cairo_045surface_045destroy(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cairo_045surface_045destroy));
 #define DEALLOCATE_FRAME___cairo_045surface_045destroy(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cairo_045surface_045destroy ();
 
 typedef struct {
 Frame* next_frame;
@@ -6180,6 +6534,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045image_045surface_045get_045width(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045image_045surface_045get_045width));
 #define DEALLOCATE_FRAME____060cairo_062_045image_045surface_045get_045width(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045image_045surface_045get_045width ();
 
 typedef struct {
 Frame* next_frame;
@@ -6193,6 +6548,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045image_045surface_045get_045height(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045image_045surface_045get_045height));
 #define DEALLOCATE_FRAME____060cairo_062_045image_045surface_045get_045height(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045image_045surface_045get_045height ();
 
 typedef struct {
 Frame* next_frame;
@@ -6208,6 +6564,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045image_045surface_045fallback_045resolution(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045image_045surface_045fallback_045resolution));
 #define DEALLOCATE_FRAME____060cairo_062_045image_045surface_045fallback_045resolution(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045image_045surface_045fallback_045resolution ();
 
 typedef struct {
 Frame* next_frame;
@@ -6223,6 +6580,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045user_045to_045device_045x(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045user_045to_045device_045x));
 #define DEALLOCATE_FRAME____060cairo_062_045user_045to_045device_045x(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045user_045to_045device_045x ();
 
 typedef struct {
 Frame* next_frame;
@@ -6238,6 +6596,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045user_045to_045device_045y(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045user_045to_045device_045y));
 #define DEALLOCATE_FRAME____060cairo_062_045user_045to_045device_045y(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045user_045to_045device_045y ();
 
 typedef struct {
 Frame* next_frame;
@@ -6253,6 +6612,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045translate(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045translate));
 #define DEALLOCATE_FRAME____060cairo_062_045translate(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045translate ();
 
 typedef struct {
 Frame* next_frame;
@@ -6268,6 +6628,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045scale(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045scale));
 #define DEALLOCATE_FRAME____060cairo_062_045scale(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045scale ();
 
 typedef struct {
 Frame* next_frame;
@@ -6285,6 +6646,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___cairo_045use_045cartesian_045coordinate_045system(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cairo_045use_045cartesian_045coordinate_045system));
 #define DEALLOCATE_FRAME___cairo_045use_045cartesian_045coordinate_045system(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cairo_045use_045cartesian_045coordinate_045system ();
 
 typedef struct {
 Frame* next_frame;
@@ -6299,6 +6661,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045set_045line_045width(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045set_045line_045width));
 #define DEALLOCATE_FRAME____060cairo_062_045set_045line_045width(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045set_045line_045width ();
 
 typedef struct {
 Frame* next_frame;
@@ -6315,6 +6678,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045set_045source_045rgb(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045set_045source_045rgb));
 #define DEALLOCATE_FRAME____060cairo_062_045set_045source_045rgb(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045set_045source_045rgb ();
 
 typedef struct {
 Frame* next_frame;
@@ -6331,6 +6695,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045set_045source_045surface(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045set_045source_045surface));
 #define DEALLOCATE_FRAME____060cairo_062_045set_045source_045surface(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045set_045source_045surface ();
 
 typedef struct {
 Frame* next_frame;
@@ -6348,6 +6713,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045rectangle(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045rectangle));
 #define DEALLOCATE_FRAME____060cairo_062_045rectangle(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045rectangle ();
 
 typedef struct {
 Frame* next_frame;
@@ -6361,6 +6727,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045stroke(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045stroke));
 #define DEALLOCATE_FRAME____060cairo_062_045stroke(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045stroke ();
 
 typedef struct {
 Frame* next_frame;
@@ -6375,6 +6742,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045surface_045write_045to_045png(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045surface_045write_045to_045png));
 #define DEALLOCATE_FRAME____060cairo_062_045surface_045write_045to_045png(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045surface_045write_045to_045png ();
 
 typedef struct {
 Frame* next_frame;
@@ -6388,6 +6756,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045paint(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045paint));
 #define DEALLOCATE_FRAME____060cairo_062_045paint(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045paint ();
 
 typedef struct {
 Frame* next_frame;
@@ -6403,6 +6772,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045move_045to(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045move_045to));
 #define DEALLOCATE_FRAME____060cairo_062_045move_045to(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045move_045to ();
 
 typedef struct {
 Frame* next_frame;
@@ -6418,6 +6788,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045line_045to(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045line_045to));
 #define DEALLOCATE_FRAME____060cairo_062_045line_045to(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045line_045to ();
 
 typedef struct {
 Frame* next_frame;
@@ -6431,6 +6802,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME____060cairo_062_045show_045page(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame____060cairo_062_045show_045page));
 #define DEALLOCATE_FRAME____060cairo_062_045show_045page(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code__060cairo_062_045show_045page ();
 
 typedef struct {
 Frame* next_frame;
@@ -6447,6 +6819,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Cairo_058_058set_045black(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Cairo_058_058set_045black));
 #define DEALLOCATE_FRAME___Cairo_058_058set_045black(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Cairo_058_058set_045black ();
 
 typedef struct {
 Frame* next_frame;
@@ -6463,6 +6836,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Cairo_058_058set_045white(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Cairo_058_058set_045white));
 #define DEALLOCATE_FRAME___Cairo_058_058set_045white(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Cairo_058_058set_045white ();
 
 typedef struct {
 Frame* next_frame;
@@ -6479,6 +6853,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Cairo_058_058set_045red(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Cairo_058_058set_045red));
 #define DEALLOCATE_FRAME___Cairo_058_058set_045red(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Cairo_058_058set_045red ();
 
 typedef struct {
 Frame* next_frame;
@@ -6495,6 +6870,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Cairo_058_058set_045green(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Cairo_058_058set_045green));
 #define DEALLOCATE_FRAME___Cairo_058_058set_045green(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Cairo_058_058set_045green ();
 
 typedef struct {
 Frame* next_frame;
@@ -6511,6 +6887,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___Cairo_058_058set_045blue(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Cairo_058_058set_045blue));
 #define DEALLOCATE_FRAME___Cairo_058_058set_045blue(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Cairo_058_058set_045blue ();
 
 typedef struct {
 Frame* next_frame;
@@ -6524,6 +6901,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058context_045list_045families(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058context_045list_045families));
 #define DEALLOCATE_FRAME___Pango_058_058context_045list_045families(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058context_045list_045families ();
 
 typedef struct {
 Frame* next_frame;
@@ -6536,6 +6914,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058font_045description_045new(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058font_045description_045new));
 #define DEALLOCATE_FRAME___Pango_058_058font_045description_045new(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058font_045description_045new ();
 
 typedef struct {
 Frame* next_frame;
@@ -6549,6 +6928,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058font_045description_045from_045string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058font_045description_045from_045string));
 #define DEALLOCATE_FRAME___Pango_058_058font_045description_045from_045string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058font_045description_045from_045string ();
 
 typedef struct {
 Frame* next_frame;
@@ -6563,6 +6943,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058font_045description_045set_045family(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058font_045description_045set_045family));
 #define DEALLOCATE_FRAME___Pango_058_058font_045description_045set_045family(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058font_045description_045set_045family ();
 
 typedef struct {
 Frame* next_frame;
@@ -6577,6 +6958,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058font_045description_045set_045weight(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058font_045description_045set_045weight));
 #define DEALLOCATE_FRAME___Pango_058_058font_045description_045set_045weight(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058font_045description_045set_045weight ();
 
 typedef struct {
 Frame* next_frame;
@@ -6591,6 +6973,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058font_045description_045set_045absolute_045size(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058font_045description_045set_045absolute_045size));
 #define DEALLOCATE_FRAME___Pango_058_058font_045description_045set_045absolute_045size(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058font_045description_045set_045absolute_045size ();
 
 typedef struct {
 Frame* next_frame;
@@ -6604,6 +6987,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058font_045description_045free(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058font_045description_045free));
 #define DEALLOCATE_FRAME___Pango_058_058font_045description_045free(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058font_045description_045free ();
 
 typedef struct {
 Frame* next_frame;
@@ -6617,6 +7001,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058cairo_045create_045layout(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058cairo_045create_045layout));
 #define DEALLOCATE_FRAME___Pango_058_058cairo_045create_045layout(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058cairo_045create_045layout ();
 
 typedef struct {
 Frame* next_frame;
@@ -6631,6 +7016,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058cairo_045show_045layout(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058cairo_045show_045layout));
 #define DEALLOCATE_FRAME___Pango_058_058cairo_045show_045layout(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058cairo_045show_045layout ();
 
 typedef struct {
 Frame* next_frame;
@@ -6644,6 +7030,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045get_045context(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045get_045context));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045get_045context(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045get_045context ();
 
 typedef struct {
 Frame* next_frame;
@@ -6660,6 +7047,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045set_045text(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045set_045text));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045set_045text(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045set_045text ();
 
 typedef struct {
 Frame* next_frame;
@@ -6676,6 +7064,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045set_045markup(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045set_045markup));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045set_045markup(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045set_045markup ();
 
 typedef struct {
 Frame* next_frame;
@@ -6690,6 +7079,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045set_045font_045description(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045set_045font_045description));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045set_045font_045description(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045set_045font_045description ();
 
 typedef struct {
 Frame* next_frame;
@@ -6704,6 +7094,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045set_045width(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045set_045width));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045set_045width(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045set_045width ();
 
 typedef struct {
 Frame* next_frame;
@@ -6717,6 +7108,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045get_045width(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045get_045width));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045get_045width(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045get_045width ();
 
 typedef struct {
 Frame* next_frame;
@@ -6731,6 +7123,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045set_045height(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045set_045height));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045set_045height(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045set_045height ();
 
 typedef struct {
 Frame* next_frame;
@@ -6744,6 +7137,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045get_045height(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045get_045height));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045get_045height(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045get_045height ();
 
 typedef struct {
 Frame* next_frame;
@@ -6758,6 +7152,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045get_045extents_045logical_045height(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045get_045extents_045logical_045height));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045get_045extents_045logical_045height(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045get_045extents_045logical_045height ();
 
 typedef struct {
 Frame* next_frame;
@@ -6772,6 +7167,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045index_045to_045y(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045index_045to_045y));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045index_045to_045y(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045index_045to_045y ();
 
 typedef struct {
 Frame* next_frame;
@@ -6786,6 +7182,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045set_045indent(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045set_045indent));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045set_045indent(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045set_045indent ();
 
 typedef struct {
 Frame* next_frame;
@@ -6799,6 +7196,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045get_045indent(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045get_045indent));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045get_045indent(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045get_045indent ();
 
 typedef struct {
 Frame* next_frame;
@@ -6813,6 +7211,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045set_045spacing(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045set_045spacing));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045set_045spacing(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045set_045spacing ();
 
 typedef struct {
 Frame* next_frame;
@@ -6827,6 +7226,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045set_045justify(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045set_045justify));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045set_045justify(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045set_045justify ();
 
 typedef struct {
 Frame* next_frame;
@@ -6841,6 +7241,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___Pango_058_058layout_045set_045alignment(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Pango_058_058layout_045set_045alignment));
 #define DEALLOCATE_FRAME___Pango_058_058layout_045set_045alignment(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Pango_058_058layout_045set_045alignment ();
 
 typedef struct {
 Frame* next_frame;
@@ -6854,6 +7255,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___g_045object_045unref(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___g_045object_045unref));
 #define DEALLOCATE_FRAME___g_045object_045unref(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_g_045object_045unref ();
 
 typedef struct {
 Frame* next_frame;
@@ -6869,6 +7271,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___PDF_058_058make_045document(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___PDF_058_058make_045document));
 #define DEALLOCATE_FRAME___PDF_058_058make_045document(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_PDF_058_058make_045document ();
 
 typedef struct {
 Frame* next_frame;
@@ -6885,6 +7288,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___make_045us_045letter(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___make_045us_045letter));
 #define DEALLOCATE_FRAME___make_045us_045letter(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_make_045us_045letter ();
 
 typedef struct {
 Frame* next_frame;
@@ -6905,6 +7309,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___PDF_058_058make_045font(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___PDF_058_058make_045font));
 #define DEALLOCATE_FRAME___PDF_058_058make_045font(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_PDF_058_058make_045font ();
 
 typedef struct {
 Frame* next_frame;
@@ -6918,6 +7323,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___family_045_062pango(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___family_045_062pango));
 #define DEALLOCATE_FRAME___family_045_062pango(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_family_045_062pango ();
 
 typedef struct {
 Frame* next_frame;
@@ -6931,6 +7337,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___weight_045_062pango(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___weight_045_062pango));
 #define DEALLOCATE_FRAME___weight_045_062pango(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_weight_045_062pango ();
 
 typedef struct {
 Frame* next_frame;
@@ -6944,6 +7351,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___size_045_062pango(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___size_045_062pango));
 #define DEALLOCATE_FRAME___size_045_062pango(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_size_045_062pango ();
 
 typedef struct {
 Frame* next_frame;
@@ -6959,6 +7367,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___PDF_058_058make_045font_045from_045string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___PDF_058_058make_045font_045from_045string));
 #define DEALLOCATE_FRAME___PDF_058_058make_045font_045from_045string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_PDF_058_058make_045font_045from_045string ();
 
 typedef struct {
 Frame* next_frame;
@@ -6975,6 +7384,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___PDF_058_058make_045paragraph(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___PDF_058_058make_045paragraph));
 #define DEALLOCATE_FRAME___PDF_058_058make_045paragraph(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_PDF_058_058make_045paragraph ();
 
 typedef struct {
 Frame* next_frame;
@@ -6990,6 +7400,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___printable_045boundry_045bottom(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___printable_045boundry_045bottom));
 #define DEALLOCATE_FRAME___printable_045boundry_045bottom(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_printable_045boundry_045bottom ();
 
 typedef struct {
 Frame* next_frame;
@@ -7007,6 +7418,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___printable_045width(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___printable_045width));
 #define DEALLOCATE_FRAME___printable_045width(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_printable_045width ();
 
 typedef struct {
 Frame* next_frame;
@@ -7044,6 +7456,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___PDF_058_058add_045paragraph(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___PDF_058_058add_045paragraph));
 #define DEALLOCATE_FRAME___PDF_058_058add_045paragraph(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_PDF_058_058add_045paragraph ();
 
 typedef struct {
 Frame* next_frame;
@@ -7067,6 +7480,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___make_045layout(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___make_045layout));
 #define DEALLOCATE_FRAME___make_045layout(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_make_045layout ();
 
 typedef struct {
 Frame* next_frame;
@@ -7080,6 +7494,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___doc_045width(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___doc_045width));
 #define DEALLOCATE_FRAME___doc_045width(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_doc_045width ();
 
 typedef struct {
 Frame* next_frame;
@@ -7093,6 +7508,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___doc_045left_045margin(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___doc_045left_045margin));
 #define DEALLOCATE_FRAME___doc_045left_045margin(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_doc_045left_045margin ();
 
 typedef struct {
 Frame* next_frame;
@@ -7106,6 +7522,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___doc_045right_045margin(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___doc_045right_045margin));
 #define DEALLOCATE_FRAME___doc_045right_045margin(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_doc_045right_045margin ();
 
 typedef struct {
 Frame* next_frame;
@@ -7119,6 +7536,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___alignment_045_062pango(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___alignment_045_062pango));
 #define DEALLOCATE_FRAME___alignment_045_062pango(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_alignment_045_062pango ();
 
 typedef struct {
 Frame* next_frame;
@@ -7133,6 +7551,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___new_045cursor_045y(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___new_045cursor_045y));
 #define DEALLOCATE_FRAME___new_045cursor_045y(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_new_045cursor_045y ();
 
 typedef struct {
 Frame* next_frame;
@@ -7149,6 +7568,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___printable_045height(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___printable_045height));
 #define DEALLOCATE_FRAME___printable_045height(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_printable_045height ();
 
 typedef struct {
 Frame* next_frame;
@@ -7161,6 +7581,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___new_045page(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___new_045page));
 #define DEALLOCATE_FRAME___new_045page(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_new_045page ();
 
 typedef struct {
 Frame* next_frame;
@@ -7177,6 +7598,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___relative_045position_045of_045break(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___relative_045position_045of_045break));
 #define DEALLOCATE_FRAME___relative_045position_045of_045break(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_relative_045position_045of_045break ();
 
 typedef struct {
 Frame* next_frame;
@@ -7196,6 +7618,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___last_045logical_045break_045not_045exceeding_045printable_045boundry_045bottom(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___last_045logical_045break_045not_045exceeding_045printable_045boundry_045bottom));
 #define DEALLOCATE_FRAME___last_045logical_045break_045not_045exceeding_045printable_045boundry_045bottom(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_last_045logical_045break_045not_045exceeding_045printable_045boundry_045bottom ();
 
 typedef struct {
 Frame* next_frame;
@@ -7219,6 +7642,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___logical_045breaks(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___logical_045breaks));
 #define DEALLOCATE_FRAME___logical_045breaks(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_logical_045breaks ();
 
 typedef struct {
 Frame* next_frame;
@@ -7233,6 +7657,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___end_045of_045paragraph(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___end_045of_045paragraph));
 #define DEALLOCATE_FRAME___end_045of_045paragraph(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_end_045of_045paragraph ();
 
 typedef struct {
 Frame* next_frame;
@@ -7250,6 +7675,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___slice(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___slice));
 #define DEALLOCATE_FRAME___slice(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_slice ();
 
 typedef struct {
 Frame* next_frame;
@@ -7264,6 +7690,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___set_045color(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___set_045color));
 #define DEALLOCATE_FRAME___set_045color(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_set_045color ();
 
 typedef struct {
 Frame* next_frame;
@@ -7290,6 +7717,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___PDF_058_058add_045image(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___PDF_058_058add_045image));
 #define DEALLOCATE_FRAME___PDF_058_058add_045image(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_PDF_058_058add_045image ();
 
 typedef struct {
 Frame* next_frame;
@@ -7302,6 +7730,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___add_045image_045new_045cursor_045y(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___add_045image_045new_045cursor_045y));
 #define DEALLOCATE_FRAME___add_045image_045new_045cursor_045y(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_add_045image_045new_045cursor_045y ();
 
 typedef struct {
 Frame* next_frame;
@@ -7315,6 +7744,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___add_045image_045new_045page(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___add_045image_045new_045page));
 #define DEALLOCATE_FRAME___add_045image_045new_045page(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_add_045image_045new_045page ();
 
 typedef struct {
 Frame* next_frame;
@@ -7331,6 +7761,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___PDF_058_058copy_045paragraph_045attributes(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___PDF_058_058copy_045paragraph_045attributes));
 #define DEALLOCATE_FRAME___PDF_058_058copy_045paragraph_045attributes(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_PDF_058_058copy_045paragraph_045attributes ();
 
 typedef struct {
 Frame* next_frame;
@@ -7346,6 +7777,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___PDF_058_058close(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___PDF_058_058close));
 #define DEALLOCATE_FRAME___PDF_058_058close(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_PDF_058_058close ();
 
 typedef struct {
 Frame* next_frame;
@@ -7361,6 +7793,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___lt(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___lt));
 #define DEALLOCATE_FRAME___lt(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_lt ();
 
 typedef struct {
 Frame* next_frame;
@@ -7376,6 +7809,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___gt(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___gt));
 #define DEALLOCATE_FRAME___gt(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_gt ();
 
 typedef struct {
 Frame* next_frame;
@@ -7396,6 +7830,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___Literate_058_058weave_045pdf(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Literate_058_058weave_045pdf));
 #define DEALLOCATE_FRAME___Literate_058_058weave_045pdf(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Literate_058_058weave_045pdf ();
 
 typedef struct {
 Frame* next_frame;
@@ -7449,6 +7884,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___weave_045tree(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___weave_045tree));
 #define DEALLOCATE_FRAME___weave_045tree(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_weave_045tree ();
 
 typedef struct {
 Frame* next_frame;
@@ -7464,6 +7900,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___title_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___title_063));
 #define DEALLOCATE_FRAME___title_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_title_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7479,6 +7916,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___section_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___section_063));
 #define DEALLOCATE_FRAME___section_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_section_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7494,6 +7932,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___doc_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___doc_063));
 #define DEALLOCATE_FRAME___doc_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_doc_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7509,6 +7948,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___Lit_058_058chunk_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___Lit_058_058chunk_063));
 #define DEALLOCATE_FRAME___Lit_058_058chunk_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_Lit_058_058chunk_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7524,6 +7964,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___code_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___code_063));
 #define DEALLOCATE_FRAME___code_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_code_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7539,6 +7980,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___image_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___image_063));
 #define DEALLOCATE_FRAME___image_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_image_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7555,6 +7997,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___title_045_062string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___title_045_062string));
 #define DEALLOCATE_FRAME___title_045_062string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_title_045_062string ();
 
 typedef struct {
 Frame* next_frame;
@@ -7571,6 +8014,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___section_045_062string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___section_045_062string));
 #define DEALLOCATE_FRAME___section_045_062string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_section_045_062string ();
 
 typedef struct {
 Frame* next_frame;
@@ -7602,6 +8046,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___doc_045_062string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___doc_045_062string));
 #define DEALLOCATE_FRAME___doc_045_062string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_doc_045_062string ();
 
 typedef struct {
 Frame* next_frame;
@@ -7616,6 +8061,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___string_045append_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___string_045append_063));
 #define DEALLOCATE_FRAME___string_045append_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_string_045append_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7631,6 +8077,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___math_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___math_063));
 #define DEALLOCATE_FRAME___math_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_math_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7646,6 +8093,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___cite_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cite_063));
 #define DEALLOCATE_FRAME___cite_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cite_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7669,6 +8117,7 @@ GIN_OBJ tmp7;
 
 #define ALLOCATE_FRAME___fmt_045doc(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fmt_045doc));
 #define DEALLOCATE_FRAME___fmt_045doc(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_fmt_045doc ();
 
 typedef struct {
 Frame* next_frame;
@@ -7682,6 +8131,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___nofmt(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___nofmt));
 #define DEALLOCATE_FRAME___nofmt(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_nofmt ();
 
 typedef struct {
 Frame* next_frame;
@@ -7695,6 +8145,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___nocode(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___nocode));
 #define DEALLOCATE_FRAME___nocode(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_nocode ();
 
 typedef struct {
 Frame* next_frame;
@@ -7708,6 +8159,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___nomath(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___nomath));
 #define DEALLOCATE_FRAME___nomath(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_nomath ();
 
 typedef struct {
 Frame* next_frame;
@@ -7726,6 +8178,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___cite(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___cite));
 #define DEALLOCATE_FRAME___cite(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_cite ();
 
 typedef struct {
 Frame* next_frame;
@@ -7747,6 +8200,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___chunk_045_062string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___chunk_045_062string));
 #define DEALLOCATE_FRAME___chunk_045_062string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_chunk_045_062string ();
 
 typedef struct {
 Frame* next_frame;
@@ -7765,6 +8219,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___fmt_045chunk_045calls(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fmt_045chunk_045calls));
 #define DEALLOCATE_FRAME___fmt_045chunk_045calls(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_fmt_045chunk_045calls ();
 
 typedef struct {
 Frame* next_frame;
@@ -7780,6 +8235,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___fmt_045chunk_045call_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fmt_045chunk_045call_063));
 #define DEALLOCATE_FRAME___fmt_045chunk_045call_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_fmt_045chunk_045call_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7806,6 +8262,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___fmt_045chunk_045call(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fmt_045chunk_045call));
 #define DEALLOCATE_FRAME___fmt_045chunk_045call(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_fmt_045chunk_045call ();
 
 typedef struct {
 Frame* next_frame;
@@ -7829,6 +8286,7 @@ GIN_OBJ tmp6;
 
 #define ALLOCATE_FRAME___escape(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___escape));
 #define DEALLOCATE_FRAME___escape(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_escape ();
 
 typedef struct {
 Frame* next_frame;
@@ -7846,6 +8304,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___code_045_062string(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___code_045_062string));
 #define DEALLOCATE_FRAME___code_045_062string(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_code_045_062string ();
 
 typedef struct {
 Frame* next_frame;
@@ -7859,6 +8318,7 @@ GIN_OBJ tmp0;
 
 #define ALLOCATE_FRAME___image_045_062filename(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___image_045_062filename));
 #define DEALLOCATE_FRAME___image_045_062filename(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_image_045_062filename ();
 
 typedef struct {
 Frame* next_frame;
@@ -7883,6 +8343,7 @@ GIN_OBJ tmp8;
 
 #define ALLOCATE_FRAME___fmt_045math(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___fmt_045math));
 #define DEALLOCATE_FRAME___fmt_045math(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_fmt_045math ();
 
 typedef struct {
 Frame* next_frame;
@@ -7900,6 +8361,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___math(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___math));
 #define DEALLOCATE_FRAME___math(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_math ();
 
 typedef struct {
 Frame* next_frame;
@@ -7916,6 +8378,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___bibliography(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___bibliography));
 #define DEALLOCATE_FRAME___bibliography(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_bibliography ();
 
 typedef struct {
 Frame* next_frame;
@@ -7937,6 +8400,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___expand_045chunks(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___expand_045chunks));
 #define DEALLOCATE_FRAME___expand_045chunks(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_expand_045chunks ();
 
 typedef struct {
 Frame* next_frame;
@@ -7951,6 +8415,7 @@ GIN_OBJ tmp1;
 
 #define ALLOCATE_FRAME___chunk_045name(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___chunk_045name));
 #define DEALLOCATE_FRAME___chunk_045name(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_chunk_045name ();
 
 typedef struct {
 Frame* next_frame;
@@ -7968,6 +8433,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___chunk_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___chunk_063));
 #define DEALLOCATE_FRAME___chunk_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_chunk_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -7986,6 +8452,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___discover_045chunks(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___discover_045chunks));
 #define DEALLOCATE_FRAME___discover_045chunks(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_discover_045chunks ();
 
 typedef struct {
 Frame* next_frame;
@@ -8005,6 +8472,7 @@ GIN_OBJ tmp3;
 
 #define ALLOCATE_FRAME___expand_045chunk_045calls(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___expand_045chunk_045calls));
 #define DEALLOCATE_FRAME___expand_045chunk_045calls(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_expand_045chunk_045calls ();
 
 typedef struct {
 Frame* next_frame;
@@ -8020,6 +8488,7 @@ GIN_OBJ tmp2;
 
 #define ALLOCATE_FRAME___chunk_045call_063(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___chunk_045call_063));
 #define DEALLOCATE_FRAME___chunk_045call_063(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_chunk_045call_063 ();
 
 typedef struct {
 Frame* next_frame;
@@ -8037,6 +8506,7 @@ GIN_OBJ tmp4;
 
 #define ALLOCATE_FRAME___macro_045key(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___macro_045key));
 #define DEALLOCATE_FRAME___macro_045key(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_macro_045key ();
 
 typedef struct {
 Frame* next_frame;
@@ -8058,4 +8528,5 @@ GIN_OBJ tmp5;
 
 #define ALLOCATE_FRAME___expand_045chunk_045call(t000) GIN_ALLOCATE_FRAME(t000, Frame*, sizeof(Frame___expand_045chunk_045call));
 #define DEALLOCATE_FRAME___expand_045chunk_045call(t000) GIN_DEALLOCATE_FRAME(t000);
+extern void code_expand_045chunk_045call ();
 
