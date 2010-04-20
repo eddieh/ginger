@@ -44,30 +44,39 @@ define discover-local-variables (v kind)
   define function v
 
   define add-local-variable (v type name index val fn)
-    set local-variables (append local-variables (list (list v type name index val fn)))
+    if (String? name)
+      set name (String->Symbol name)
+    define e (Dict::get local-variables v)
+    if e
+      if (Dict::get e name)
+        false
+      else:
+        Dict::set e name (list v type name index val fn)
+        true
+    else:
+      Dict::set local-variables v (Dict::make name (list v type name index val fn))
+      true
   
   ; Search for local variables in a function body
   define search (v)
-    ; if (<term>::register-class-symbol? v)
-    ;  removed - if you need this go back and look at an old revision
     if (or (<term>::definition? v) (<term>::each-loop? v))
       define f v
       define var-name (<term>::get-definition-name f)
 
       if (or (<term>::function-definition? f) (<term>::method-definition? f))
-        if (eq? var-name false)
+        if (false? var-name)
           println "DEAD"
           print-term f
           exit
-        add-local-variable function 'local var-name index 'function f
-
+        if (add-local-variable function 'local var-name index 'function f)
+          ++ index
       else:
-        if (eq? var-name false)
+        if (false? var-name)
           println "DEAD"
           print-term f        
           exit
-        add-local-variable function 'local var-name index 'value f
-      ++ index
+        if (add-local-variable function 'local var-name index 'value f)
+          ++ index
 
     if (not (<term>::definition? v))
       if (list? v)
@@ -80,28 +89,29 @@ define discover-local-variables (v kind)
     search (fifth v) ; the body of the method
   else:
     search v
+
   set index 0
   
   ; Look for arguments
-  if (eq? kind 'function)
+  if (Symbol::eq? kind 'function)
     each i (<term>::get-definition-arguments v)
       if (list? i)
-        if (eq? (first i) false)
+        if (false? (first i))
           println "DEAD ARGUMENT 1"
           print-term i
           exit
-        add-local-variable function 'argument (first i) index 'value v
-        ++ index
+        if (add-local-variable function 'argument (first i) index 'value v)
+          ++ index
       elsif: (Label? i)
         ; labels don't get counted as arguments.
         noop
       elsif: (Symbol? i)
-        if (eq? i false)
+        if (false? i)
           println "DEAD ARGUMENT 2"
           print-term i
           exit
-        add-local-variable function 'argument i index 'value v
-        ++ index
+        if (add-local-variable function 'argument i index 'value v)
+          ++ index
       elsif: (Boolean? i)
         ; the function has no arguments
         noop
@@ -156,20 +166,22 @@ define function-prototype-expansion (v kind)
   println output-h "GIN_OBJ return_address;"
   println output-h "GIN_OBJ result;"
   define c-name "MAIN"
-  if (eq? kind 'function)
-    ;println (<term>::get-definition-name v)
-    ;println (name->c-name (<term>::get-definition-name v))
+  if (Symbol::eq? kind 'function)
     set c-name (name->c-name (<term>::get-definition-name v))
   define argument-count 0
   define local-count 0
   define tmp-count 0
   define j 0
-  each i local-variables
-    if (eq? v (first i))
-      if (eq? (second i) 'local)
-        ++ local-count
-      elsif: (eq? (second i) 'argument)
-        ++ argument-count
+  define m (Dict::get local-variables v)
+  if m
+    define dv (Dict->values m)
+    each i dv
+        define ii (second i)
+        if (Symbol::eq? ii 'local)
+          ++ local-count
+        elsif: (Symbol::eq? ii 'argument)
+          ++ argument-count
+
   each i tmp-variables
     if (eq? v (first i))
       set tmp-count (second i)
@@ -195,7 +207,7 @@ define function-definition-expansion (v kind)
   define name ""
 
   define c-name "MAIN"
-  if (eq? kind 'function)
+  if (Symbol::eq? kind 'function)
     set terms (second* v)
     set name (<term>::get-definition-name v)
     set c-name (name->c-name name)
@@ -203,7 +215,7 @@ define function-definition-expansion (v kind)
   println output-c "#define fdef___" c-name " " func-def-exp-number
   println output-c "gin_function_table[" func-def-exp-number "].frame_size = sizeof(Frame___" c-name ");"
 
-  if (eq? kind 'function)
+  if (Symbol::eq? kind 'function)
     println output-c "gin_function_table[" func-def-exp-number "].code = &&code_" c-name ";"
   else:
     println output-c "gin_function_table[" func-def-exp-number "].code = &&main_entry;"
@@ -212,11 +224,11 @@ define function-definition-expansion (v kind)
   ++ func-def-exp-number
 
 define <term> register-class-symbol? (v)
-  and (Symbol? v) (eq? v 'register-class)
+  and (Symbol? v) (Symbol::eq? v 'register-class)
 
 define <list>-remove (lst e)
   if (Null? lst) lst
-  elsif: (eq? (first lst) e)
+  elsif: (Symbol::eq? (first lst) e)
     ; TODO - is this correct?
     <list>-remove (second* lst) e
   else:
@@ -228,18 +240,18 @@ define lexical-path (term function)
   define function-name ""
   define info false
   define fn false
+
   define lexical-path-i (term function)
     define r false
-    each i local-variables
-      if (eq? (first i) function)
-        define tmp (third i)
-        
-        ; hack - take care fo the case when we might compare
-        ; different types
-        if (and (String? tmp) (not (String? term)))
-          set tmp (String->Symbol tmp)
-        
-        if (eq? tmp term)
+    define n (Dict::get local-variables function)
+    if n
+      define qt term
+      if (String? qt)
+        set qt (String->Symbol qt)
+
+      define m (Dict::get n qt)
+
+      if m
           ; TODO - check if it is a local variable or an argument.
           if (or (<term>::function-definition? function) (<term>::method-definition? function))
             set function-name (name->c-name (<term>::get-definition-name function))
@@ -248,23 +260,24 @@ define lexical-path (term function)
           else:
             set function-name "MAIN"
             set fn tree-head
-          if (eq? (second i) 'local)
+          if (Symbol::eq? (second m) 'local)
             set r "loc"
           else:
             set r "arg"
-          set r (String::append r (Fixnum->String (fourth i)))
-          set info (fifth i)
-          set fn (sixth i)
-    if (eq? r false)
+          set r (String::append r (Fixnum->String (fourth m)))
+          set info (fifth m)
+          set fn (sixth m)
+
+    if (false? r)
       if (eq? function tree-head)
         false
       else:
         define t false
-        if (eq? (<term>::get-parent-function function) false)
+        if (false? (<term>::get-parent-function function))
           set t (lexical-path-i term tree-head)
         else:
           set t (lexical-path-i term (<term>::get-parent-function function))
-        if (eq? t false)
+        if (false? t)
           false
         else:
           if (String::eq? (String::substring t 0 3) "pre")
@@ -273,6 +286,7 @@ define lexical-path (term function)
             String::append "previous_lexical_frame))->" t
     else:
       r
+
   define z (lexical-path-i term function)
   if (not z)
     false
@@ -291,7 +305,7 @@ define function-expansion (v kind)
   define function-name "MAIN"
   define output-delayed-c (open-output-string)
   
-  if (eq? kind 'function)
+  if (Symbol::eq? kind 'function)
     set function-name (name->c-name (<term>::get-definition-name function))
     println output-c "BEGIN_FUNCTION(" function-name ")"
   define tmp-number 0
@@ -315,43 +329,51 @@ define function-expansion (v kind)
     ; Arguments are to functions are not pairs...
     if (not (Cons? v))
       set v (pair v null)
+
+    define keyword (first v)
     
-    if (<term>::quoted-symbol? (first v))
-      println output-delayed-c a " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (second (first v))) ");"
-    elsif: (Label? (first v))
-      println output-delayed-c a " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (first v)) ");"
-    elsif: (Symbol? (first v))
-      ; lookup lexical path to value
-      define info (lexical-path (first v) function)
-      if (not info)
-        println "** Error - Unbound variable.1: " (first v) " on line " (trait (Term::head v) 'line) "."
-        exit
-      define bound-variable (first info)
-      println output-delayed-c a " = " bound-variable ";"
-    elsif: (Integer? (first v))
-      ; RHS is a value
-      println output-delayed-c a " = GIN_IM_FROM_INT(" (first v) ");"
-    elsif: (Char? (first v))
-      ; RHS is a value
-      println output-delayed-c a " = GIN_IM_FROM_CHAR8('" (sq-escape (first v)) "');"
-    elsif: (String? (first v))
-      println output-delayed-c "GIN_NEW_STR8(" a ",\"" (dq-escape (first v)) "\");"
-    elsif: (Flonum? (first v))
-      println output-delayed-c "GIN_NEW_FLONUM(" a ", (double)" (first v) ");"
-    elsif: (Boolean? (first v))
-      ; RHS is a value
-      print output-delayed-c a " = GIN_IM_FROM_BOOL("
-      if (first v)
-        print output-delayed-c "1"
+    if (Ginger::immediate? keyword)
+
+      if (Symbol? keyword)
+        ; lookup lexical path to value
+        define info (lexical-path keyword function)
+        if (not info)
+          println "** Error - Unbound variable.1: " keyword " on line " (trait (Term::head v) 'line) "."
+          exit
+        define bound-variable (first info)
+        println output-delayed-c a " = " bound-variable ";"
+      elsif: (Label? keyword)
+        println output-delayed-c a " = GIN_IM_FROM_SYM(qsdef___" (name->c-name keyword) ");"
+      elsif: (Integer? keyword)
+        ; RHS is a value
+        println output-delayed-c a " = GIN_IM_FROM_INT(" keyword ");"
+      elsif: (Char? keyword)
+        ; RHS is a value
+        println output-delayed-c a " = GIN_IM_FROM_CHAR8('" (sq-escape keyword) "');"
+      elsif: (Boolean? keyword)
+        ; RHS is a value
+        print output-delayed-c a " = GIN_IM_FROM_BOOL("
+        if keyword
+          print output-delayed-c "1"
+        else:
+          print output-delayed-c "0"
+        println output-delayed-c ");"
+      elsif: (Null? keyword)
+        ; RHS is a value
+        println output-delayed-c a " = GIN_NULL;"
       else:
-        print output-delayed-c "0"
-      println output-delayed-c ");"
-    elsif: (Null? (first v))
-      ; RHS is a value
-      println output-delayed-c a " = GIN_NULL;"
+        println output-delayed-c "// UNKNOWN flatten-term"
+        print output-delayed-c "UNKNOWN-" v "-" (Symbol->String (type-of v))
     else:
-      println output-delayed-c "// UNKNOWN flatten-term"
-      print output-delayed-c "UNKNOWN-" v "-" (Symbol->String (type-of v))
+      if (String? keyword)
+        println output-delayed-c "GIN_NEW_STR8(" a ",\"" (dq-escape keyword) "\");"
+      elsif: (Flonum? keyword)
+        println output-delayed-c "GIN_NEW_FLONUM(" a ", (double)" keyword ");"
+      elsif: (<term>::quoted-symbol? keyword)
+        println output-delayed-c a " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (second keyword)) ");"
+      else:
+        println output-delayed-c "// UNKNOWN flatten-term"
+        print output-delayed-c "UNKNOWN-" v "-" (Symbol->String (type-of v))
 
   define flatten-set (lhs rhs)
     ; Variable definition and sets
@@ -359,57 +381,66 @@ define function-expansion (v kind)
     ;   e.g. set name value
     ; lhs => variable
     ; rhs => value
-    define info (lexical-path (first lhs) function)
+    define lhsKeyword (first lhs)
+    define info (lexical-path lhsKeyword function)
     if (not info)
-      println "** Error - Unbound variable.2: " (first lhs) " on line " (trait (Term::head lhs) 'line) "."
+      println "** Error - Unbound variable.2: " lhsKeyword " on line " (trait (Term::head lhs) 'line) "."
       exit
-    println output-delayed-c "// SET " (first lhs)
+    println output-delayed-c "// SET " lhsKeyword
     define bound-variable (first info)
 
-    if (<term>::quoted-symbol? (first rhs))
-      println output-delayed-c bound-variable " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (second (first rhs))) ");"
-    elsif: (Cons? (first rhs))
-      ; RHS is an expression
-      flatten (first rhs)
-      println output-delayed-c "GIN_NEW_OBJ(" bound-variable ",((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")"
-    elsif: (Symbol? (first rhs))
-      ; RHS is a variable
+    define rhsKeyword (first rhs)
 
-      define info2 (lexical-path (first rhs) function)
-      if (not info2)
-        println "** Error - Unbound variable.3: " (first rhs) " on line " (trait (Term::head rhs) 'line) "."
-        exit
-      define bound-variable-2 (first info2)
+    if (Ginger::immediate? rhsKeyword)
 
-      println output-delayed-c "GIN_NEW_OBJ(" bound-variable "," bound-variable-2 ")"
-    elsif: (Integer? (first rhs))
-      ; RHS is a value
-      println output-delayed-c "GIN_NEW_FIXNUM(" bound-variable "," (first rhs) ")"
-    elsif: (Char? (first rhs))
-      ; RHS is a value
-      println output-delayed-c "GIN_NEW_CHAR8(" bound-variable ", '" (sq-escape (first rhs)) "')"
-    elsif: (Flonum? (first rhs))
-      ; RHS is a value
-      println output-delayed-c "GIN_NEW_FLONUM(" bound-variable ", (double)" (first rhs) ")"
-    elsif: (String? (first rhs))
-      ; RHS is a value
-      println output-delayed-c "GIN_NEW_STR8(" bound-variable ",\"" (dq-escape (first rhs)) "\")"
-    elsif: (Boolean? (first rhs))
-      ; RHS is a value
-      print output-delayed-c "GIN_NEW_BOOL(" bound-variable ","
-      if (first rhs)
-        print output-delayed-c "1"
+      if (Symbol? rhsKeyword)
+        ; RHS is a variable
+        define info2 (lexical-path rhsKeyword function)
+        if (not info2)
+          println "** Error - Unbound variable.3: " rhsKeyword " on line " (trait (Term::head rhs) 'line) "."
+          exit
+        define bound-variable-2 (first info2)
+        println output-delayed-c "GIN_NEW_OBJ(" bound-variable "," bound-variable-2 ")"
+      elsif: (Integer? rhsKeyword)
+        ; RHS is a value
+        println output-delayed-c "GIN_NEW_FIXNUM(" bound-variable "," rhsKeyword ")"
+      elsif: (Char? rhsKeyword)
+        ; RHS is a value
+        println output-delayed-c "GIN_NEW_CHAR8(" bound-variable ", '" (sq-escape rhsKeyword) "')"
+      elsif: (Boolean? rhsKeyword)
+        ; RHS is a value
+        print output-delayed-c "GIN_NEW_BOOL(" bound-variable ","
+        if rhsKeyword
+          print output-delayed-c "1"
+        else:
+          print output-delayed-c "0"
+        println output-delayed-c ")"
+      elsif: (Null? rhsKeyword)
+        ; RHS is a value
+        println output-delayed-c bound-variable " = GIN_NULL; "
+      elsif: (Label? rhs)
+        println output-delayed-c bound-variable " = GIN_IM_FROM_SYM(qsdef___" (name->c-name rhs) ");"
       else:
-        print output-delayed-c "0"
-      println output-delayed-c ")"
-    elsif: (Null? (first rhs))
-      ; RHS is a value
-      println output-delayed-c bound-variable " = GIN_NULL; "
-    elsif: (Label? rhs)
-      println output-delayed-c bound-variable " = GIN_IM_FROM_SYM(qsdef___" (name->c-name rhs) ");"
+        println output-delayed-c "// UNKNOWN flatten-set"
+        print output-delayed-c "UNKNOWN-" rhs "-" (Symbol->String (type-of rhs))
+
     else:
-      println output-delayed-c "// UNKNOWN flatten-set"
-      print output-delayed-c "UNKNOWN-" rhs "-" (Symbol->String (type-of rhs))
+
+      if (String? rhsKeyword)
+        ; RHS is a value
+        println output-delayed-c "GIN_NEW_STR8(" bound-variable ",\"" (dq-escape rhsKeyword) "\")"
+      elsif: (Flonum? rhsKeyword)
+        ; RHS is a value
+        println output-delayed-c "GIN_NEW_FLONUM(" bound-variable ", (double)" rhsKeyword ")"
+      elsif: (<term>::quoted-symbol? rhsKeyword)
+        println output-delayed-c bound-variable " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (second rhsKeyword)) ");"
+      elsif: (Cons? rhsKeyword)
+        ; RHS is an expression
+        flatten rhsKeyword
+        println output-delayed-c "GIN_NEW_OBJ(" bound-variable ",((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")"
+      else:
+        println output-delayed-c "// UNKNOWN flatten-set"
+        print output-delayed-c "UNKNOWN-" rhs "-" (Symbol->String (type-of rhs))
 
   define flatten (v)
 
@@ -454,56 +485,58 @@ define function-expansion (v kind)
         previous-tmp
 
       elsif: (Symbol? (first v))
-        if (eq? (first v) 'require)
+        define keyword (first v)
+
+        if (Symbol::eq? keyword 'require)
           noop
 
-        elsif: (eq? (first v) 'ensure)
+        elsif: (Symbol::eq? keyword 'ensure)
           noop
 
-        elsif: (eq? (first v) 'noop)
+        elsif: (Symbol::eq? keyword 'noop)
           noop
 
-        elsif: (eq? (first v) 'first)
+        elsif: (Symbol::eq? keyword 'first)
           flatten (second v)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_NIM_GET_F0(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ");"
 
-        elsif: (eq? (first v) 'properties)
+        elsif: (Symbol::eq? keyword 'properties)
           flatten (second v)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_NIM_GET_F1(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ");"
 
-        elsif: (eq? (first v) 'second*)
+        elsif: (Symbol::eq? keyword 'second*)
           flatten (second v)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_NIM_GET_F2(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ");"
 
-        elsif: (eq? (first v) 'second)
+        elsif: (Symbol::eq? keyword 'second)
           flatten (second v)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_NIM_GET_F0(GIN_NIM_GET_F2(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) "));"
 
-        elsif: (eq? (first v) 'third)
+        elsif: (Symbol::eq? keyword 'third)
           flatten (second v)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_NIM_GET_F0(GIN_NIM_GET_F2(GIN_NIM_GET_F2(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")));"
 
-        elsif: (eq? (first v) 'Cons?)
+        elsif: (Symbol::eq? keyword 'Cons?)
           flatten (second v)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_IM_FROM_BOOL(GIN_IS_CONS(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) "));"
 
-        elsif: (eq? (first v) 'Symbol?)
+        elsif: (Symbol::eq? keyword 'Symbol?)
           flatten (second v)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_IM_FROM_BOOL(GIN_IS_SYM(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) "));"
 
-;         elsif: (eq? (first v) 'Label?)
+;         elsif: (eq? keyword 'Label?)
 ;           flatten (second v)
 ;           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_IM_FROM_BOOL(GIN_IS_IM(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ") && GIN_IS_LABEL(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) "));"
 
-;         elsif: (eq? (first v) 'Char?)
+;         elsif: (eq? keyword 'Char?)
 ;           flatten (second v)
 ;           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_IM_FROM_BOOL(GIN_IS_IM(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ") && GIN_IS_CHAR8(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) "));"
 
-        elsif: (eq? (first v) 'Null?)
+        elsif: (Symbol::eq? keyword 'Null?)
           flatten (second v)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_IM_FROM_BOOL(((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " == GIN_NULL);"
 
-        elsif: (eq? (first v) 'repeat)
+        elsif: (Symbol::eq? keyword 'repeat)
           ; an expression that controls the number of times the body is executed
           ; it should evaluate to an integer
           flatten (second v) ;(cadr terms)
@@ -521,7 +554,7 @@ define function-expansion (v kind)
           previous-tmp
           println output-delayed-c "}"
 
-        elsif: (eq? (first v) 'while)
+        elsif: (Symbol::eq? keyword 'while)
           ; conditional expression, should evaluate to a boolean
           flatten (second v) ;(cadr terms)
 
@@ -539,7 +572,7 @@ define function-expansion (v kind)
 
           ; TODO - set the right return value..
 
-        elsif: (eq? (first v) 'each)
+        elsif: (Symbol::eq? keyword 'each)
           ; TODO - fix var scope
           ; TODO - change tmp0 to a better name (its really each-of-list).
           next-tmp
@@ -565,7 +598,7 @@ define function-expansion (v kind)
           println output-delayed-c "}"
           previous-tmp
 
-        elsif: (eq? (first v) 'if)
+        elsif: (Symbol::eq? keyword 'if)
           ; if conditional
           flatten (second v)
           
@@ -586,7 +619,7 @@ define function-expansion (v kind)
               flatten (second t)
               println output-delayed-c "if (!GIN_IS_FALSE(" "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) ")) {"
               
-              ; esif body
+              ; elsif body
               flatten (third t)
 
               println output-delayed-c "} else {"
@@ -614,11 +647,10 @@ define function-expansion (v kind)
             -- else-count
           println output-delayed-c ""
 
-        elsif: (eq? (first v) 'quote)
+        elsif: (Symbol::eq? keyword 'quote)
           println output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1) " = GIN_IM_FROM_SYM(qsdef___" (name->c-name (second v)) ");"
-          ;exit
           
-        elsif: (eq? (first v) 'or)
+        elsif: (Symbol::eq? keyword 'or)
           ; TODO - when macros work, this could be replaced with a macro
 
           define else-count 0
@@ -639,10 +671,10 @@ define function-expansion (v kind)
 
           previous-tmp
 
-        elsif: (eq? (first v) 'set)
+        elsif: (Symbol::eq? keyword 'set)
           flatten-set (second* v) (third* v)
 
-        elsif: (eq? (first v) '++)
+        elsif: (Symbol::eq? keyword '++)
 
           define info (lexical-path (second v) function)
           if (not info)
@@ -651,7 +683,7 @@ define function-expansion (v kind)
           define bound-variable (first info)
           println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))+1);"
 
-        elsif: (eq? (first v) '--)
+        elsif: (Symbol::eq? keyword '--)
 
           define info (lexical-path (second v) function)
           if (not info)
@@ -660,7 +692,7 @@ define function-expansion (v kind)
           define bound-variable (first info)
           println output-delayed-c bound-variable "= GIN_IM_FROM_INT(((int)GIN_IM_TO_INT(" bound-variable "))-1);"
 
-        elsif: (eq? (first v) 'and)
+        elsif: (Symbol::eq? keyword 'and)
           ; TODO - when macros work, this could be replaced with a macro
 
           define else-count 0
@@ -681,7 +713,7 @@ define function-expansion (v kind)
 
           previous-tmp
 
-        elsif: (eq? (first v) 'register-class)
+        elsif: (Symbol::eq? keyword 'register-class)
           define info (lexical-path (first (second terms)) function)
           if (not info)
             println "** Error - Unbound variable.9: " (first (second terms)) " on line " (trait (Term::head (second terms)) 'line) "."
@@ -706,13 +738,13 @@ define function-expansion (v kind)
 
           println output-delayed-c "GIN_NEW_CLASS(" bound-variable ",cdef___" (name->c-name (first (second terms))) "," bound-base-class "," bound-make-fn "," bound-unmake-fn ");"
 
-        elsif: (eq? (first v) 'inline-c-header)
+        elsif: (Symbol::eq? keyword 'inline-c-header)
           println output-h (second v)
 
-        elsif: (eq? (first v) 'inline-c)
+        elsif: (Symbol::eq? keyword 'inline-c)
           each i (second* v)
             if (Symbol? i)
-              if (eq? i 'result)
+              if (Symbol::eq? i 'result)
                 print output-delayed-c "((Frame___" function-name " *)(frame))->tmp" (- tmp-number 1)
               else:
                 define info (lexical-path i function)
@@ -753,11 +785,11 @@ define function-expansion (v kind)
           ; comment this line out to test the new code..
           set immutable true
 
-          if (and (not (eq? (second info) 'function)) (= (length v) 1) immutable)
+          if (and (not (Symbol::eq? (second info) 'function)) (= (length v) 1) immutable)
             ; it's an immutable value..  we can really do better than this.. TODO: better optimization
             ; A value returns itself.  In this case we know it's a value and not a function because it's immutable.
             flatten-term (String::append "((Frame___" function-name " *)(frame))->tmp" (Fixnum->String (- tmp-number 1))) (first v)
-          elsif: (and (eq? (second info) 'function) immutable)
+          elsif: (and (Symbol::eq? (second info) 'function) immutable)
             ; it's an immutable function..
             define output-call (open-output-string)
             println output-call "CALL_ALLOCATE(" (name->c-name (first v)) ");"
@@ -797,11 +829,9 @@ define function-expansion (v kind)
                 set optional-parameters (append optional-parameters (list a))
               else:
                 ; TODO - handle this
-                if (not has-residual)
-                  println "BAD: " a
-;              elsif: (Residual? a)
-;                ; We set the residual keyword.  The next symbol won't be added to either list.
-;                set has-residual true
+                if (not (Null? a))
+                  if (not has-residual)
+                    println "BAD: " a
 
             define find-named-parameter0 (plst a)
               if (Null? plst) false
@@ -838,7 +868,7 @@ define function-expansion (v kind)
               if (and (> (length original-parameters) 0) (not (Label? (first original-parameters))))
                 ; 2. See if there is an unnamed parameter.  It must be this one..
                 ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
-                if (eq? anon-first false)
+                if (false? anon-first)
                   println "Named arguments must follow unnamed arguments!"
                   exit
                 set new-parameters (append new-parameters (list (first original-parameters)))
@@ -847,7 +877,6 @@ define function-expansion (v kind)
                 ; This was a required arg but we didn't find a named term or an anon term that matched.
                 println "Required argument, " a ", missing from " (first v) " call on line " (trait (Term::head v) 'line) "." 
                 exit
-            
 
             if (> (length required-parameters) (length new-parameters))
               ; TODO - better output state function, line and which parameters were missing.
@@ -866,7 +895,7 @@ define function-expansion (v kind)
               .. (not (Label? (first original-parameters))))
                 ; 2. See if there is an unnamed parameter.  It must be this one..
                 ; Named arguments must FOLLOW unnamed arguments (unless inside a residual).
-                if (eq? anon-first false)
+                if (false? anon-first)
                   println "Named arguments must follow unnamed arguments!"
                   exit
                 set new-parameters (append new-parameters (list (first original-parameters)))
@@ -916,12 +945,6 @@ define function-expansion (v kind)
             each ii new-parameters
               print output-call "((Frame_Narg *)(frame->next_frame))->argn[" i "] = "
               ++ i
-
-;              if (list? ii)
-;                if (Cons? (first ii))
-;                  println "b" (Dict? (properties (first ii)))
-;                  if (Dict? (properties (first ii)))
-;                    println "c" (trait (first ii) 'residual)
 
               if (<term>::quoted-symbol? ii)
                 print output-call "GIN_IM_FROM_SYM(qsdef___" (name->c-name (second ii)) ")"
@@ -1017,7 +1040,7 @@ define function-expansion (v kind)
       flatten-term (String::append "((Frame___" function-name " *)(frame))->tmp" (Fixnum->String (- tmp-number 1))) v
    ; This ensures NEW_FN appears before other code
 
-  if (eq? kind 'function)
+  if (Symbol::eq? kind 'function)
     flatten (<term>::get-definition-body function)
     println output-c (get-output-string output-delayed-c)
     ; println output-c "frame->result = ((Frame___" function-name " *)(frame))->tmp" tmp-number ";"
@@ -1029,21 +1052,6 @@ define function-expansion (v kind)
     ; println output-c "frame->result = ((Frame___" function-name " *)(frame))->tmp" tmp-number ";"
     ; After the function has been flattened we can now report the required number of tmp vars
     set tmp-variables (append tmp-variables (list (list tree-head tmp-number-max)))
-
-; define glob-push (s)
-;   set glob-stack (append glob-stack (list s))
-
-; define glob-pop ()
-;   set glob-stack (first glob-stack)
-
-; define glob-top ()
-;   last glob-stack
-
-; define glob-parent ()
-;   cadr (reverse glob-stack)
-
-; define glob-current ()
-;   first (reverse glob-stack)
 
 define string-n (v n)
   if (= n 0)
