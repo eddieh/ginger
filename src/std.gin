@@ -367,19 +367,18 @@ define Ginger::Symbol->Number (s)
 
 ; Does not check if string is a valid symbol.
 define Ginger::String->Symbol (a)
-  ; require (!= (length a) 0)
+  define rval false
   if (= (String::length a) 1)
     define n (Char->Integer (String::nth a 0))
-    inline-c n " = GIN_IM_FROM_SYM(GIN_IM_TO_INT(" n "));"
-    n
-  elsif: (not (false? (Dict::get Ginger::string->symbol a)))
-    Dict::get Ginger::string->symbol a
-  else:
-    define n (+ (Vector::length Ginger::symbol->string) 2048)
-    inline-c n " = GIN_IM_FROM_SYM(GIN_IM_TO_INT(" n "));"
-    Dict::set Ginger::string->symbol a n
-    Vector::push Ginger::symbol->string a
-    n
+    inline-c rval " = GIN_IM_FROM_SYM(GIN_IM_TO_INT(" n "));"
+  else: 
+    set rval (Dict::get Ginger::string->symbol a)
+    if (false? rval)
+      set rval (+ (Vector::length Ginger::symbol->string) 2048)
+      inline-c rval " = GIN_IM_FROM_SYM(GIN_IM_TO_INT(" rval "));"
+      Dict::set Ginger::string->symbol a rval
+      Vector::push Ginger::symbol->string a
+  rval
 
 define Ginger::Symbol->String (s)
   define n (Ginger::Symbol->Number s)
@@ -1578,6 +1577,9 @@ define Dict? (self)
 define Dict->keys (self)
   inline-c result " = gin_dict_keys(" self ", 1);"
 
+define Dict->values (self)
+  inline-c result " = gin_dict_values(" self ", 1);"
+
 define Dict set (self key value)
   define i (pair key value)
   inline-c "gin_dict_insert(" self ", " i ");"
@@ -1833,19 +1835,31 @@ define write-string-stream (out in)
   define out-length 0
   define in-length 0
   define total-length 0
+  define pool-length 0
   define tmp false
   inline-c out-length "= GIN_IM_FROM_INT(GIN_NIM_GET_STRING_STREAM_LENGTH(" out "));"
   inline-c in-length "= GIN_IM_FROM_INT(GIN_STR_LENGTH(" in "));"
+  inline-c pool-length "= GIN_IM_FROM_INT(((GingerObject*)(" out "))->pool_length);"
   set total-length (+ out-length in-length)
-  inline-c "GIN_NEW_STR8(" tmp ",GIN_STR_VALUE(" out "));"
-  inline-c "GIN_ALLOCATE(GIN_STR_VALUE(" out "),char*,sizeof(char)*((int)GIN_IM_TO_INT(" total-length ")+1));"
-  inline-c "strncpy(&(GIN_STR_VALUE(" out ")[0]),GIN_STR_VALUE(" tmp "),GIN_STR_LENGTH(" tmp "));"
-  inline-c "strncpy(&(GIN_STR_VALUE(" out ")[GIN_NIM_GET_STRING_STREAM_POSITION(" out ")]), \
-    GIN_STR_VALUE(" in "), \
-    GIN_STR_LENGTH(" in "));"
-  inline-c "GIN_NIM_SET_STRING_STREAM_LENGTH(" out ",GIN_IM_TO_INT(" total-length "));"
-  inline-c "GIN_NIM_SET_STRING_STREAM_POSITION(" out ",GIN_IM_TO_INT(" total-length "));"
-  inline-c "GIN_STR_VALUE(" out ")[(int)GIN_IM_TO_INT(" total-length ")] = 0;"
+  if (> total-length pool-length)
+    inline-c "GIN_NEW_EMPTY_STR8(" tmp ");"
+    inline-c "GIN_ALLOCATE(GIN_STR_VALUE(" tmp "),char*,sizeof(char)*((int)GIN_IM_TO_INT(" total-length ")+512+1));"
+    inline-c "strncpy(&(GIN_STR_VALUE(" tmp ")[0]),GIN_STR_VALUE(" out "),GIN_STR_LENGTH(" out "));"
+    inline-c "strncpy(&(GIN_STR_VALUE(" tmp ")[GIN_NIM_GET_STRING_STREAM_POSITION(" out ")]), \
+      GIN_STR_VALUE(" in "), \
+      GIN_STR_LENGTH(" in "));"
+    inline-c "GIN_NIM_SET_STRING_STREAM_LENGTH(" out ",GIN_IM_TO_INT(" total-length "));"
+    inline-c "GIN_NIM_SET_STRING_STREAM_POSITION(" out ",GIN_IM_TO_INT(" total-length "));"
+    inline-c "GIN_STR_VALUE(" out ") = GIN_STR_VALUE(" tmp ");"
+    inline-c "GIN_STR_VALUE(" out ")[(int)GIN_IM_TO_INT(" total-length ")] = 0;"
+    inline-c "((GingerObject*)(" out "))->pool_length = GIN_IM_TO_INT(" total-length  ")+512;"
+  else:
+    inline-c "strncpy(&(GIN_STR_VALUE(" out ")[GIN_NIM_GET_STRING_STREAM_POSITION(" out ")]), \
+      GIN_STR_VALUE(" in "), \
+      GIN_STR_LENGTH(" in "));"
+    inline-c "GIN_NIM_SET_STRING_STREAM_LENGTH(" out ",GIN_IM_TO_INT(" total-length "));"
+    inline-c "GIN_NIM_SET_STRING_STREAM_POSITION(" out ",GIN_IM_TO_INT(" total-length "));"
+    inline-c "GIN_STR_VALUE(" out ")[(int)GIN_IM_TO_INT(" total-length ")] = 0;"
 
 ; Environment
 define getenv (name (default ""))
@@ -1899,35 +1913,38 @@ define print-term (residual: z)
       else:
         inline-c "fprintf(GIN_NIM_GET_STREAM(" output "),\"%s\", GIN_STR_VALUE(" term "));"
 
-  if (Null? term) (print-primitive "null")
-  elsif: (list? term)
-    print-primitive "("
-    each i term
-      print-term i
-      print-primitive " "
-    print-primitive ")"
-  elsif: (Cons? term)
-    print-primitive "("
-    print-term (first term)
-    print-primitive " . . "
-    print-term (second* term)
-    print-primitive ")"
-  elsif: (String? term) 
-    print-primitive term
-  elsif: (Binary? term) (print-primitive (Binary->String term))
-  elsif: (Function? term) (print-primitive (Function->String term))
-  elsif: (Char? term) (print-primitive (Char->String term))
-  elsif: (Boolean? term) (print-primitive (Boolean->String term))
-  elsif: (Fixnum? term) (print-primitive (Fixnum->String term))
-  elsif: (Integer? term) (print-primitive (Fixnum->String term))
-  elsif: (Flonum? term) (print-primitive (Flonum->String term))
+  if (Ginger::immediate? term)
+    if (Null? term) (print-primitive "null")
+    elsif: (Char? term) (print-primitive (Char->String term))
+    elsif: (Symbol? term) (print-primitive (Symbol->String term))
+    elsif: (Boolean? term) (print-primitive (Boolean->String term))
+    elsif: (Fixnum? term) (print-primitive (Fixnum->String term))
+    elsif: (Integer? term) (print-primitive (Fixnum->String term))
+    else: (print-primitive (Foreign->String term))
+  else:
+    if (String? term) 
+      print-primitive term
+    elsif: (list? term)
+      print-primitive "("
+      each i term
+        print-term i
+        print-primitive " "
+      print-primitive ")"
+    elsif: (Cons? term)
+      print-primitive "("
+      print-term (first term)
+      print-primitive " . . "
+      print-term (second* term)
+      print-primitive ")"
+    elsif: (Binary? term) (print-primitive (Binary->String term))
+    elsif: (Function? term) (print-primitive (Function->String term))
+    elsif: (Flonum? term) (print-primitive (Flonum->String term))
 ;  elsif: (Stream? term) (print-primitive (Stream->String term))
 ;  elsif: (String-Stream? term) (print-primitive (String-Stream->String term))
-  elsif: (Vector? term) (print-primitive (Vector->String term))
-  elsif: (Dict? term) (print-primitive (Dict->String term))
+    elsif: (Vector? term) (print-primitive (Vector->String term))
+    elsif: (Dict? term) (print-primitive (Dict->String term))
 ;  elsif: (Class? term) (print-primitive (class-to-str term))
-  elsif: (Symbol? term) (print-primitive (Symbol->String term))
-  else: (print-primitive (Foreign->String term))
+    else: (print-primitive (Foreign->String term))
 
 define print (residual: terms)
   if (and (> (length terms) 0) (Generic-Stream? (first terms)))
@@ -2107,10 +2124,11 @@ define <term> get-definition-arguments (self)
     false
 
 define Term::head (v)
-  if (Cons? (properties v))
-    Term::head (properties v)
-  else:
-    v
+  define q (properties v)
+  while (Cons? q)
+    set v q
+    set q (properties v)
+  v
 
 define <term> parent (o)
   set o (Term::head o)
