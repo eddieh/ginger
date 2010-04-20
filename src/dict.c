@@ -1,18 +1,18 @@
 /*
   Copyright 2009 by James Dean Palmer and others.
 
-  Licensed under the Apache License, Version 2.0 (the "License"); 
-  you may not use this file except in compliance with the License. 
-  You may obtain a copy of the License at 
- 
-    http://www.apache.org/licenses/LICENSE-2.0 
- 
-  Unless required by applicable law or agreed to in writing, software 
-  distributed under the License is distributed on an "AS IS" BASIS, 
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-  See the License for the specific language governing permissions and 
-  limitations under the License. 
- 
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
   Please report all bugs and problems to "bugs@ging3r.org".
 */
 
@@ -34,37 +34,41 @@ GIN_OBJ gin_dict_contains(GIN_OBJ t, GIN_OBJ k) {
 
     while (!GIN_IS_CONS(p)) {
       GingerDictionaryCell *q = (GingerDictionaryCell*)p;
-      
+
       unsigned char c = 0;
       if (q->byte < k_len) {
-	if (q->byte < 4)
-	  c = 0;
-	else
-	  c = *(k_ptr+(q->byte-4));
+        if (q->byte < 4)
+          c = 0;
+        else
+          c = *(k_ptr+(q->byte-4));
       }
       const int direction = (1+(q->otherbits|c))>>8;
       if (direction == 0)
-	p = q->left;
+        p = q->left;
       else
-	p = q->right;
+        p = q->right;
     }
 
   } else {
     k_len = 4;
-    k_ptr = (char*)&k;
+    if (GIN_IS_IM(k)) {
+      k_ptr = (char*)&k;
+    } else {
+      k_ptr = (char*)&(((GingerObject*)k)->uid);
+    }
 
     while (!GIN_IS_CONS(p)) {
       GingerDictionaryCell *q = (GingerDictionaryCell*)p;
-      
+
       unsigned char c= 0;
       if (q->byte < k_len) {
-	c = *(k_ptr+q->byte);
+        c = *(k_ptr+q->byte);
       }
       const int direction= (1+(q->otherbits|c))>>8;
       if (direction == 0)
-	p = q->left;
+        p = q->left;
       else
-	p = q->right;
+        p = q->right;
     }
 
   }
@@ -106,41 +110,45 @@ int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp) {
 
     while (!GIN_IS_CONS(p)) {
       GingerDictionaryCell *q = (GingerDictionaryCell*)p;
-      
+
       unsigned char c= 0;
       if (q->byte < k_len) {
-	if (q->byte < 4)
-	  c = 0;
-	else
-	  c = *(k_ptr+(q->byte-4));
+        if (q->byte < 4)
+          c = 0;
+        else
+          c = *(k_ptr+(q->byte-4));
       }
       const int direction= (1+(q->otherbits|c))>>8;
       if (direction == 0)
-	p = q->left;
+        p = q->left;
       else
-	p = q->right;
+        p = q->right;
     }
 
   } else {
     k_len = 4;
-    k_ptr = (char*)&k;
+    if (GIN_IS_IM(k)) {
+      k_ptr = (char*)&k;
+    } else {
+      k_ptr = (char*)&(((GingerObject*)k)->uid);
+    }
 
     while (!GIN_IS_CONS(p)) {
       GingerDictionaryCell *q = (GingerDictionaryCell*)p;
-      
+
       unsigned char c = 0;
       if (q->byte < k_len) {
-	c = *(k_ptr+q->byte);
+        c = *(k_ptr+q->byte);
       }
       const int direction= (1+(q->otherbits|c))>>8;
       if (direction == 0)
-	p = q->left;
+        p = q->left;
       else
-	p = q->right;
+        p = q->right;
     }
 
   }
-  
+
   unsigned long newbyte;
   unsigned long newotherbits;
   GIN_OBJ pk = GIN_NIM_GET_F0(p);
@@ -154,20 +162,20 @@ int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp) {
     pk_len = GIN_STR_LENGTH(pk) + 4;
 
     for (newbyte=0; (newbyte<k_len) && (newbyte<pk_len); ++newbyte) {
-    
+
       if (newbyte < 4) {
-	c = 0;
-	d = 0;
+        c = 0;
+        d = 0;
       } else {
-	c = *(pk_ptr+(newbyte-4));
-	d = *(k_ptr+(newbyte-4));
+        c = *(pk_ptr+(newbyte-4));
+        d = *(k_ptr+(newbyte-4));
       }
       if (c != d) {
-	newotherbits = c^d;
-	goto different_byte_found;
+        newotherbits = c^d;
+        goto different_byte_found;
       }
     }
-  
+
     // It's the same key if the lengths are equal
     if (k_len == pk_len) {
       //    printf("INSERT: lengths equal\n");
@@ -180,20 +188,20 @@ int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp) {
     if (k_len > pk_len) {
       //    printf("INSERT: new key is longer\n");
       if (newbyte < 4)
-	c = 0;
+        c = 0;
       else
-	c = k_ptr[newbyte-4];
+        c = k_ptr[newbyte-4];
       newotherbits = c;
       goto different_byte_found;
     }
-    
+
     // The old key is longer
     if (k_len < pk_len) {
       //    printf("INSERT: old key is longer\n");
       if (newbyte < 4)
-	c = 0;
+        c = 0;
       else
-	c = pk_ptr[newbyte-4];
+        c = pk_ptr[newbyte-4];
       newotherbits = c;
       goto different_byte_found;
     }
@@ -205,39 +213,43 @@ int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp) {
     pk_len = GIN_STR_LENGTH(pk) + 4;
 
     for (newbyte=0; (newbyte<k_len) && (newbyte<pk_len); ++newbyte) {
-    
+
       if (newbyte < 4) {
-	c = 0;
+        c = 0;
       } else {
-	c = *(pk_ptr+(newbyte-4));
+        c = *(pk_ptr+(newbyte-4));
       }
       d = k_ptr[newbyte];
 
       if (c != d) {
-	newotherbits = c^d;
-	goto different_byte_found;
+        newotherbits = c^d;
+        goto different_byte_found;
       }
     }
-    
+
     // Execution never reaches here.
     assert(0);
 
   } else if (GIN_IS_STR8(k)) {
-    pk_ptr = (char*)&pk;
     pk_len = 4;
+    if (GIN_IS_IM(pk)) {
+      pk_ptr = (char*)&pk;
+    } else {
+      pk_ptr = (char*)&(((GingerObject*)pk)->uid);
+    }
 
     for (newbyte=0; (newbyte<k_len) && (newbyte<pk_len); ++newbyte) {
-    
+
       c = pk_ptr[newbyte];
       if (newbyte < 4) {
-	d = 0;
+        d = 0;
       } else {
-	d = *(k_ptr+(newbyte-4));
+        d = *(k_ptr+(newbyte-4));
       }
 
       if (c != d) {
-	newotherbits = c^d;
-	goto different_byte_found;
+        newotherbits = c^d;
+        goto different_byte_found;
       }
     }
 
@@ -246,18 +258,22 @@ int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp) {
 
   } else {
 
-    pk_ptr = (char*)&pk;
     pk_len = 4;
+    if (GIN_IS_IM(pk)) {
+      pk_ptr = (char*)&pk;
+    } else {
+      pk_ptr = (char*)&(((GingerObject*)pk)->uid);
+    }
 
     for (newbyte=0; (newbyte<k_len) && (newbyte<pk_len); ++newbyte) {
       c = pk_ptr[newbyte];
       d = k_ptr[newbyte];
       if (c != d) {
-	newotherbits = c^d;
-	goto different_byte_found;
+        newotherbits = c^d;
+        goto different_byte_found;
       }
     }
-  
+
     // It's the same key if the lengths are equal
     if (k_len == pk_len) {
       //    printf("INSERT: lengths equal\n");
@@ -272,9 +288,9 @@ int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp) {
 
   printf("This should never be executed.\n");
   assert(0);
-  
+
  different_byte_found:
-   
+
   while (newotherbits & (newotherbits-1))
     newotherbits &= newotherbits - 1;
 
@@ -292,9 +308,8 @@ int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp) {
   }
 
   int newdirection = (1+(newotherbits|cc)) >> 8;
-  
+
   GingerDictionaryCell* newnode;
-  // TODO - GC here might be bad?
   GIN_ALLOCATE(newnode, GingerDictionaryCell*, sizeof(GingerDictionaryCell));
 
   newnode->type_index = GIN_TYPE_DICT_CELL;
@@ -310,43 +325,43 @@ int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp) {
   if (GIN_IS_STR8(k)) {
     for(;;){
       GIN_OBJ p = *wherep;
-      
+
       if (GIN_IS_CONS(p)) break;
-      
+
       GingerDictionaryCell* q = p;
       if (q->byte > newbyte) break;
       if (q->byte == newbyte && q->otherbits > newotherbits) break;
-      
+
       unsigned char c = 0;
       if (q->byte < k_len) {
-	if (q->byte < 4) c = 0;
-	else c = k_ptr[q->byte-4];
+        if (q->byte < 4) c = 0;
+        else c = k_ptr[q->byte-4];
       }
       const int direction = (1 + (q->otherbits|c)) >> 8;
       if (direction == 0)
-	wherep = &(q->left);
+        wherep = &(q->left);
       else
-	wherep = &(q->right);
+        wherep = &(q->right);
     }
   } else {
     for(;;){
       GIN_OBJ p = *wherep;
-      
+
       if (GIN_IS_CONS(p)) break;
-      
+
       GingerDictionaryCell* q = p;
       if (q->byte > newbyte) break;
       if (q->byte == newbyte && q->otherbits > newotherbits) break;
-      
+
       unsigned char c = 0;
       if (q->byte < k_len) {
-	c = k_ptr[q->byte];
+        c = k_ptr[q->byte];
       }
       const int direction = (1 + (q->otherbits|c)) >> 8;
       if (direction == 0)
-	wherep = &(q->left);
+        wherep = &(q->left);
       else
-	wherep = &(q->right);
+        wherep = &(q->right);
     }
   }
 
@@ -356,7 +371,7 @@ int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp) {
     newnode->right = *wherep;
 
   *wherep = newnode;
-  
+
   return 2;
 }
 
@@ -375,7 +390,7 @@ GIN_OBJ gin_dict_keys (GIN_OBJ node, int init){
 
   if (node == 0)
     return 0;
-  
+
   GingerDictionaryCell *q = (GingerDictionaryCell*)node;
 
   gin_dict_keys(q->right, 0);
@@ -383,4 +398,29 @@ GIN_OBJ gin_dict_keys (GIN_OBJ node, int init){
 
   return r;
 }
- 
+
+GIN_OBJ gin_dict_values (GIN_OBJ node, int init){
+
+  if (init == 1) {
+    node = ((GingerDictionary*)node)->root;
+    r = GIN_NULL;
+  }
+
+  if (GIN_IS_CONS(node)) {
+    GIN_OBJ q;
+    GIN_NEW_SAFE_PAIR(q, GIN_NIM_GET_F2(node), r);
+    r = q;
+    return q;
+  }
+
+  if (node == 0)
+    return 0;
+
+  GingerDictionaryCell *q = (GingerDictionaryCell*)node;
+
+  gin_dict_values(q->right, 0);
+  gin_dict_values(q->left, 0);
+
+  return r;
+}
+
