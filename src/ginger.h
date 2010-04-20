@@ -64,7 +64,7 @@ typedef struct {
 } Frame_Narg;
 
 typedef struct {
-  GIN_OBJ dispatch_table;
+//  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   GIN_OBJ left;
   GIN_OBJ right;
@@ -73,7 +73,7 @@ typedef struct {
 } GingerDictionaryCell;
 
 typedef struct {
-  GIN_OBJ dispatch_table;
+//  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   GIN_OBJ root;
 } GingerDictionary;
@@ -99,7 +99,7 @@ typedef struct {
 /// This is the primary object type.
 
 typedef struct {
-  GIN_OBJ dispatch_table;
+//  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   union {
     void*  f0;
@@ -117,29 +117,31 @@ typedef struct {
     void* f2;
     long  str_length;
   };
+  int uid;
+  long pool_length;
 } GingerObject;
 
 typedef struct {
-  GIN_OBJ dispatch_table;
+//  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   double value;
 } GingerFlonum;
 
 typedef struct {
-  GIN_OBJ dispatch_table;
+//  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   long value;
 } GingerInteger;
 
 typedef struct {
-  GIN_OBJ dispatch_table;
+//  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   unsigned long length;
   unsigned long value[];
 } GingerBinary;
 
 typedef struct {
-  GIN_OBJ dispatch_table;
+//  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   long length;
   long pool_length;
@@ -147,7 +149,7 @@ typedef struct {
 } GingerVector;
 
 typedef struct {
-  GIN_OBJ dispatch_table;
+//  GIN_OBJ dispatch_table;
   GIN_OBJ type_index;
   GIN_OBJ index;  // Always NIM
   //  GIN_OBJ make;
@@ -160,13 +162,13 @@ typedef struct {
 typedef struct {
   short num_bytes;
   short visited;
-  short active;
+//  short active;
 } GCFastAllocHeader;
 
 typedef struct GCSysAllocHeader_t {
   short num_bytes;
   short visited;
-  short active;
+//  short active;
   short requires_cleanup;
   struct GCSysAllocHeader_t* next;
 } GCSysAllocHeader;
@@ -217,9 +219,12 @@ typedef struct GarbageCollector_t {
 /// Section 2: Macro definitions
 ///
 
-#define GIN_GC_MB 50
+#define GIN_GC_MB 25
 #define GIN_GC_INIT mm = gc_new(1024*1024*GIN_GC_MB); gc_set_collection_callback(mm, collect);
 #define GIN_ALLOCATE(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate(mm, size); \
+v = (type)safe_allocate;
+
+#define GIN_ALLOCATE_SYSTEM(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate_system(mm, size); \
 v = (type)safe_allocate;
 
 #define GIN_ALLOCATE_FRAME(v, type, size) safe_allocate = (GIN_OBJ)gc_allocate(mm, size); \
@@ -331,6 +336,7 @@ int gin_debug = 1; \
 int gin_debug_max_depth = -1; \
 int debug_depth = 0; \
 int debug_depth_iterator = 0; \
+int global_uid = 0; \
 GIN_OBJ type_table = 0;
 
 // gin_debug is a flag, it controls when the trace is printed
@@ -533,27 +539,39 @@ int main(int argc, char *argv[]) {                      \
 // Create a ginger object..
 #define GIN_NEW_CONS(v,a,b,c) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_CONS; \
+((GingerObject*)v)->uid = global_uid; global_uid++; \
  GIN_NIM_SET_F0(v,a); \
  GIN_NIM_SET_F1(v,b); \
  GIN_NIM_SET_F2(v,c);
 #define GIN_NEW_BCONS(v,a,b,c) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_BCONS; \
+((GingerObject*)v)->uid = global_uid; global_uid++; \
  GIN_NIM_SET_F0(v,a); \
  GIN_NIM_SET_F1(v,b); \
  GIN_NIM_SET_F2(v,c);
 #define GIN_NEW_PAIR(v,a,b) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_CONS; \
+((GingerObject*)v)->uid = global_uid; global_uid++; \
  GIN_NIM_SET_F0(v,a); \
  GIN_NIM_SET_F1(v,GIN_NULL); \
  GIN_NIM_SET_F2(v,b);
 #define GIN_NEW_SAFE_PAIR(v,a,b) GIN_ALLOCATE(safe_pair, void*, sizeof(GingerObject)); \
 ((GingerObject*)safe_pair)->type_index = GIN_TYPE_CONS; \
+((GingerObject*)safe_pair)->uid = global_uid; global_uid++; \
+ GIN_NIM_SET_F0(safe_pair,a); \
+ GIN_NIM_SET_F1(safe_pair,GIN_NULL); \
+ GIN_NIM_SET_F2(safe_pair,b); \
+ v = safe_pair;
+#define GIN_NEW_SAFE_PAIR_SYSTEM(v,a,b) GIN_ALLOCATE_SYSTEM(safe_pair, void*, sizeof(GingerObject)); \
+((GingerObject*)safe_pair)->type_index = GIN_TYPE_CONS; \
+((GingerObject*)safe_pair)->uid = global_uid; global_uid++; \
  GIN_NIM_SET_F0(safe_pair,a); \
  GIN_NIM_SET_F1(safe_pair,GIN_NULL); \
  GIN_NIM_SET_F2(safe_pair,b); \
  v = safe_pair;
 #define GIN_NEW_TAG_PAIR(v,a,b) GIN_ALLOCATE(safe_pair, void*, sizeof(GingerObject)); \
 ((GingerObject*)safe_pair)->type_index = GIN_TYPE_TAG_PAIR; \
+((GingerObject*)safe_pair)->uid = global_uid; global_uid++; \
  GIN_NIM_SET_F0(safe_pair,a); \
  GIN_NIM_SET_F1(safe_pair,GIN_NULL); \
  GIN_NIM_SET_F2(safe_pair,b); \
@@ -569,6 +587,7 @@ int main(int argc, char *argv[]) {                      \
 /* mpz_init_set_str((((GingerInteger*)v)->value), a, 10); */
 #define GIN_NEW_FN(v,a,frame) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_FUNCTION; \
+((GingerObject*)v)->uid = global_uid; global_uid++; \
 ((GingerObject*)v)->function = a; \
 ((GingerObject*)v)->previous_lexical_frame = frame;
 #define GIN_NEW_CHAR8(v,a) v=GIN_IM_FROM_CHAR8(a);
@@ -598,6 +617,7 @@ memcpy(((GingerObject*)v)->str8_value, a, ((GingerObject*)v)->str_length); \
 
 #define GIN_NEW_STREAM(v,s,m) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STREAM; \
+((GingerObject*)v)->uid = global_uid; global_uid++; \
 ((GingerObject*)v)->stream = s; \
 GIN_NIM_SET_STREAM_MODE(v,m);
 
@@ -621,13 +641,17 @@ GIN_NIM_SET_STREAM_MODE(v,m);
 
 #define GIN_NEW_STRING_STREAM(v,s,m) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STRING_STREAM; \
+((GingerObject*)v)->uid = global_uid; global_uid++; \
 GIN_NIM_SET_STRING_STREAM_LENGTH(v,strlen(s)); \
+((GingerObject*)v)->pool_length = strlen(s);                    \
 GIN_NIM_SET_STRING_STREAM_POSITION(v,0);                        \
 GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, strlen(s)+1);       \
 memcpy(((GingerObject*)v)->str8_value, s, strlen(s)+1);
 
 #define GIN_NEW_EMPTY_STRING_STREAM(v,m) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STRING_STREAM; \
+((GingerObject*)v)->uid = global_uid; global_uid++; \
+((GingerObject*)v)->pool_length = 0; \
 GIN_NIM_SET_STRING_STREAM_LENGTH(v,0); \
 GIN_NIM_SET_STRING_STREAM_POSITION(v,0);              \
 GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, 1); \
@@ -769,6 +793,7 @@ extern GIN_OBJ gin_string_to_float(GIN_OBJ str);
 extern int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp);
 extern GIN_OBJ gin_dict_contains(GIN_OBJ t, GIN_OBJ k);
 extern GIN_OBJ gin_dict_keys(GIN_OBJ, int);
+extern GIN_OBJ gin_dict_values(GIN_OBJ, int);
 
 extern void collect (GarbageCollector* mm);
 
@@ -789,5 +814,6 @@ extern int cdef_count;
 extern int gin_argc;
 extern char** gin_argv;
 extern GIN_OBJ type_table;
+extern int global_uid;
 
 #endif /* GINGER_H */
