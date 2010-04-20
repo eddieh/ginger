@@ -275,7 +275,7 @@ if compile
   println output-c "#include \"" output-h-file-name "\""
 
   define flat-functions (list)
-  define local-variables (list)
+  define local-variables (Dict::make)
   define tmp-variables (list)
   define glob 0
   define glob-stack (list 0)
@@ -313,10 +313,11 @@ if compile
   ; Discover classes
   define cdef-count 0
   println "Writing class definitions.."
-  each i local-variables
-    if (eq? (fifth i) 'class)
-      println output-c "#define cdef___" (name->c-name (third i)) " " (Fixnum->String cdef-count)
-      ++ cdef-count
+  each j (Dict->values local-variables)
+    each i (Dict->values j)
+      if (eq? (fifth i) 'class)
+        println output-c "#define cdef___" (name->c-name (third i)) " " (Fixnum->String cdef-count)
+        ++ cdef-count
   println output-c "GingerClassDefinition cdef[" (Fixnum->String cdef-count) "];"
   println output-c "int cdef_count = " (Fixnum->String cdef-count) ";"
    
