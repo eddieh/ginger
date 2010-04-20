@@ -27,6 +27,20 @@ void gc_free_managed_memory(GarbageCollector* mm);
 static int gc_system_xfers = 0;
 static int gc_free_alloc = 0;
 
+static int  stat_str8 = 0;
+static int stat_vector = 0;
+static int  stat_cons = 0;
+static int  stat_function = 0;
+static int stat_binary = 0;
+static int  stat_dict = 0;
+static int stat_dict_cell = 0;
+static int  stat_type = 0;
+static int  stat_float = 0;
+static int  stat_stream = 0;
+static int  stat_string_stream = 0;
+static int  stat_other = 0;
+
+
 GarbageCollector* gc_new (int page_size) {
   GarbageCollector* mm = (GarbageCollector*)malloc(sizeof(GarbageCollector));
   memset(mm, 0, sizeof(GarbageCollector));
@@ -113,6 +127,11 @@ void* gc_allocate(GarbageCollector* mm, int num_bytes) {
     return result;
   } else {
 
+    // printf("SYSALLOC %d\n", num_bytes);
+
+    if (mm->system_allocations_since_last_collection > 200)
+      mm->collection_callback(mm);
+
     // system allocation
     ++mm->system_allocations_since_last_collection;
     char* result = (void*)malloc(num_bytes + sizeof(GCSysAllocHeader));
@@ -124,7 +143,7 @@ void* gc_allocate(GarbageCollector* mm, int num_bytes) {
 
     GCSysAllocHeader* mem = (GCSysAllocHeader*) result;
     mem->visited = 0;
-    mem->active = 1;
+    //mem->active = 1;
     mem->num_bytes = num_bytes;
     mem->requires_cleanup = 0;
     mem->next = mm->long_lived_list;
@@ -153,7 +172,7 @@ void* gc_allocate_system (GarbageCollector* mm, int num_bytes) {
 
   GCSysAllocHeader* mem = (GCSysAllocHeader*) result;
   mem->visited = 0;
-  mem->active = 1;
+  //mem->active = 1;
   mem->num_bytes = num_bytes;
   mem->requires_cleanup = 0;
   mem->next = mm->long_lived_list;
@@ -163,6 +182,7 @@ void* gc_allocate_system (GarbageCollector* mm, int num_bytes) {
   result += sizeof(GCSysAllocHeader);
   bzero(result, num_bytes);
   //memset (result, 0, num_bytes);
+  //printf("ALLOC %d\n", result);
   return result;
 }
 
@@ -178,7 +198,7 @@ void* gc_allocate_persistent (GarbageCollector* mm, int num_bytes) {
 
   GCSysAllocHeader* mem = (GCSysAllocHeader*) result;
   mem->visited = 0;
-  mem->active = 1;
+  //mem->active = 1;
   mem->num_bytes = num_bytes;
   mem->requires_cleanup = 0;
   mem->next = mm->persistent_list;
@@ -267,7 +287,7 @@ short gc_reference(GarbageCollector* mm, void** ptr ) {
 
       GCSysAllocHeader* mem = (GCSysAllocHeader*) result;
       mem->visited = 1;
-      mem->active = 1;
+      //mem->active = 1;
       mem->requires_cleanup = 0;
       mem->next = mm->long_lived_list;
       mem->num_bytes = num_bytes;
@@ -346,6 +366,7 @@ void gc_analyze(GarbageCollector* mm, void* addr0) {
   GCSysAllocHeader* mem = mm->long_lived_list;
   while (mem != 0) {
     if ((char*)(mem + 1) == addr) {
+//    if ((char*)(mem + sizeof(GCSysAllocHeader)) == addr) {
       int i=0;
       int n = gc_size(mm, addr);
       printf("analyze: is long lived\n");
@@ -422,6 +443,7 @@ void gc_end_collection(GarbageCollector* mm) {
         prev->next = next;
         cur->next = mm->pending_cleanup;
         mm->pending_cleanup = cur;
+        //printf("FREE PENDING %d\n", ((char*)cur)+sizeof(GCSysAllocHeader));
         cur = next;
 
       } else {
@@ -429,6 +451,7 @@ void gc_end_collection(GarbageCollector* mm) {
         gc_free_alloc++;
         GCSysAllocHeader* next = cur->next;
         prev->next = next;
+        //printf("FREE %d\n", ((char*)cur)+sizeof(GCSysAllocHeader));
         free(cur);
         cur = next;
 
@@ -506,9 +529,9 @@ unsigned long gc_size(GarbageCollector* mm, void *addr0) {
   }
 
   GCSysAllocHeader* n = (GCSysAllocHeader*)(addr - sizeof(GCSysAllocHeader));
-  if (n->active == 0) {
-    return 0;
-  }
+  //if (n->active == 0) {
+  //  return 0;
+  //}
   return n->num_bytes;
 }
 
@@ -520,9 +543,9 @@ unsigned long gc_active(GarbageCollector* mm, void *addr0) {
   }
 
   GCSysAllocHeader* n = (GCSysAllocHeader*)(addr - sizeof(GCSysAllocHeader));
-  if (n->active == 0) {
-    return 0;
-  }
+  //if (n->active == 0) {
+  //return 0;
+  //}
   return 1;
 }
 
@@ -546,6 +569,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_STR8(o)) {
+
+    stat_str8++;
+
 #ifdef GC_DEBUG
     printf("reference_var: STRING %s %d\n", GIN_STR_VALUE(o), GIN_STR_LENGTH(o));
 #endif
@@ -558,6 +584,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_VECTOR(o)) {
+
+    stat_vector++;
+
 #ifdef GC_DEBUG
     printf("reference_var: VECTOR\n");
     printf("VECTOR length=%d\n", ((GingerVector*)(o))->length);
@@ -585,6 +614,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_CONS(o)) {
+
+    stat_cons++;
+
 #ifdef GC_DEBUG
     printf("reference_var: CONS\n");
 #endif
@@ -645,6 +677,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_FUNCTION(o)) {
+
+    stat_function++;
+
 #ifdef GC_DEBUG
     printf("reference_var: FUNCTION\n");
 #endif
@@ -660,6 +695,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_BINARY(o)) {
+
+    stat_binary++;
+
 #ifdef GC_DEBUG
     printf("reference_var: BINARY\n");
 #endif
@@ -671,6 +709,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   // Dictionaries
   //
   if (GIN_IS_DICT(o)) {
+
+    stat_dict++;
+
 #ifdef GC_DEBUG
     printf("reference_var: DICT\n");
 #endif
@@ -687,6 +728,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_DICT_CELL(o)) {
+
+    stat_dict_cell++;
+
 #ifdef GC_DEBUG
     printf("reference_var: DICT CELL\n");
 #endif
@@ -710,6 +754,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_TYPE(o)) {
+
+    stat_type++;
+
 #ifdef GC_DEBUG
     printf("reference_var: TYPE\n");
 #endif
@@ -721,6 +768,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_FLONUM(o)) {
+
+    stat_float++;
+
 #ifdef GC_DEBUG
     printf("reference_var: FLONUM\n");
 #endif
@@ -732,6 +782,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_STREAM(o)) {
+
+    stat_stream++;
+
 #ifdef GC_DEBUG
     printf("reference_var: STREAM\n");
 #endif
@@ -743,6 +796,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
 
   if (GIN_IS_STRING_STREAM(o)) {
+
+    stat_string_stream++;
+
 #ifdef GC_DEBUG
     printf("reference_var: STRING STREAM\n");
 #endif
@@ -753,6 +809,9 @@ void reference_var(GarbageCollector* mm, GIN_OBJ o) {
   //
   // Runtime Types
   //
+
+  stat_other++;
+
 
 #ifdef GC_DEBUG
   printf("reference_var: RUNTIME TYPE\n");
@@ -829,6 +888,22 @@ void reference_frame(GarbageCollector* mm, Frame_Narg* cframe) {
 }
 
 void collect (GarbageCollector* mm) {
+//  printf("GC BEGIN==============================================================\n");
+
+  stat_str8 = 0;
+  stat_vector = 0;
+  stat_cons = 0;
+  stat_function = 0;
+  stat_binary = 0;
+  stat_dict = 0;
+  stat_dict_cell = 0;
+  stat_type = 0;
+  stat_float = 0;
+  stat_stream = 0;
+  stat_string_stream = 0;
+  stat_other = 0;
+
+
   gc_begin_collection(mm);
 
   // Explore every reachable frame touching everything we can find. It all stems from the current frame.
@@ -844,6 +919,23 @@ void collect (GarbageCollector* mm) {
   gc_end_collection(mm);
   gc_system_xfers = 0;
   gc_free_alloc = 0;
+
+/*
+  printf ("str8     =%d\n", stat_str8);
+  printf ("vector   =%d\n", stat_vector);
+  printf ("cons     =%d\n", stat_cons);
+  printf ("function =%d\n", stat_function);
+  printf ("binary   =%d\n", stat_binary);
+  printf ("dict     =%d\n", stat_dict);
+  printf ("dict_cell=%d\n", stat_dict_cell);
+  printf ("type     =%d\n", stat_type);
+  printf ("float    =%d\n", stat_float);
+  printf ("stream   =%d\n", stat_stream);
+  printf ("string_st=%d\n", stat_string_stream);
+  printf ("other    =%d\n", stat_other);
+
+  printf("GC END==============================================================\n");
+*/
 
   return; // Eddie: return so we never reach the following code.
   // TODO - what is this code supposed to do?
