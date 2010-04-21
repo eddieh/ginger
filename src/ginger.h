@@ -364,11 +364,6 @@ int main(int argc, char *argv[]) {                      \
   return 0; \
 }
 
-#define BEGIN_FUNCTION(function) void code_ ## function () {
-
-#define END_FUNCTION() frame = frame->previous_frame; \
-}
-
 // GIN_OBJ is defined as a void* but in reality it can hold
 // pointers (non-immediates) and certain useful primitives
 // (immediates).  The following describes how the bit string
