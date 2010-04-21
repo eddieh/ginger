@@ -339,7 +339,7 @@ if compile
   println output-c "void main_entry () {"
   function-expansion tree-head 'main
    
-  println output-c "END_FUNCTION()"
+  println output-c "frame = frame->previous_frame; }"
   println output-c "END_CODE"
    
   println "Expand prototypes"
