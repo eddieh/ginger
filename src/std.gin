@@ -1906,12 +1906,12 @@ define print-term (residual: z)
 
   define print-primitive (term)
     if (false? output)
-      inline-c "fprintf(stdout,\"%s\", GIN_STR_VALUE(" term "));"
+      inline-c "fwrite(GIN_STR_VALUE(" term "), GIN_STR_LENGTH(" term "), 1, stdout);"
     else:
       if (String-Stream? output)
         write-string-stream output term
       else:
-        inline-c "fprintf(GIN_NIM_GET_STREAM(" output "),\"%s\", GIN_STR_VALUE(" term "));"
+        inline-c "fwrite(GIN_STR_VALUE(" term "), GIN_STR_LENGTH(" term "), 1, GIN_NIM_GET_STREAM(" output "));"
 
   if (Ginger::immediate? term)
     if (Null? term) (print-primitive "null")
