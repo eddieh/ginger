@@ -163,7 +163,6 @@ define function-prototype-expansion (v kind)
   println output-h "Frame* next_frame;"
   println output-h "Frame* previous_frame;"
   println output-h "Frame* previous_lexical_frame;"
-  println output-h "GIN_OBJ return_address;"
   println output-h "GIN_OBJ result;"
   define c-name "MAIN"
   if (Symbol::eq? kind 'function)
