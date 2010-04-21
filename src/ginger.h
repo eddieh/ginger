@@ -22,18 +22,21 @@
 //#define DEBUG 1
 //#define GC_DEBUG
 
+///
 /// Section 0: Includes
+///
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 
+///
 /// Section 1: Type and structure definitions
 ///
 /// Here we define all the structures used by Ginger.
 
-/// This is the primary reference used internally by Ginger.  It can hold
+/// GIN_OBJ is the primary reference used internally by Ginger.  It can hold
 /// immediate (chars, fixed ints, symbols, etc.) and non-immediates (a pointer
 /// to more complex data structures (foreign objects, floats, dictionaries,
 /// etc.)
@@ -49,7 +52,6 @@ typedef struct Frame_t {
   struct Frame_t* next_frame;
   struct Frame_t* previous_frame;
   struct Frame_t* previous_lexical_frame;
-  GIN_OBJ return_address; // deprecated
   GIN_OBJ result;
 } Frame;
 
@@ -57,7 +59,6 @@ typedef struct {
   Frame* next_frame;
   Frame* previous_frame;
   Frame* previous_lexical_frame;
-  GIN_OBJ return_address; // deprecated
   GIN_OBJ result;
   // Flexible array member:
   GIN_OBJ argn[];
@@ -278,7 +279,7 @@ gc_mark_as_requiring_cleanup(mm, v);
   } \
   frame = frame->next_frame; \
   frame->next_frame = 0; \
-  code_ ## function ();                 \
+  code_ ## function (); \
   result0 = frame->next_frame->result; \
   frame->next_frame->previous_frame = 0; \
   frame->next_frame->previous_lexical_frame = 0; \
@@ -288,7 +289,7 @@ gc_mark_as_requiring_cleanup(mm, v);
 // 1. if it's not a function and has no args, return the value.
 // 2. if it's not a function and has args - we need to determine the method to call. then do 3.
 // 3. if it is a function, use the signature to properly order the arguments and make the call.
-#define CALLNDYNAMIC(function,seed,result0,varn)        \
+#define CALLNDYNAMIC(function,seed,result0,varn) \
   if ((varn == GIN_NULL) && !(GIN_IS_FUNCTION(function))) result0 = function; \
   else { \
   if (!GIN_IS_FUNCTION(function)) { \
@@ -308,7 +309,7 @@ gc_mark_as_requiring_cleanup(mm, v);
   next_func = function; \
   frame = frame->next_frame; \
   frame->next_frame = 0; \
-  GIN_NIM_GET_FUNCTION(next_func)->code();      \
+  GIN_NIM_GET_FUNCTION(next_func)->code(); \
   result0 = frame->next_frame->result; \
   frame->next_frame->previous_frame = 0; \
   frame->next_frame->previous_lexical_frame = 0; \
@@ -347,19 +348,19 @@ GIN_OBJ ginExec (GIN_OBJ fn, GIN_OBJ args) { \
 }
 
 #define END_CODE \
-int main(int argc, char *argv[]) {                      \
+int main(int argc, char *argv[]) { \
   gin_argc = argc; \
   gin_argv = argv; \
   GIN_GC_INIT; \
   frame = 0; \
-  GIN_ALLOCATE_FRAME(frame, Frame*, sizeof(Frame));     \
-  frame->previous_frame = 0;                    \
+  GIN_ALLOCATE_FRAME(frame, Frame*, sizeof(Frame)); \
+  frame->previous_frame = 0; \
   frame->result = 0; \
-  frame->next_frame = 0;  \
-  frame->previous_lexical_frame = 0;            \
+  frame->next_frame = 0; \
+  frame->previous_lexical_frame = 0; \
   ginExec(0, GIN_NULL); \
   GIN_OBJ main_fn; \
-  GIN_NEW_FN(main_fn, &(gin_function_table[0]), 0);     \
+  GIN_NEW_FN(main_fn, &(gin_function_table[0]), 0); \
   ginExec(main_fn, GIN_NULL); \
   return 0; \
 }
@@ -479,25 +480,8 @@ int main(int argc, char *argv[]) {                      \
 #define GIN_TYPE_BOOL GIN_IM_FROM_INT(13)
 #define GIN_TYPE_NULL GIN_IM_FROM_INT(14)
 #define GIN_TYPE_CHAR GIN_IM_FROM_INT(15)
-//#define GIN_TYPE_FOREIGN
-
-/*
-#define GIN_TYPE_STR8 1
-#define GIN_TYPE_STR16 2
-#define GIN_TYPE_FUNCTION 3
-#define GIN_TYPE_INT 4
-#define GIN_TYPE_FLONUM 5
-#define GIN_TYPE_STREAM 6 // file stream
-#define GIN_TYPE_STRING_STREAM 7 // string stream
-#define GIN_TYPE_VECTOR 8
-#define GIN_TYPE_TAG_PAIR 9
-#define GIN_TYPE_DICTIONARY 10
-#define GIN_TYPE_BCONS 11
-#define GIN_TYPE_BINARY 100 // 100 .. ? is reserved
-*/
 
 // What kind of object does a GIN object contain?
-// #define GIN_IS_INT(x) (GIN_IS_IM_INT(x)||GIN_IS_FIXNUM(x))
 #define GIN_IS_INT(x) (GIN_IS_IM_INT(x))
 #define GIN_IS_STR8(x) ((!GIN_IS_IM(x))&&(((GingerObject*)x)->type_index==GIN_TYPE_STR8))
 #define GIN_IS_FUNCTION(x) ((!GIN_IS_IM(x))&&(((GingerObject*)x)->type_index==GIN_TYPE_FUNCTION))
@@ -510,7 +494,6 @@ int main(int argc, char *argv[]) {                      \
 #define GIN_IS_CHAR(x) (GIN_IS_IM_CHAR8(x)||GIN_IS_IM_CHAR16(x))
 #define GIN_IS_BOOL(x) GIN_IS_IM_BOOL(x)
 #define GIN_IS_STR16(x) ((!GIN_IS_IM(x))&&(((GingerObject*)x)->type_index==GIN_TYPE_STR16))
-//#define GIN_IS_STR(x) (GIN_IS_STR8(x)||GIN_IS_STR16(x))
 #define GIN_IS_STR(x) (GIN_IS_STR8(x))
 #define GIN_IS_CONS(x) ((!GIN_IS_IM(x))&&(((GingerObject*)x)->type_index==GIN_TYPE_CONS))
 #define GIN_IS_BCONS(x) ((!GIN_IS_IM(x))&&(((GingerObject*)x)->type_index==GIN_TYPE_BCONS))
@@ -590,14 +573,14 @@ memcpy(((GingerObject*)v)->str8_value, a, ((GingerObject*)v)->str_length); \
 #define GIN_NEW_EMPTY_STR8(v) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STR8; \
 ((GingerObject*)v)->str_length = 0;
-#define GIN_NEW_STR16(v,a) GIN_ALLOCATE(v, void*, sizeof(GingerObject));        \
+#define GIN_NEW_STR16(v,a) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 ((GingerObject*)v)->type_index = GIN_TYPE_STR16; \
 ((GingerObject*)v)->str16_value = a;
 #define GIN_NEW_SYM(v,a) v=GIN_IM_FROM_SYM(a);
 #define GIN_NEW_LABEL(v,a) v=GIN_IM_FROM_LABEL(a);
 #define GIN_NEW_BOOL(v,a) v=GIN_IM_FROM_BOOL(a);
 #define GIN_NEW_OBJ(v,a) v=a;
-#define GIN_NEW_FLONUM(v,a) GIN_ALLOCATE(v, void*, sizeof(GingerFlonum));       \
+#define GIN_NEW_FLONUM(v,a) GIN_ALLOCATE(v, void*, sizeof(GingerFlonum)); \
 ((GingerFlonum*)v)->type_index = GIN_TYPE_FLONUM; \
 ((GingerFlonum*)v)->value = a;
 #define GIN_NEW_NIM(v) GIN_ALLOCATE(v, void*, sizeof(GingerObject));
@@ -621,7 +604,6 @@ GIN_NIM_SET_STREAM_MODE(v,m);
 #define GIN_NIM_GET_TYPE(v) ((GingerObject*)v)->type_index
 #define GIN_NIM_GET_TYPE_OBJECT(v) ((GingerVector*)type_table)->value[GIN_IM_TO_INT(((GingerObject*)v)->type_index)]
 
-
 #define GIN_NIM_GET_STRING_STREAM_LENGTH(v) (((GingerObject*)v)->str_length)
 #define GIN_NIM_SET_STRING_STREAM_LENGTH(v,l) (((GingerObject*)v)->str_length) = l;
 
@@ -632,9 +614,9 @@ GIN_NIM_SET_STREAM_MODE(v,m);
 ((GingerObject*)v)->type_index = GIN_TYPE_STRING_STREAM; \
 ((GingerObject*)v)->uid = global_uid; global_uid++; \
 GIN_NIM_SET_STRING_STREAM_LENGTH(v,strlen(s)); \
-((GingerObject*)v)->pool_length = strlen(s);                    \
-GIN_NIM_SET_STRING_STREAM_POSITION(v,0);                        \
-GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, strlen(s)+1);       \
+((GingerObject*)v)->pool_length = strlen(s); \
+GIN_NIM_SET_STRING_STREAM_POSITION(v,0); \
+GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, strlen(s)+1); \
 memcpy(((GingerObject*)v)->str8_value, s, strlen(s)+1);
 
 #define GIN_NEW_EMPTY_STRING_STREAM(v,m) GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
@@ -642,10 +624,9 @@ memcpy(((GingerObject*)v)->str8_value, s, strlen(s)+1);
 ((GingerObject*)v)->uid = global_uid; global_uid++; \
 ((GingerObject*)v)->pool_length = 0; \
 GIN_NIM_SET_STRING_STREAM_LENGTH(v,0); \
-GIN_NIM_SET_STRING_STREAM_POSITION(v,0);              \
+GIN_NIM_SET_STRING_STREAM_POSITION(v,0); \
 GIN_ALLOCATE(((GingerObject*)v)->str8_value, char*, 1); \
 ((GingerObject*)v)->str8_value[0] = 0;
-
 
 // GL Images Objects
 // foreign_value =>  data
@@ -702,13 +683,10 @@ GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 #define GIN_NIM_GET_PREVIOUS_LEXICAL_FRAME(v) ((GingerObject*)v)->previous_lexical_frame
 
 #define GIN_NIM_SET_FLONUM(v,a) ((GingerFlonum*)v)->value = a;
-//#define GIN_NIM_GET_FLONUM(v) (double)((GIN_IS_FLONUM(v)) ? (((GingerFlonum*)v)->value) : (mpz_get_d(GIN_NIM_GET_INTEGER(v))))
 #define GIN_NIM_GET_FLONUM(v) (double)((GIN_IS_FLONUM(v)) ? (((GingerFlonum*)v)->value) : (GIN_IM_TO_INT(v)))
 
 #define GIN_NIM_SET_INTEGER(v,a) ((GingerInteger*)v)->value = a;
 #define GIN_NIM_GET_INTEGER(v) ((GingerInteger*)v)->value
-
-//#define GIN_NIM_GET_FIXNUM_CSTR(v) mpz_get_str(NULL, 10, GIN_NIM_GET_INTEGER(v))
 
 #define GIN_NIM_SET_STREAM(v,stream) ((GingerObject*)v)->stream = stream;
 #define GIN_NIM_GET_STREAM(v) ((GingerObject*)v)->stream
@@ -721,7 +699,6 @@ GIN_ALLOCATE(v, void*, sizeof(GingerObject)); \
 // the use of the memory itself.  Smaller allocations are certainly
 // viable when memory is tight.
 #define  GC_DEFAULT_FAST_PAGE_SIZE (20*1024*1024)
-
 
 // GC_FAST_HEAP_THRESHOLD
 //
@@ -763,6 +740,7 @@ extern void* gc_get_next_pending_cleanup(GarbageCollector *mm);
 extern void gc_analyze(GarbageCollector* mm, void* addr);
 extern void* gc_allocate_call(GarbageCollector* mm, int num_bytes);
 extern void gc_deallocate_call(GarbageCollector* mm, void* data);
+extern void collect (GarbageCollector* mm);
 
 extern GIN_OBJ ginExec (GIN_OBJ fn, GIN_OBJ args);
 extern void GIN_display(GIN_OBJ x, GIN_OBJ out, int was_not_cdr);
@@ -783,13 +761,12 @@ extern int gin_dict_insert(GIN_OBJ t, GIN_OBJ kp);
 extern GIN_OBJ gin_dict_contains(GIN_OBJ t, GIN_OBJ k);
 extern GIN_OBJ gin_dict_keys(GIN_OBJ, int);
 extern GIN_OBJ gin_dict_values(GIN_OBJ, int);
-
-extern void collect (GarbageCollector* mm);
-
 extern GIN_OBJ gin_getenv(GIN_OBJ name, GIN_OBJ default_value);
 extern GIN_OBJ gin_file_exists(GIN_OBJ filename);
 extern GIN_OBJ gin_string_to_value(GIN_OBJ str);
+extern void main_entry ();
 
+///
 /// Section 4: Global variables
 ///
 
@@ -804,5 +781,5 @@ extern int gin_argc;
 extern char** gin_argv;
 extern GIN_OBJ type_table;
 extern int global_uid;
-extern void main_entry ();
+
 #endif /* GINGER_H */
